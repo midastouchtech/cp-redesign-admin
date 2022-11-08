@@ -1,13 +1,28 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { MdSpaceDashboard, MdLibraryBooks, MdBusiness, MdPerson, MdHealthAndSafety } from "react-icons/md";
+import {HiUserGroup} from "react-icons/hi";
+import styled from "styled-components";
 
+const NavContainer = styled.div`
+  .deznav {
+    width: 12rem;
+  }
+  .metismenu {
+    li{
+      font-size:20px;
+    }
+  }
+`;
 const SideBar = ({ title, onBack }) => {
   return (
-    <div class="deznav">
+    <NavContainer>
+      <div class="deznav">
       <div class="deznav-scroll">
-        <ul class="metismenu" id="menu">
+        <ul class="metismenu mm-show" id="menu">
           <li>
-            <Link to="/" class="has-arrow ai-icon" aria-expanded="false">
+            <Link className="has-arrow ai-icon" to="/" aria-expanded="false">
+              <MdSpaceDashboard />
               Dashboard
             </Link>
           </li>
@@ -15,23 +30,35 @@ const SideBar = ({ title, onBack }) => {
             <Link
               to="/appointments"
               class="has-arrow ai-icon"
-              aria-expanded="false"
             >
+              <MdLibraryBooks />
               Appointments
             </Link>
           </li>
+          <li >
+            <Link
+              to="/companies"
+              class="has-arrow ai-icon"
+            >
+              <MdBusiness />
+              Companies
+            </Link>
+          </li>
           <li>
-            <Link to="clients" class="has-arrow ai-icon" aria-expanded="false">
+            <Link to="/clients" class="has-arrow ai-icon" aria-expanded="false">
+              <HiUserGroup />
               Clients
             </Link>
           </li>
           <li>
             <Link to="/doctors" class="has-arrow ai-icon" aria-expanded="false">
+              <MdHealthAndSafety />
               Doctors
             </Link>
           </li>
-          <li>
+          <li className="has-arrow ai-icon">
             <Link to="/profile" class="has-arrow ai-icon" aria-expanded="false">
+              <MdPerson />
               Profile
             </Link>
           </li>
@@ -43,6 +70,7 @@ const SideBar = ({ title, onBack }) => {
 				</div> */}
       </div>
     </div>
+    </NavContainer>
   );
 };
 

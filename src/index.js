@@ -7,8 +7,13 @@ import Layout from "./components/layout";
 import io from "socket.io-client";
 import Dashboard from "./views/dashboard";
 import Appointments from "./views/appointments";
+import Companies from "./views/companies";
+import CompanyEditor from "./views/companies/company/edit";
+import Clients from "./views/clients";
+import ClientEditor from "./views/clients/client/edit";
 import Appointment from "./views/appointments/appointment";
-
+import AppointmentEditor from "./views/appointments/appointment/edit";
+import AppointmentQuotation from "./views/appointments/appointment/quote";
 import { Provider } from "react-redux";
 import store from "./store";
 
@@ -36,7 +41,25 @@ const Main = () => {
             path="/appointment/:appId"
             element={<Appointment socket={socket} />}
           />
+          <Route
+            path="/appointment-edit/:appId"
+            element={<AppointmentEditor socket={socket} />}
+          />
+          <Route
+            path="/appointment/quote/:appId"
+            element={<AppointmentQuotation socket={socket} />}
+          />
+          <Route
+            path="/client-edit/:clientId"
+            element={<ClientEditor socket={socket} />}
+          />
+          <Route
+            path="/company-edit/:companyId"
+            element={<CompanyEditor socket={socket} />}
+          />
           <Route path="/appointments" element={<Appointments socket={socket} />} />
+          <Route path="/companies" element={<Companies socket={socket} />} />
+          <Route path="/clients" element={<Clients socket={socket} />} />
         </Routes>
       </Layout>
     </Router>

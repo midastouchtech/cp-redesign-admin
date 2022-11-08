@@ -132,6 +132,12 @@ const Dashboard = ({ socket }) => {
     socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
       setLatestMessages(messages);
     });
+    socket.on("DATABASE_UPDATED", (u) => {
+      console.log("database updated we are now going to update the stats")
+      socket.emit("GET_STATS");
+      socket.emit("GET_LATEST_APPOINTMENTS");
+      socket.emit("GET_LATEST_MESSAGES");
+     });
   }
   const toggleStat = (stat) => {
     setSelectedStats(
