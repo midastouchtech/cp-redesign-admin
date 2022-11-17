@@ -11,6 +11,7 @@ import {
   reject,
   without,
   insert,
+  pipe,
   equals,
 } from "ramda";
 import React, { useEffect, useState } from "react";
@@ -19,6 +20,8 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
+import CompanySearch from "../../../../components/Modal/companySearch";
+import AppointmentSearch from "../../../../components/Modal/appointmentSearch";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -31,53 +34,104 @@ const ChatContainer = styled.div`
   }
 `;
 function App({ socket }) {
-  let params = useParams();
   const navigate = useNavigate();
 
   const [bodyItem, setBodyItem] = useState("details");
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setDBUser] = useState({});
-  const [originalUser, setOriginalUser] = useState({});
-  const [hasUpdatedUser, setHasUpdatedUser] = useState(false);
-
-  if (socket && isLoading) {
-    socket.emit("GET_USER", { id: params.clientId });
-    socket.on("RECEIVE_USER", (client) => {
-      console.log("client page RECEIVE_client", client);
-      setIsLoading(false);
-      setDBUser(client);
-      setOriginalUser(client);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM CLient PAGE");
-      socket.emit("GET_USER", { id: params.appId });
-    });
-  }
+  const [show, setShowCompanySearch] = useState(false);
+  const [showAppSearch, setShowAppointmentSearch] = useState(false);
+  const [user, setUser] = useState({
+    details: {
+      name: "",
+      surname: "",
+      email: "",
+      cell: "",
+    },
+    appointmentsManaging: [],
+    companiesManaging: [],
+    isSuspended: false,
+    role: "client",
+    password: "123456",
+    tracking: [],
+  });
 
   const setDetail = (key, value) => {
-    setDBUser(assocPath(["details", key], value, user));
+    setUser(assocPath(["details", key], value, user));
   };
-
-  const resetDBUserToOriginal = () => {
-    setDBUser(originalUser);
-  };
-
-  console.log(user);
 
   const saveUser = () => {
     console.log("saving appza");
-    socket.emit("UPDATE_USER", user);
-    socket.on("USER_UPDATED", () => {
-      console.log("user updated");
-      console.log("navigating to", " /client/edit/" + user.id)
-      navigate("/clients");
+    socket.emit("SAVE_NEW_USER", user);
+    socket.on("RECEIVE_SAVE_USER_SUCCESS", (data) => {
+      console.log("user added");
+      console.log("navigating to", " /client/edit/" + data.id);
+      navigate("/client/edit/" + data.id);
     });
   };
 
-  useEffect(() => {
-    const hasUpdatedUser = !equals(user, originalUser);
-    setHasUpdatedUser(hasUpdatedUser);
-  });
+  const selectCompany = (company) => {
+    console.log("selecting company", company);
+    const userAlreadyHasCompany = any(
+      (c) => c.id === company.id,
+      user.companiesManaging
+    );
+    if (userAlreadyHasCompany) {
+      return;
+    }
+    const newUser = pipe(
+      assocPath(
+        ["companiesManaging"],
+        [
+          ...user?.companiesManaging,
+          { id: company?.id, name: company?.details?.name },
+        ]
+      )
+    )(user);
+    setUser(newUser);
+  };
+
+  const removeCompany = (company) => {
+    console.log("removing company", company);
+    const newUser = pipe(
+      assocPath(
+        ["companiesManaging"],
+        reject(equals(company), user?.companiesManaging)
+      )
+    )(user);
+    setUser(newUser);
+  };
+
+  const selectAppointment = (appointment) => {
+    console.log("selecting appointment", appointment);
+    const userAlreadyHasAppointment = any(
+      (c) => c.id === appointment.id,
+      user.appointmentsManaging
+    );
+    if (userAlreadyHasAppointment) {
+      return;
+    }
+    const newUser = pipe(
+      assocPath(
+        ["appointmentsManaging"],
+        [
+          ...user?.appointmentsManaging,
+          { id: appointment?.id, company: appointment?.details?.company?.name },
+        ]
+      )
+    )(user);
+    setUser(newUser);
+  };
+
+  const removeAppointment = (appointment) => {
+    console.log("removing appointment", appointment);
+    const newUser = pipe(
+      assocPath(
+        ["appointmentsManaging"],
+        reject(equals(appointment), user?.appointmentsManaging)
+      )
+    )(user);
+    setUser(newUser);
+  };
 
   return (
     <div class="container-fluid">
@@ -88,27 +142,11 @@ function App({ socket }) {
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
                 onClick={() => navigate("/clients")}
-                disabled={hasUpdatedUser}
               >
                 Close
               </button>
-              <button
-                className={`btn mr-1 ${
-                  hasUpdatedUser ? "btn-primary" : "btn-secondary"
-                }`}
-                onClick={saveUser}
-                disabled={!hasUpdatedUser}
-              >
+              <button className={`btn mr-1 btn-primary`} onClick={saveUser}>
                 Save User
-              </button>
-              <button
-                className={`btn ${
-                  hasUpdatedUser ? "btn-link" : "btn-secondary"
-                }`}
-                onClick={resetDBUserToOriginal}
-                disabled={!hasUpdatedUser}
-              >
-                Cancel Changes
               </button>
             </div>
           </div>
@@ -155,6 +193,7 @@ function App({ socket }) {
                       />
                     </div>
                   </div>
+                  
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">
                       Cellphone Number
@@ -165,6 +204,18 @@ function App({ socket }) {
                         placeholder="enter 10 digit cell number"
                         onChange={(e) => setDetail("cell", e.target.value)}
                         value={user?.details?.cell}
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">Password</label>
+                    <div class="col-sm-8">
+                      <input
+                        class="form-control input-default"
+                        placeholder="enter password"
+                        type="text"
+                        onChange={(e) => setUser(assoc("password", e.target.value, user))}
+                        value={user?.password}
                       />
                     </div>
                   </div>
@@ -179,7 +230,10 @@ function App({ socket }) {
               <h4 class="card-title">Suspension</h4>
             </div>
             <div class="card-body">
-              <p>You can select one of he two options below to suspend a user from creating appointments or companies.</p>
+              <p>
+                You can select one of he two options below to suspend a user
+                from creating appointments or companies.
+              </p>
               <div class="basic-form">
                 <form>
                   <div class="form-group">
@@ -188,7 +242,9 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={user?.isSuspended === true}
-                        onChange={() => setDBUser(assoc("isSuspended", true, user))}
+                        onChange={() =>
+                          setUser(assoc("isSuspended", true, user))
+                        }
                       />
                       <label class="form-check-label" for="check1">
                         User is Suspended
@@ -199,7 +255,9 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={user?.isSuspended === false}
-                        onChange={() => setDBUser(assoc("isSuspended", false, user))}
+                        onChange={() =>
+                          setUser(assoc("isSuspended", false, user))
+                        }
                       />
                       <label class="form-check-label" for="check2">
                         User is not suspended
@@ -213,7 +271,24 @@ function App({ socket }) {
         </div>
         <div class="col-xl-12">
           <div class="card">
-            <div class="card-header">Companies Managing</div>
+            <div class="card-header">
+              Companies Managing
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowCompanySearch(true)}
+              >
+                Add Company
+              </button>
+              {show && (
+                <CompanySearch
+                  name="comsearch"
+                  socket={socket}
+                  show={show}
+                  close={() => setShowCompanySearch(false)}
+                  onCompanySelect={selectCompany}
+                />
+              )}
+            </div>
             <div class="card-body p-0">
               <div class="table-responsive fs-14">
                 <table class="table">
@@ -236,6 +311,15 @@ function App({ socket }) {
                         <td>
                           <Link to={`/company/edit/${c?.id}`}>Open</Link>
                         </td>
+                        <td>
+                          {" "}
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => removeCompany(c)}
+                          >
+                            Remove Company
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -246,7 +330,24 @@ function App({ socket }) {
         </div>
         <div class="col-xl-12">
           <div class="card">
-            <div class="card-header">Appointments Managing</div>
+            <div class="card-header">
+              Appointments Managing
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowAppointmentSearch(true)}
+              >
+                Add Appointment
+              </button>
+              {showAppSearch && (
+                <AppointmentSearch
+                  name="appsearch"
+                  socket={socket}
+                  show={showAppSearch}
+                  close={() => setShowAppointmentSearch(false)}
+                  onAppointmentSelect={selectAppointment}
+                />
+              )}
+            </div>
             <div class="card-body p-0">
               <div class="table-responsive fs-14">
                 <table class="table">
@@ -267,7 +368,13 @@ function App({ socket }) {
                         <td>{a?.id}</td>
                         <td>{a?.company}</td>
                         <td>
-                          <Link to={`/appointment/${a.id}`}>Open</Link>
+                          {" "}
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => removeAppointment(a)}
+                          >
+                            Remove Appointment
+                          </button>
                         </td>
                       </tr>
                     ))}

@@ -337,10 +337,10 @@ const Dashboard = ({ socket }) => {
                     {latestAppointments &&
                       latestAppointments.map((appointment) => (
                         <tr>
-                          <td>{appointment.details.company.name}</td>
-                          <td>{appointment.usersWhoCanManage[0].name}</td>
-                          <td>{appointment.details.date}</td>
-                          <td>{appointment.status}</td>
+                          <td>{appointment?.details?.company?.name}</td>
+                          <td>{appointment?.usersWhoCanManage ? appointment?.usersWhoCanManage[0].name : ""}</td>
+                          <td>{appointment?.details?.date}</td>
+                          <td>{appointment?.status}</td>
                         </tr>
                       ))}
                   </tbody>

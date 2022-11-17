@@ -34,23 +34,18 @@ function App({ socket }) {
   let params = useParams();
   const navigate = useNavigate();
 
-  const [bodyItem, setBodyItem] = useState("details");
   const [isLoading, setIsLoading] = useState(true);
   const [user, setDBUser] = useState({});
   const [originalUser, setOriginalUser] = useState({});
   const [hasUpdatedUser, setHasUpdatedUser] = useState(false);
 
   if (socket && isLoading) {
-    socket.emit("GET_USER", { id: params.clientId });
+    socket.emit("GET_USER", { id: params.adminId });
     socket.on("RECEIVE_USER", (client) => {
       console.log("client page RECEIVE_client", client);
       setIsLoading(false);
       setDBUser(client);
       setOriginalUser(client);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM CLient PAGE");
-      socket.emit("GET_USER", { id: params.appId });
     });
   }
 
@@ -68,9 +63,7 @@ function App({ socket }) {
     console.log("saving appza");
     socket.emit("UPDATE_USER", user);
     socket.on("USER_UPDATED", () => {
-      console.log("user updated");
-      console.log("navigating to", " /client/edit/" + user.id)
-      navigate("/clients");
+      navigate("/admins");
     });
   };
 
@@ -207,72 +200,6 @@ function App({ socket }) {
                     </div>
                   </div>
                 </form>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-12">
-          <div class="card">
-            <div class="card-header">Companies Managing</div>
-            <div class="card-body p-0">
-              <div class="table-responsive fs-14">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>
-                        <strong>Id</strong>
-                      </th>
-                      <th>
-                        <strong>Name</strong>
-                      </th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {user?.companiesManaging?.map((c) => (
-                      <tr>
-                        <td>{c?.id}</td>
-                        <td>{c?.name}</td>
-                        <td>
-                          <Link to={`/company/edit/${c?.id}`}>Open</Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-12">
-          <div class="card">
-            <div class="card-header">Appointments Managing</div>
-            <div class="card-body p-0">
-              <div class="table-responsive fs-14">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>
-                        <strong>Id</strong>
-                      </th>
-                      <th>
-                        <strong>For Company</strong>
-                      </th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {user?.appointmentsManaging?.map((a) => (
-                      <tr>
-                        <td>{a?.id}</td>
-                        <td>{a?.company}</td>
-                        <td>
-                          <Link to={`/appointment/${a.id}`}>Open</Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>

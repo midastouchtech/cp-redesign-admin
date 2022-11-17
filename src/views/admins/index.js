@@ -3,19 +3,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-const getBadgeclassName = (status) => {
-  switch (status) {
-    case "pending":
-      return "badge badge-warning";
-    case "approved":
-      return "badge badge-success";
-    case "declined":
-      return "badge badge-danger";
-    default:
-      return "badge badge-primary";
-  }
-};
-
 const NoAppointments = styled.div`
   display: flex;
   justify-content: center;
@@ -25,22 +12,22 @@ const NoAppointments = styled.div`
 
 `;
 
-const Companies = ({ socket }) => {
-  const [companies, setCompanies] = useState(null);
-  const [originalCompanies, setOriginalCompanies] = useState(null);
+const Admins = ({ socket }) => {
+  const [admins, setAdmins] = useState(null);
+  const [originalAdmins, setoriginalAdmins] = useState(null);
   const [page, setPage] = useState(0);
 
-  const getPageCompanies = (p) => {
-      socket.emit("GET_NEXT_PAGE_COMPANIES", { page: p});
-      socket.on("RECEIVE_NEXT_PAGE_COMPANIES", (data) => {
-        setCompanies(data);
-        setOriginalCompanies(data);
+  const getPageAdmins = (p) => {
+      socket.emit("GET_NEXT_PAGE_CLIENTS", { page: p, role:"admin" });
+      socket.on("RECEIVE_NEXT_PAGE_CLIENTS", (data) => {
+        setAdmins(data);
+        setoriginalAdmins(data);
         setPage(p);
       });
   };
 
-  if (socket && !companies) {
-    getPageCompanies(1);
+  if (socket && !admins) {
+    getPageAdmins(0);
   }
 
   return (
@@ -48,9 +35,9 @@ const Companies = ({ socket }) => {
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
         <div className="mb-3 mr-3">
           <h6 className="fs-16 text-black font-w600 mb-0">
-            Companies
+            Admins
           </h6>
-          <span className="fs-14">All active companies listed here </span>
+          <span className="fs-14">All active administrators listed here </span>
         </div>
       </div>
       <div className="row">
@@ -58,7 +45,7 @@ const Companies = ({ socket }) => {
           <div className="tab-content">
             <div id="All" className="tab-pane active fade show">
               <div className="table-responsive">
-                {!isNil(companies) && !isEmpty(companies) && (
+                {!isNil(admins) && !isEmpty(admins) && (
                   <table
                     id="example2"
                     className="table card-table display dataTablesCard"
@@ -67,28 +54,23 @@ const Companies = ({ socket }) => {
                       <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>Manager</th>
-                        <th>Vat</th>
-                        <th>Registration Number </th>
-                        <th>Info </th>
+                        <th>Email</th>
+                        <th>Contact No</th>
+                        <th>Suspended </th>
+                        <th> </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {companies?.map((company, index) => (
+                      {admins?.map((admin, index) => (
                         <tr key={index}>
-                          <td>{company.id}</td>
-                          <td>{company.details.name}</td>
-                          <td>{company.usersWhoCanManage[0].name}</td>
-                          <td>{company.details.vat}</td>
-                          <td>{company.details.registrationNumber}</td>
+                          <td>{admin?.id}</td>
+                          <td>{admin?.details.name}</td>
+                          <td>{admin?.details.email}</td>
+                          <td>{admin?.details.cell}</td>
+                          <td>{admin?.isSuspended ?  "Yes" : "No"}</td>
                           <td>
-                            <Link to={`/company/edit/${company.id}`}  className="btn btn-primary text-nowrap">
-                              <i
-                                className="fa fa-info
-                                            scale5 mr-3"
-                                aria-hidden="true"
-                              ></i>
-                              More info
+                            <Link to={`/admin/edit/${admin?.id}`}  className="btn btn-primary text-nowrap">                              
+                              Edit
                             </Link>
                           </td>
                         </tr>
@@ -96,10 +78,10 @@ const Companies = ({ socket }) => {
                     </tbody>
                   </table>
                 )}
-                {(isNil(companies) || isEmpty(companies)) && (
+                {(isNil(admins) || isEmpty(admins)) && (
                   <NoAppointments>
                     <div className="d-flex">
-                      <h1>No Companies</h1>
+                      <h1>No Admins</h1>
                     </div>
                   </NoAppointments>
                 )}
@@ -113,7 +95,7 @@ const Companies = ({ socket }) => {
           <li className="nav-item">
             <a
               className={`nav-link`}
-              onClick={() => getPageCompanies(page === 0 ? 0 : page-1)}
+              onClick={() => getPageAdmins(page === 0 ? 0 : page-1)}
             >
               Prev Page
             </a>
@@ -121,7 +103,7 @@ const Companies = ({ socket }) => {
           <li className="nav-item">
             <a
               className={`nav-link`}
-              onClick={() => getPageCompanies(page+1)}
+              onClick={() => getPageAdmins(page+1)}
             >
               Next Page
             </a>
@@ -130,7 +112,7 @@ const Companies = ({ socket }) => {
             <li className="nav-item">
               <a
                 className={`nav-link`}
-                onClick={() => getPageCompanies(index)}
+                onClick={() => getPageAdmins(index)}
               >
                 Page {index+1}
               </a>
@@ -142,4 +124,4 @@ const Companies = ({ socket }) => {
   );
 };
 
-export default Companies;
+export default Admins;

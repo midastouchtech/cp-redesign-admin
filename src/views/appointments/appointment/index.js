@@ -54,7 +54,7 @@ function App({ socket }) {
                     </h2>
                     <div class="d-flex align-items-center">
                       <Link
-                        to={`/appointment-edit/${appointment.id}`}
+                        to={`/appointment/edit/${appointment.id}`}
                         class="btn btn-primary mr-3"
                       >
                         Edit
@@ -267,7 +267,7 @@ function App({ socket }) {
                         {appointment?.usersWhoCanManage?.map((user) => (
                             <tr>
                                 <td>{user?.name}</td>
-                                <td><Link to={`/client-edit/${user.id}`}>Open</Link></td>
+                                <td><Link to={`/client/edit/${user.id}`}>Open</Link></td>
                             </tr>
                         ))}
 
@@ -300,7 +300,7 @@ function App({ socket }) {
                         {appointment?.usersWhoCanManage?.map((user) => (
                             <tr>
                                 <td>{user?.name}</td>
-                                <td><Link to={`/client-edit/${user.id}`}>Open</Link></td>
+                                <td><Link to={`/client/edit/${user.id}`}>Open</Link></td>
                             </tr>
                         ))}
 

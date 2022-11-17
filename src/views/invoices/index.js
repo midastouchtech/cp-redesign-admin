@@ -1,7 +1,13 @@
-import { isNil, isEmpty, repeat } from "ramda";
+import moment from "moment";
+import { isNil, isEmpty, repeat, take } from "ramda";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+
+
+const formatPrice = (price) => {
+  return `R ${price.toFixed(2)}`;
+};
 
 const getBadgeclassName = (status) => {
   switch (status) {
@@ -22,35 +28,39 @@ const NoAppointments = styled.div`
   align-items: center;
   height: 500px;
   width: 100%;
-
 `;
 
-const Companies = ({ socket }) => {
-  const [companies, setCompanies] = useState(null);
-  const [originalCompanies, setOriginalCompanies] = useState(null);
+const Invoices = ({ socket }) => {
+  const [invoices, setInvoices] = useState(null);
   const [page, setPage] = useState(0);
 
-  const getPageCompanies = (p) => {
-      socket.emit("GET_NEXT_PAGE_COMPANIES", { page: p});
-      socket.on("RECEIVE_NEXT_PAGE_COMPANIES", (data) => {
-        setCompanies(data);
-        setOriginalCompanies(data);
-        setPage(p);
-      });
+  const getAllInvoices = () => {
+    socket.emit("GET_ALL_INVOICES");
+    socket.on("RECEIVE_ALL_INVOICES", (data) => {
+      setInvoices(data);
+    });
   };
 
-  if (socket && !companies) {
-    getPageCompanies(1);
+  if (socket && !invoices) {
+    getAllInvoices();
   }
+
+  const getPageInvoices = (p) => {
+    socket.emit("GET_NEXT_PAGE_INVOICES", { page: p });
+    socket.on("RECEIVE_NEXT_PAGE_INVOICES", (data) => {
+      setInvoices(data);
+      setPage(p);
+    });
+  };
 
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
         <div className="mb-3 mr-3">
           <h6 className="fs-16 text-black font-w600 mb-0">
-            Companies
+            Invoices
           </h6>
-          <span className="fs-14">All active companies listed here </span>
+          <span className="fs-14"> All invoices sent listed here </span>
         </div>
       </div>
       <div className="row">
@@ -58,7 +68,7 @@ const Companies = ({ socket }) => {
           <div className="tab-content">
             <div id="All" className="tab-pane active fade show">
               <div className="table-responsive">
-                {!isNil(companies) && !isEmpty(companies) && (
+                {!isNil(invoices) && !isEmpty(invoices) && (
                   <table
                     id="example2"
                     className="table card-table display dataTablesCard"
@@ -66,40 +76,32 @@ const Companies = ({ socket }) => {
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Name</th>
-                        <th>Manager</th>
-                        <th>Vat</th>
-                        <th>Registration Number </th>
-                        <th>Info </th>
+                        <th>Company</th>
+                        <th>Client</th>
+                        <th>Emailed to</th>
+                        <th>Amount </th>
+                        <th>Date Sent</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {companies?.map((company, index) => (
+                      {invoices?.map((invoice, index) => (
                         <tr key={index}>
-                          <td>{company.id}</td>
-                          <td>{company.details.name}</td>
-                          <td>{company.usersWhoCanManage[0].name}</td>
-                          <td>{company.details.vat}</td>
-                          <td>{company.details.registrationNumber}</td>
-                          <td>
-                            <Link to={`/company/edit/${company.id}`}  className="btn btn-primary text-nowrap">
-                              <i
-                                className="fa fa-info
-                                            scale5 mr-3"
-                                aria-hidden="true"
-                              ></i>
-                              More info
-                            </Link>
-                          </td>
+                          <td>{take(8,invoice.id)}</td>
+                          <td>{invoice?.company?.name}</td>
+                          <td>{invoice?.client?.name} {invoice?.client?.surname}</td>
+                          <td>{invoice.client?.email}</td>
+                          <td>{formatPrice(invoice?.payment?.amount)}</td>
+                          <td>{moment(invoice?.date).format("DD MMM YYYY HH:mm")}</td>
+                          <td><a href={invoice?.url} target="_blank" className="btn btn-primary">View</a></td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 )}
-                {(isNil(companies) || isEmpty(companies)) && (
+                {(isNil(invoices) || isEmpty(invoices)) && (
                   <NoAppointments>
                     <div className="d-flex">
-                      <h1>No Companies</h1>
+                      <h1>No Invoices</h1>
                     </div>
                   </NoAppointments>
                 )}
@@ -113,26 +115,26 @@ const Companies = ({ socket }) => {
           <li className="nav-item">
             <a
               className={`nav-link`}
-              onClick={() => getPageCompanies(page === 0 ? 0 : page-1)}
+              onClick={() => getPageInvoices(page === 0 ? 0 : page - 1)}
             >
               Prev Page
             </a>
-          </li> 
+          </li>
           <li className="nav-item">
             <a
               className={`nav-link`}
-              onClick={() => getPageCompanies(page+1)}
+              onClick={() => getPageInvoices(page + 1)}
             >
               Next Page
             </a>
           </li>
-          {repeat('i', page).map((i, index) => (
+          {repeat("i", page).map((i, index) => (
             <li className="nav-item">
               <a
                 className={`nav-link`}
-                onClick={() => getPageCompanies(index)}
+                onClick={() => getPageInvoices(index)}
               >
-                Page {index+1}
+                Page {index + 1}
               </a>
             </li>
           ))}
@@ -142,4 +144,4 @@ const Companies = ({ socket }) => {
   );
 };
 
-export default Companies;
+export default Invoices;

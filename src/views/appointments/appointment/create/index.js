@@ -13,6 +13,7 @@ import {
   insert,
   keys,
   equals,
+  pipe,
 } from "ramda";
 import short from "short-uuid";
 import React, { useEffect, useState } from "react";
@@ -24,6 +25,8 @@ import { SegmentedControl } from "segmented-control-react";
 import { MEDICAL_SERVICES } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
+import SearchModal from "../../../../components/Modal";
+import CompanySearch from "../../../../components/Modal/companySearch";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -36,31 +39,38 @@ const ChatContainer = styled.div`
   }
 `;
 function App({ socket }) {
-  let params = useParams();
   const navigate = useNavigate();
 
   const [bodyItem, setBodyItem] = useState("details");
   const [isLoading, setIsLoading] = useState(true);
-  const [appointment, setAppointment] = useState({});
+  const [appointment, setAppointment] = useState({
+    details: {
+      company:null,
+      date: null,
+      purchaseOrderNumber: null,
+      clinic: "Churchill",
+      ndaAccepted: false,
+      employees: [],
+    },
+    usersWhoCanEdit: [],
+    usersWhoCanManage: [],
+    payment: {
+      proofOfPayment:"",
+      amount: 0
+    },
+    isVoided: false,
+    isComplete: false,
+    tracking: [],
+    messages: [],
+    status: "pending",
+  });
   const [originalAppointment, setOriginalAppointment] = useState({});
   const [hasUpdatedAppointmnent, setHasUpdatedAppointment] = useState(false);
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
-
-  if (socket && isLoading) {
-    socket.emit("GET_APPOINTMENT", { id: params.appId });
-    socket.on("RECEIVE_APPOINTMENT", (appointment) => {
-      setIsLoading(false);
-      setAppointment(appointment);
-      setOriginalAppointment(appointment);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM APPOINTMENT PAGE");
-      socket.emit("GET_APPOINTMENT", { id: params.appId });
-    });
-  }
+  const [show, setShowCompanySearch] = useState(false);
 
   const setDetail = (key, value) => {
-    console.log("setting detail", key, value)
+    console.log("setting detail", key, value);
     setAppointment(assocPath(["details", key], value, appointment));
   };
 
@@ -88,7 +98,6 @@ function App({ socket }) {
     return status === appointment.status ? "btn-primary" : "btn-secondary";
   };
 
-  
   const calculateBookingPrice = () => {
     const allServices = appointment?.details?.employees?.reduce(
       (acc, employee) => {
@@ -122,12 +131,12 @@ function App({ socket }) {
     }, 0);
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
-        return employee?.sites ? acc + (employee?.sites?.length * 35) : acc
+        return employee?.sites ? acc + employee?.sites?.length * 35 : acc;
       },
       0
     );
-    console.log('servicesPrice', servicesPrice)
-    console.log("site price",sitesPrice);
+    console.log("servicesPrice", servicesPrice);
+    console.log("site price", sitesPrice);
     const bookingPrice = servicesPrice + sitesPrice;
     console.log("bookingPrice", bookingPrice);
     return bookingPrice;
@@ -135,13 +144,27 @@ function App({ socket }) {
 
   const saveAppointment = () => {
     const price = calculateBookingPrice();
-    const appointmentWithNewPrice = assocPath(["payment", "amount"], price, appointment);
+    const appointmentWithNewPrice = assocPath(
+      ["payment", "amount"],
+      price,
+      appointment
+    );
     console.log("saving appza");
-    socket.emit("UPDATE_APPOINTMENT", appointmentWithNewPrice);
-    socket.on("APPOINTMENT_UPDATED", () => {
-      console.log("appointment updated");
-      navigate("/appointment/edit/" + appointment.id);
+    socket.emit("SAVE_NEW_APPOINTMENT", appointmentWithNewPrice);
+    socket.on("APPOINTMENT_ADDED", (data) => {
+      console.log("appointment added", data);
+      navigate("/appointment/" + data.id);
     });
+  };
+
+  const selectCompany = (company) => {
+    console.log("selecting company", company);
+    
+    const newAppointment = pipe(
+      assocPath(["details", "company"], {id: company?.id, name: company?.details?.name}),
+      assocPath(["usersWhoCanManage"], company?.usersWhoCanManage)
+    )(appointment)
+    setAppointment(newAppointment);
   };
 
   const createNewEmployee = () => {
@@ -157,7 +180,7 @@ function App({ socket }) {
     setDetail("employees", newEmployees);
   };
 
-  const removeEmployee = (id) => ()=> {
+  const removeEmployee = (id) => () => {
     console.log("removing employee", id);
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
@@ -173,7 +196,7 @@ function App({ socket }) {
   return (
     <div class="container-fluid">
       <div class="row">
-      <div className="col-xl-12 col-lg-12">
+        <div className="col-xl-12 col-lg-12">
           <div className="card">
             <div className="card-body">
               <button
@@ -217,18 +240,20 @@ function App({ socket }) {
                     <div class="col-sm-8">
                       <input
                         class="form-control input-default "
-                        placeholder="col-form-label-sm"
+                        placeholder="company name"
                         disabled
                         value={appointment?.details?.company?.name}
                       />
+                      <button  onClick={(e) => {e.preventDefault();setShowCompanySearch(true)}} className="btn btn-sm btn-link">Search</button>
                     </div>
                   </div>
+                  <CompanySearch name="companysearch" socket={socket} show={show} onCompanySelect={selectCompany} close={() => setShowCompanySearch(false)} />
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Date</label>
                     <div class="col-sm-8">
                       <input
                         class="form-control input-default "
-                        placeholder="col-form-label-sm"
+                        placeholder="select date"
                         type="date"
                         onChange={(e) => setDetail("date", e.target.value)}
                         value={appointment?.details?.date}
@@ -243,7 +268,7 @@ function App({ socket }) {
                       <input
                         type="email"
                         class="form-control input-default "
-                        placeholder="col-form-label"
+                        placeholder="Purchase order number"
                         onChange={(event) =>
                           setDetail("purchaseOrderNumber", event.target.value)
                         }
@@ -340,25 +365,44 @@ function App({ socket }) {
         <div class="col-xl-6 col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title">Non disclosure agreement</h4>
+              <h4 class="card-title">Non disclosure Agreement</h4>
             </div>
             <div class="card-body">
-              <div class="row">
-                <div class="col-12">
-                  {appointment?.details?.ndaUrl && (
-                    <p>
-                      <a
-                        className="btn btn-primary mb-2"
-                        href={appointment.details.ndaUrl}
-                      >
-                        View Uploaded
-                      </a>
-                    </p>
-                  )}
-                  <Uploader
-                    onChange={(ndaUrl) => setDetail("ndaUrl", ndaUrl)}
-                  />
-                </div>
+              <p>
+                You can select one of the two options below to specify wether
+                the nda terms have been accepted or not.
+              </p>
+              <div class="basic-form">
+                <form>
+                  <div class="form-group">
+                    <div class="form-check mb-2">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        checked={appointment?.details?.ndaAccepted === true}
+                        onChange={() =>
+                          setDetail("ndaAccepted", true)
+                        }
+                      />
+                      <label class="form-check-label" for="check1">
+                       NDA has been accepted.
+                      </label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        checked={appointment?.details?.ndaAccepted === false}
+                        onChange={() =>
+                          setDetail("ndaAccepted", false)
+                        }
+                      />
+                      <label class="form-check-label" for="check2">
+                        NDA has not been accepted.
+                      </label>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -369,7 +413,10 @@ function App({ socket }) {
               <h4 class="card-title">Completion</h4>
             </div>
             <div class="card-body">
-              <p>You can select one of the two options below to specify wether this appointment has been completed or not.</p>
+              <p>
+                You can select one of the two options below to specify wether
+                this appointment has been completed or not.
+              </p>
               <div class="basic-form">
                 <form>
                   <div class="form-group">
@@ -378,7 +425,9 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={appointment?.isComplete === true}
-                        onChange={() => setAppointment(assoc("isComplete", true, appointment))}
+                        onChange={() =>
+                          setAppointment(assoc("isComplete", true, appointment))
+                        }
                       />
                       <label class="form-check-label" for="check1">
                         Appointment has been completed.
@@ -389,7 +438,11 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={appointment?.isComplete === false}
-                        onChange={() => setAppointment(assoc("isComplete", false, appointment))}
+                        onChange={() =>
+                          setAppointment(
+                            assoc("isComplete", false, appointment)
+                          )
+                        }
                       />
                       <label class="form-check-label" for="check2">
                         Appointment is still in progress.
@@ -401,11 +454,18 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        <div class="col-xl-12 col-lg-12 text-center" >
+        
+        <div class="col-xl-12 col-lg-12 text-center">
           <h2>Employees</h2>
-          <button className="btn btn-primary mb-2" onClick={createNewEmployee}> Add New Employee </button>
+          <button className="btn btn-primary mb-2" onClick={createNewEmployee}>
+            {" "}
+            Add New Employee{" "}
+          </button>
           <br />
-          <p>This appointment has {appointment?.details?.employees?.length} employees. </p>
+          <p>
+            This appointment has {appointment?.details?.employees?.length}{" "}
+            employees.{" "}
+          </p>
         </div>
         {appointment?.details?.employees?.map((employee) => (
           <div class="col-xl-6 col-lg-6 col-sm-6">
@@ -416,7 +476,13 @@ function App({ socket }) {
                   <span className="badge badge-secondary">Employee</span>{" "}
                   {employee?.name}{" "}
                 </h4>
-                <button className="btn btn-danger" onClick={removeEmployee(employee.id)}> Delete </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={removeEmployee(employee.id)}
+                >
+                  {" "}
+                  Delete{" "}
+                </button>
               </div>
               <div class="card-body">
                 <div class="basic-form">
@@ -460,13 +526,23 @@ function App({ socket }) {
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">Sites</label>
                       <div class="col-sm-8">
-                        <Sites employeeSites={employee?.sites || []} onChange={(sites) => setEmployeeDetail(employee.id, "sites", sites)} />
+                        <Sites
+                          employeeSites={employee?.sites || []}
+                          onChange={(sites) =>
+                            setEmployeeDetail(employee.id, "sites", sites)
+                          }
+                        />
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">Services</label>
                       <div class="col-sm-8">
-                        <Services selectedServices={employee?.services} onChange={(services) => setEmployeeDetail(employee.id, "services", services)} />
+                        <Services
+                          selectedServices={employee?.services}
+                          onChange={(services) =>
+                            setEmployeeDetail(employee.id, "services", services)
+                          }
+                        />
                       </div>
                     </div>
                     <div class="form-group row">

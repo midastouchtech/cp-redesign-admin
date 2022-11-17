@@ -4,28 +4,32 @@ import BasicDocument from "./BasicDocument";
 import { MEDICAL_SERVICES } from "../../../../config";
 import { keys } from "ramda";
 import styled from "styled-components";
+import html2canvas from "html2canvas";
+import jspdf from "jspdf";
+import axios from "axios";
 
 const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
 };
 
 const StyedContainer = styled.div`
-@media print {
-  #printPageButton {
-    display: none;
+  @media print {
+    #printPageButton {
+      display: none;
+    }
   }
-}
-.quote-container{
-  border: 1px solid #lightgrey;
-}
+  .quote-container {
+    border: 1px solid #lightgrey;
+  }
   background-color: #fff;
   img {
     width: 100%;
   }
-  h5{
+  h5 {
     padding: 10px 0;
   }
-  td, th {
+  td,
+  th {
     padding: 5px 0 !important;
   }
   .details-row {
@@ -34,10 +38,10 @@ const StyedContainer = styled.div`
       margin: 0 !important;
     }
   }
-  tr{
-    &:last-of-type{
-      td{
-        border:none;
+  tr {
+    &:last-of-type {
+      td {
+        border: none;
       }
     }
   }
@@ -46,7 +50,6 @@ const StyedContainer = styled.div`
 function App({ socket }) {
   let params = useParams();
   const navigate = useNavigate();
-
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({});
   const [services, setServices] = useState([]);
@@ -54,6 +57,58 @@ function App({ socket }) {
   const [servicesPrice, setServicesPrice] = useState(0);
   const [sitesPrice, setSitesPrice] = useState(0);
   const [company, setCompany] = useState({});
+  const [disableButton, setButtonDisabled] = useState(false);
+  const [status , setStatus] = useState("Email Invoice");
+
+  const savetopdf = () => {
+    window.scrollTo(0, 0);
+    const input = document.getElementById("quote-container");
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jspdf("p", "mm", "a4");
+      var width = pdf.internal.pageSize.getWidth() - 20;
+      var height = pdf.internal.pageSize.getHeight() - 20;
+      pdf.addImage(imgData, "JPEG", 10, 0, width, height);
+      pdf.save("download.pdf");
+    });
+  };
+
+  const uploadToCloudinary = () => {
+    setButtonDisabled(true);
+    setStatus("Generating invoice...");
+    window.scrollTo(0, 0);
+    const input = document.getElementById("quote-container");
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jspdf("p", "mm", "a4");
+      var width = pdf.internal.pageSize.getWidth() - 20;
+      var height = pdf.internal.pageSize.getHeight() - 20;
+      pdf.addImage(imgData, "JPEG", 10, 0, width, height);
+      var blob = pdf.output("blob");
+      const url = "https://api.cloudinary.com/v1_1/clinic-plus/raw/upload";
+      const formData = new FormData();
+      formData.append("file", blob, "quote.pdf");
+      formData.append("upload_preset", "pwdsm6sz");
+      setStatus("Uploading invoice...");
+      axios({
+        method: "POST",
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+        url,
+      })
+        .then((response) => {
+          console.log(response.data.secure_url);
+          socket.emit("SEND_INVOICE", { appointment, url: response.data.secure_url });
+          setStatus("Sending...");
+          socket.on("RECEIVE_SAVE_INVOICE_SUCCESS", (data) => {
+            setStatus("Invoice sent!");
+          });
+        })
+        .catch((errr) => setStatus("Error sending invoice"));
+    });
+  };
+
+  
 
   if (socket && isLoading) {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
@@ -98,7 +153,7 @@ function App({ socket }) {
       }, 0);
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites ? acc + (employee?.sites?.length * 35) : acc
+          return employee?.sites ? acc + employee?.sites?.length * 35 : acc;
         },
         0
       );
@@ -106,12 +161,16 @@ function App({ socket }) {
       setServicesPrice(servicesPrice);
       setSitesPrice(sitesPrices);
       setServices(services);
+      if (appointment.invoice) {
+        setButtonDisabled(true);
+      }
     });
     socket.on("DATABASE_UPDATED", (u) => {
       console.log("Database updated FROM APPOINTMENT PAGE");
       socket.emit("GET_APPOINTMENT", { id: params.appId });
     });
   }
+
 
   return (
     <StyedContainer>
@@ -121,14 +180,37 @@ function App({ socket }) {
           <div class="row">
             <div class="col-1"></div>
             <div class="col-10 text-center">
-            <a id="printPageButton" className="btn btn-primary mr-1" href={"/appointment/"+appointment.id}> Close</a>
-            <button id="printPageButton" className="btn btn-primary ml-1" onClick={() => window.print()}> Save as PDF </button>
+              <a
+                id="printPageButton"
+                className="btn btn-primary mr-1"
+                href={"/appointment/" + appointment.id}
+              >
+                {" "}
+                Close
+              </a>
+              <button
+                id="printPageButton"
+                className="btn btn-primary ml-1"
+                onClick={() => savetopdf()}
+              >
+                {" "}
+                Save as PDF{" "}
+              </button>
+              <button
+                id="printPageButton"
+                disabled={disableButton}
+                className="btn btn-primary ml-1"
+                onClick={() => uploadToCloudinary()}
+              >
+                {" "}
+                {status}{" "}
+              </button>
             </div>
           </div>
           <br />
           <div className="row">
             <div className="col-1"></div>
-            <div className="col-10 quote-container">
+            <div id="quote-container" className="col-10 quote-container">
               <br />
               <div class="row details-row">
                 <div class="col-md-6">
@@ -220,7 +302,11 @@ function App({ socket }) {
                               {employee?.sites ? employee?.sites?.length : 0}
                             </td>
                             <td class="col-md-5 text-right">
-                              {formatPrice(employee?.sites ? employee?.sites?.length * 35 : 0)}
+                              {formatPrice(
+                                employee?.sites
+                                  ? employee?.sites?.length * 35
+                                  : 0
+                              )}
                             </td>
                           </tr>
                         ))}

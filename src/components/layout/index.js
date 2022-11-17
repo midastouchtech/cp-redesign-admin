@@ -4,13 +4,42 @@ import NavHeader from "./navHeader";
 import Header from './header';
 import { connect } from "react-redux";
 import SideBar from "./sidebar";
+import {useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { isNil, isEmpty } from "ramda";
+import cookies from "js-cookie";
+import { useLocation } from "react-router-dom";
+
+
+const exists = (i) => !isNil(i) && !isEmpty(i);
 
 export const Layout = (props) => {
+  const [user , setUser] = React.useState(null);
   const { children, socket, saveUser } = props;
-  saveUser({ name: "Humphrey", surname : "Odillo", role: "Admin" });
-  const isQuotePage = window.location.pathname.includes("quote");
+  const cookieUser = cookies.get("clinicplus_admin_logged_in_user");
+  const navigate = useNavigate();
+  const location = useLocation();
+  if (socket && !exists(user)) {
 
-  if(isQuotePage) {
+    if (cookieUser) {
+      socket.emit("GET_USER", { id: cookieUser });
+    }
+    if (
+      (isNil(cookieUser) || isEmpty(cookieUser)) &&
+      location.pathname !== "/login"
+    ) {
+      navigate("/login");
+    }
+    socket.on("RECEIVE_USER", (u) => {
+      saveUser(u);
+      setUser(u);
+      socket.off("RECEIVE_USER");
+    });
+
+  }
+  const isQuoteOrLoginPage = window.location.pathname.includes("quote") || window.location.pathname.includes("login") || window.location.pathname.includes("logout");
+
+  if(isQuoteOrLoginPage) {
     return (
       <div>
         <Helmet>
