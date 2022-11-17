@@ -40,7 +40,7 @@ const Companies = ({ socket }) => {
   };
 
   if (socket && !companies) {
-    getPageCompanies(1);
+    getPageCompanies(0);
   }
 
   return (
