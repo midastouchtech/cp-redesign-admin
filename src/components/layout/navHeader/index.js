@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const NavHeader = ({ title, onBack }) => {
+const NavHeader = ({ title, onBack, toggleOpen }) => {
   return (
     <div className="nav-header">
       <a href="index.html" className="brand-logo">
@@ -11,7 +11,7 @@ const NavHeader = ({ title, onBack }) => {
       </a>
 
       <div className="nav-control">
-        <div className="hamburger">
+        <div className="hamburger" onClick={toggleOpen}>
           <span className="line"></span>
           <span className="line"></span>
           <span className="line"></span>

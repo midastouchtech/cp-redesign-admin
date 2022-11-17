@@ -4,24 +4,71 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
+import { connect } from "react-redux";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
-   .chatbox{
-    position: initial;
-   }
-   .chatbox .msg_card_body {
-    height: calc(100vh - 195px);
-    overflow: scroll;
-}
+  .chatbox {
+    position: fixed;
+    width: 340px;
+    height: 78vh;
+    position: fixed;
+    right: 40px !important;
+    top: 18vh;
+  }
+  .chatbox .msg_card_body {
+    height: 50vh;
+    overflow-y: scroll;
+  }
+  @media (max-width: 800px) {
+    ${(props) => (props.isOpen ? "display: block" : "display: none")};
+    .chatbox {
+      position: fixed;
+      top: 12vh;
+      left: 0;
+      right: 0;
+      width: 100vw;
+    }
+  }
 `;
-function App({ socket }) {
+
+const StyledImg = styled.img`
+  width: 40px !important;
+  height: 40px;
+  border-radius: 50%;
+  background: url(${(props) => props.src});
+  background-size: cover;
+`;
+
+const MessageContainer = styled.div`
+  height: 50vh;
+  overflow-y: auto;
+  padding: 10px;
+  .justify-content-end {
+    .msg_cotainer {
+      background: #777271;
+      &:after {
+        border-right: 10px solid #777271;
+      }
+    }
+  }
+`;
+
+const FloatingButton = styled.button`
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  z-index: 999;
+`;
+function App({ socket, user }) {
   let params = useParams();
 
   const [bodyItem, setBodyItem] = useState("details");
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({});
   const [avatars, setAvatars] = useState({});
+  const [message, setMessage] = useState(null);
+  const [chatOpen, setChatOpen] = useState(false);
 
   if (socket && isLoading) {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
@@ -29,13 +76,41 @@ function App({ socket }) {
       console.log("appointment page RECEIVE_APPOINTMENT", appointment);
       setIsLoading(false);
       setAppointment(appointment);
-      
+      const messageUsers = appointment.messages.map((m) => m?.author?.id);
+      socket.emit("GET_AVATARS", { ids: messageUsers });
     });
     socket.on("DATABASE_UPDATED", (u) => {
       console.log("Database updated FROM APPOINTMENT PAGE");
       socket.emit("GET_APPOINTMENT", { id: params.appId });
     });
+
+    socket.on("RECEIVE_AVATARS", (avatars) => {
+      console.log("RECEIVE_AVATARS", avatars);
+      setAvatars(avatars);
+    });
   }
+
+  const appendMessageToAppointment = () => {
+    const newMessage = {
+      message,
+      author: {
+        id: user?.id,
+        name: `${user?.details?.name} ${user?.details?.surname}`,
+      },
+      createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+    };
+    const newApp = assoc(
+      "messages",
+      [...appointment.messages, newMessage],
+      appointment
+    );
+    setAppointment(newApp);
+    setMessage(null);
+    socket.emit("UPDATE_APPOINTMENT", newApp);
+    socket.on("APPOINTMENT_UPDATED", () => {
+      console.log("appointment updated");
+    });
+  };
 
   return (
     <div class="container-fluid">
@@ -65,10 +140,9 @@ function App({ socket }) {
                       >
                         View Quote
                       </a>
-                       <a href="#" class="badge mr-3">
+                      <a href="#" class="badge mr-3">
                         {appointment.status}
                       </a>
-                      
                     </div>
                   </div>
                   <div class="row">
@@ -89,12 +163,18 @@ function App({ socket }) {
                         </svg>
                         <div class="media-body">
                           <span class="fs-12 d-block mb-1">Booking Price</span>
-                          <span class="fs-16 text-black">R{Math.round(appointment?.payment?.amount?? 0)}</span>
+                          <span class="fs-16 text-black">
+                            R{Math.round(appointment?.payment?.amount ?? 0)}
+                          </span>
                         </div>
                         <div class="media-body">
                           <span class="fs-12 d-block mb-1">Completion</span>
-                          <span class="fs-16 text-black">{appointment?.isComplete ? "Complete" : "Not Complete"}</span>
-                        </div>                        
+                          <span class="fs-16 text-black">
+                            {appointment?.isComplete
+                              ? "Complete"
+                              : "Not Complete"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-xxl-6 mb-3">
@@ -146,7 +226,9 @@ function App({ socket }) {
                         <div class="media-body">
                           <span class="fs-12 d-block mb-1">Date</span>
                           <span class="fs-16 text-black">
-                            {moment(appointment?.details?.date).format("DD MMM YYYY")}
+                            {moment(appointment?.details?.date).format(
+                              "DD MMM YYYY"
+                            )}
                           </span>
                         </div>
                       </div>
@@ -234,7 +316,9 @@ function App({ socket }) {
                           </defs>
                         </svg>
                         <div class="media-body">
-                          <span class="fs-12 d-block mb-1">Purchase Order Number</span>
+                          <span class="fs-12 d-block mb-1">
+                            Purchase Order Number
+                          </span>
                           <span class="fs-16 text-black">
                             {appointment?.details?.purchaseOrderNumber}
                           </span>
@@ -265,14 +349,14 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         {appointment?.usersWhoCanManage?.map((user) => (
-                            <tr>
-                                <td>{user?.name}</td>
-                                <td><Link to={`/client/edit/${user.id}`}>Open</Link></td>
-                            </tr>
+                          <tr>
+                            <td>{user?.name}</td>
+                            <td>
+                              <Link to={`/client/edit/${user.id}`}>Open</Link>
+                            </td>
+                          </tr>
                         ))}
-
-                        </tbody>
-                        
+                      </tbody>
                     </table>
                   </div>
                 </div>
@@ -298,14 +382,14 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         {appointment?.usersWhoCanManage?.map((user) => (
-                            <tr>
-                                <td>{user?.name}</td>
-                                <td><Link to={`/client/edit/${user.id}`}>Open</Link></td>
-                            </tr>
+                          <tr>
+                            <td>{user?.name}</td>
+                            <td>
+                              <Link to={`/client/edit/${user.id}`}>Open</Link>
+                            </td>
+                          </tr>
                         ))}
-
-                        </tbody>
-                        
+                      </tbody>
                     </table>
                   </div>
                 </div>
@@ -334,16 +418,16 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         {appointment?.details?.employees?.map((employee) => (
-                            <tr>
-                                <td>{employee?.name}</td>
-                                <td>{employee?.occupation}</td>
-                                <td>{employee?.site}</td>
-                                <td><a href={employee?.jobSpecFile}>View</a></td>
-                            </tr>
+                          <tr>
+                            <td>{employee?.name}</td>
+                            <td>{employee?.occupation}</td>
+                            <td>{employee?.site}</td>
+                            <td>
+                              <a href={employee?.jobSpecFile}>View</a>
+                            </td>
+                          </tr>
                         ))}
-
-                        </tbody>
-                        
+                      </tbody>
                     </table>
                   </div>
                 </div>
@@ -352,83 +436,124 @@ function App({ socket }) {
           </div>
         </div>
         <div class="col-xl-3 col-xxl-4">
-
-        <ChatContainer>
-        <div class="chatbox">
-			<div class="chatbox-close"></div>
-			<div class="custom-tab-1">
-				<div class="tab-content">
-					<div class="tab-pane fade active show" id="chat" role="tabpanel">
-						<div class="card active chat dz-chat-history-box">
-							<div class="card-header chat-list-header text-center">
-								<a href="javascript:void(0)" class="dz-chat-history-back">
-									<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 24 24" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><polygon points="0 0 24 0 24 24 0 24"/><rect fill="#000000" opacity="0.3" transform="translate(15.000000, 12.000000) scale(-1, 1) rotate(-90.000000) translate(-15.000000, -12.000000) " x="14" y="7" width="2" height="10" rx="1"/><path d="M3.7071045,15.7071045 C3.3165802,16.0976288 2.68341522,16.0976288 2.29289093,15.7071045 C1.90236664,15.3165802 1.90236664,14.6834152 2.29289093,14.2928909 L8.29289093,8.29289093 C8.67146987,7.914312 9.28105631,7.90106637 9.67572234,8.26284357 L15.6757223,13.7628436 C16.0828413,14.136036 16.1103443,14.7686034 15.7371519,15.1757223 C15.3639594,15.5828413 14.7313921,15.6103443 14.3242731,15.2371519 L9.03007346,10.3841355 L3.7071045,15.7071045 Z" fill="#000000" fill-rule="nonzero" transform="translate(9.000001, 11.999997) scale(-1, -1) rotate(90.000000) translate(-9.000001, -11.999997) "/></g></svg>
-								</a>
-								<div>
-									<h6 class="mb-1">Chat with {appointment?.details?.company?.name}</h6>
-									{/* <p class="mb-0 text-success">Online</p> */}
-								</div>							
-								<div class="dropdown">
-									<a href="javascript:void(0)" data-toggle="dropdown" >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 24 24" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect x="0" y="0" width="24" height="24"/><circle fill="#000000" cx="5" cy="12" r="2"/><circle fill="#000000" cx="12" cy="12" r="2"/><circle fill="#000000" cx="19" cy="12" r="2"/></g></svg></a>
-									<ul class="dropdown-menu dropdown-menu-right">
-										<li class="dropdown-item"><i class="fa fa-user-circle text-primary mr-2"></i> View profile</li>
-										<li class="dropdown-item"><i class="fa fa-users text-primary mr-2"></i> Add to close friends</li>
-										<li class="dropdown-item"><i class="fa fa-plus text-primary mr-2"></i> Add to group</li>
-										<li class="dropdown-item"><i class="fa fa-ban text-primary mr-2"></i> Block</li>
-									</ul>
-								</div>
-							</div>
-							<div class="card-body msg_card_body dz-scroll" id="DZ_W_Contacts_Body3">
-								{appointment.messages?.map((message) => {
-                                    return message.author?.role === "admin" ? 
-                                    (
-                                        <div class="d-flex justify-content-start mb-4">
-                                            <div class="img_cont_msg">
-                                                <img src={avatars[message?.author?.id
-                                                ]} class="rounded-circle user_img_msg" alt=""/>
-                                                
-                                            </div>
-                                            <div class="msg_cotainer">
-                                                {message?.message}
-                                                <span class="msg_time"> {message?.author?.name} {moment(message?.createdAt).format("DD MMMM YYYY HH:mm")}</span>
-                                                
-                                            </div>
-                                        </div>
-                                    )
-                                    :
-                                    (
-                                        <div class="d-flex justify-content-end mb-4">
-                                            <div class="img_cont_msg">
-                                                <img src={message?.author?.avatar} class="rounded-circle user_img_msg" alt=""/>
-                                            </div>
-                                            <div class="msg_cotainer">
-                                                {message?.message}
-                                                <span class="msg_time">{moment(message?.createdAt).format("DD MMMM YYYY HH:mm")}</span>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
+          <FloatingButton
+            className="btn btn-primary d-block d-sm-block d-md-none"
+            onClick={() => setChatOpen(!chatOpen)}
+          >
+            {chatOpen ? "Close Messages" : "Open Messages"}
+          </FloatingButton>
+          <ChatContainer isOpen={chatOpen}>
+            <div class="chatbox">
+              <div class="chatbox-close"></div>
+              <div class="custom-tab-1">
+                <div class="tab-content">
+                  <div
+                    class="tab-pane fade active show"
+                    id="chat"
+                    role="tabpanel"
+                  >
+                    <div class="card active chat dz-chat-history-box">
+                      <div class="card-header chat-list-header text-center">
+                        <div className="row">
+                          <div className="col-8 d-flex flex-column align-items-center justify-content-center">
+                            <h6 class="mb-1">
+                              Chat with {appointment?.details?.company?.name}
+                            </h6>
+                          </div>
+                          <div class="col-4">
+                            <button
+                              className="btn btn-primary d-block d-sm-block d-md-none"
+                              onClick={() => setChatOpen(!chatOpen)}
+                            >
+                              {chatOpen ? "Close" : "Open"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <MessageContainer
+                        className="card-body msg_card_body dz-scroll"
+                        id="DZ_W_Contacts_Body3"
+                      >
+                        {appointment.messages?.map((message) => {
+                          return avatars[message?.author?.id]?.role ===
+                            "admin" ? (
+                            <div class="d-flex justify-content-start mb-4">
+                              <div class="img_cont_msg">
+                                <StyledImg
+                                  src={
+                                    avatars[message?.author?.id]?.avatar ||
+                                    "/images/man.png"
+                                  }
+                                  class="rounded-circle user_img_msg"
+                                  alt={message?.author?.name}
+                                />
+                              </div>
+                              <div class="msg_cotainer">
+                                {message?.message}
+                                <span class="msg_time">
+                                  {" "}
+                                  {message?.author?.name}{" "}
+                                  {moment(message?.createdAt).format(
+                                    "DD MMMM YYYY HH:mm"
+                                  )}
+                                </span>
+                              </div>
                             </div>
-							<div class="card-footer type_msg">
-								<div class="input-group">
-									<textarea class="form-control" placeholder="Type your message..."></textarea>
-									<div class="input-group-append">
-										<button type="button" class="btn btn-primary"><i class="fa fa-location-arrow"></i></button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-        </ChatContainer>
-
+                          ) : (
+                            <div class="d-flex justify-content-end mb-4">
+                              <div class="img_cont_msg">
+                                <StyledImg
+                                  src={
+                                    avatars[message?.author?.id]?.avatar ||
+                                    "/images/man.png"
+                                  }
+                                  class="rounded-circle user_img_msg"
+                                  alt={message?.author?.name}
+                                />
+                              </div>
+                              <div class="msg_cotainer">
+                                {message?.message}
+                                <span class="msg_time">
+                                  {message?.author?.name}{" "}
+                                  {moment(message?.createdAt).format(
+                                    "DD MMMM YYYY HH:mm"
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </MessageContainer>
+                      <div class="card-footer">
+                        <textarea
+                          class="form-control"
+                          placeholder="Type your message..."
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          rows="5"
+                        ></textarea>
+                        <button
+                          type="button"
+                          class="btn btn-block btn-primary"
+                          onClick={appendMessageToAppointment}
+                        >
+                          send
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ChatContainer>
         </div>
       </div>
     </div>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => ({
+  user: state.auth.user,
+});
+
+export default connect(mapStateToProps)(App);

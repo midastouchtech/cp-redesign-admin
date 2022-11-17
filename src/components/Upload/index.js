@@ -8,6 +8,7 @@ function Uploader({ title, onChange }) {
   const [isUploading, setIsUploading] = useState(null);
 
   const onFileChange = (event) => {
+    console.log("doing onchane")
     setIsUploading(true);
     const url = "https://api.cloudinary.com/v1_1/clinic-plus/raw/upload";
     const formData = new FormData();
@@ -28,17 +29,24 @@ function Uploader({ title, onChange }) {
 
   return (
     <Container>
-      <div class="input-group">
+      <div>
+        <div className="row">
         <div class="custom-file">
-          <input type="file" class="custom-file-input" />
-          <label class="custom-file-label">Choose file</label>
-          {isUploading === true && (
-            <div className="login-loading">Uploading...</div>
+          <input type="file" class="custom-file-input" onChange={onFileChange}/>
+          <label class="custom-file-label">Choose file</label>          
+        </div>
+        </div>
+        <div className="row">
+        <div className="col-12 mt-3">
+        {isUploading === true && (
+            <small className="login-loading">Uploading...</small>
           )}
           {isUploading === false && (
-            <div className="login-loading">Upload complete!</div>
+            <small className="login-loading">Upload complete!</small>
           )}
         </div>
+        </div>
+
       </div>
     </Container>
   );

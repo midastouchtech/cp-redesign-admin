@@ -66,7 +66,6 @@ function App({ socket }) {
     });
   };
 
-
   return (
     <div class="container-fluid">
       <div class="row">
@@ -93,6 +92,14 @@ function App({ socket }) {
             <div class="card-body">
               <div class="basic-form">
                 <form>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">
+                      Profile Picture
+                    </label>
+                    <div class="col-sm-8">
+                      <Uploader onChange={(url) => setDetail("picture", url)} />
+                    </div>
+                  </div>
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Name</label>
                     <div class="col-sm-8">
@@ -127,7 +134,7 @@ function App({ socket }) {
                       />
                     </div>
                   </div>
-                  
+
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">
                       Cellphone Number
@@ -148,7 +155,9 @@ function App({ socket }) {
                         class="form-control input-default"
                         placeholder="enter password"
                         type="text"
-                        onChange={(e) => setUser(assoc("password", e.target.value, user))}
+                        onChange={(e) =>
+                          setUser(assoc("password", e.target.value, user))
+                        }
                         value={user?.password}
                       />
                     </div>

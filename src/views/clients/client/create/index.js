@@ -160,6 +160,14 @@ function App({ socket }) {
               <div class="basic-form">
                 <form>
                   <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">
+                      Profile Picture
+                    </label>
+                    <div class="col-sm-8">
+                      <Uploader onChange={(url) => setDetail("picture", url)} />
+                    </div>
+                  </div>
+                  <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Name</label>
                     <div class="col-sm-8">
                       <input
@@ -193,7 +201,7 @@ function App({ socket }) {
                       />
                     </div>
                   </div>
-                  
+
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">
                       Cellphone Number
@@ -214,7 +222,9 @@ function App({ socket }) {
                         class="form-control input-default"
                         placeholder="enter password"
                         type="text"
-                        onChange={(e) => setUser(assoc("password", e.target.value, user))}
+                        onChange={(e) =>
+                          setUser(assoc("password", e.target.value, user))
+                        }
                         value={user?.password}
                       />
                     </div>

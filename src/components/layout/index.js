@@ -9,12 +9,31 @@ import { useNavigate } from "react-router-dom";
 import { isNil, isEmpty } from "ramda";
 import cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
+import styled from "styled-components";
 
+const ChildrenContainer = styled.div`
+margin-left: 12rem;
+padding-top: 1rem;
+  @media(max-width: 800px) {
+    height: 80vh;
+    overflow: scroll;
+    margin-left: 0;
+    margin-top: 30px;
+    .event-tabs {
+      margin-right: 0 !important;
+    }
+  }
+`
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 
 export const Layout = (props) => {
   const [user , setUser] = React.useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleOpen = () => {
+    setIsOpen(!isOpen);
+  };
   const { children, socket, saveUser } = props;
   const cookieUser = cookies.get("clinicplus_admin_logged_in_user");
   const navigate = useNavigate();
@@ -77,10 +96,10 @@ export const Layout = (props) => {
         </div>
     </div> */}
     <div id="main-wrapper" className="show">
-      <NavHeader />
+      <NavHeader toggleOpen={toggleOpen}/>
       <Header />
-      <SideBar />
-      <div class="content-body">{children}</div>
+      <SideBar isOpen={isOpen} toggleOpen={toggleOpen}/>
+      <ChildrenContainer className="content-body">{children}</ChildrenContainer>
       
     </div>
     </div>

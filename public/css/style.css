@@ -9825,7 +9825,7 @@ a {
     display: flex; }
     @media only screen and (max-width: 767px) {
       .header .header-content {
-        padding-left: 3.75rem;
+        padding-left: 2.75rem;
         padding-right: 0.938rem;
         border-radius: 0; } }
   .header .navbar {
@@ -12123,7 +12123,6 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
   top: 0.625rem; }
 
 .content-body {
-  margin-left: 12rem;
   z-index: 0;
   transition: all .2s ease; }
 input{

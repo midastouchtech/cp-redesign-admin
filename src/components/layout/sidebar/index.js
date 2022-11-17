@@ -20,21 +20,52 @@ const NavContainer = styled.div`
     min-width: 160px;
 
   }
+  @media (max-width: 800px) {
+    .deznav {
+      position: absolute ;
+      &.open{
+        width: 100%;
+        left:0;
+        height: 90vh;
+    overflow: scroll;
+
+      }
+      &.closed{
+        left: -100%;
+      }
+    }
+  }
+  @media (max-width: 400px) {
+    .deznav {
+      position: absolute ;
+      &.open{
+        width: 100%;
+        left:0;
+        height: 82vh;
+    overflow: scroll;
+
+      }
+      &.closed{
+        left: -100%;
+      }
+    }
+  }
+    .
 `;
-const SideBar = ({ title, onBack }) => {
+const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
   return (
     <NavContainer>
-      <div class="deznav">
+      <div class={isOpen ? "deznav open" : "deznav closed"}>
       <div class="deznav-scroll">
         
         <ul class="metismenu mm-show" id="menu">
-          <li>
+          <li onClick={toggleOpen}>
             <Link className="has-arrow ai-icon" to="/" aria-expanded="false">
               <MdSpaceDashboard />
               Dashboard
             </Link>
           </li>
-          <li>
+          <li onClick={toggleOpen}>
             <Link
               to="/appointments"
               class="has-arrow ai-icon"
@@ -43,7 +74,7 @@ const SideBar = ({ title, onBack }) => {
               Appointments
             </Link>
           </li>
-          <li >
+          <li onClick={toggleOpen} >
             <Link
               to="/companies"
               class="has-arrow ai-icon"
@@ -52,31 +83,31 @@ const SideBar = ({ title, onBack }) => {
               Companies
             </Link>
           </li>
-          <li>
+          <li onClick={toggleOpen}>
             <Link to="/clients" class="has-arrow ai-icon" aria-expanded="false">
               <HiUserGroup />
               Clients
             </Link>
           </li>
-          <li>
+          <li onClick={toggleOpen}>
             <Link to="/admins" class="has-arrow ai-icon" aria-expanded="false">
               <MdAdminPanelSettings />
               Administrators
             </Link>
           </li>
-          <li>
+          <li onClick={toggleOpen}>
             <Link to="/invoices" class="has-arrow ai-icon" aria-expanded="false">
               <FaFileInvoiceDollar />
               Invoices
             </Link>
           </li>
-          <li>
+          <li onClick={toggleOpen}>
             <Link to="/doctors" class="has-arrow ai-icon" aria-expanded="false">
               <MdHealthAndSafety />
               Doctors
             </Link>
           </li>
-          <li className="has-arrow ai-icon">
+          <li className="has-arrow ai-icon" onClick={toggleOpen}>
             <Link to="/profile" class="has-arrow ai-icon" aria-expanded="false">
               <MdPerson />
               Profile
@@ -84,11 +115,11 @@ const SideBar = ({ title, onBack }) => {
           </li>
         </ul>
 
-        <Link to="appointment/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" >+ New Appointment</Link>
+        <Link to="appointment/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" onClick={toggleOpen}>+ New Appointment</Link>
         
-        <Link to="company/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" >+ New Company</Link>
-        <Link to="client/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" >+ New Client</Link>
-        <Link to="admin/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" >+ New Admin</Link>
+        <Link to="company/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" onClick={toggleOpen}>+ New Company</Link>
+        <Link to="client/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" onClick={toggleOpen}>+ New Client</Link>
+        <Link to="admin/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" onClick={toggleOpen}>+ New Admin</Link>
 
         {/* <div class="copyright">
 					<p><strong>Acara Ticketing Dashboard</strong> © 2021 All Rights Reserved</p>

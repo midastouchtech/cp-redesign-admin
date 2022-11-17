@@ -1,35 +1,10 @@
 import moment from "moment";
-import {
-  any,
-  assoc,
-  has,
-  isEmpty,
-  isNil,
-  values,
-  assocPath,
-  omit,
-  reject,
-  without,
-  insert,
-  equals,
-} from "ramda";
+import { assoc, assocPath, equals } from "ramda";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
-import { SegmentedControl } from "segmented-control-react";
 
-const exists = (i) => !isNil(i) && !isEmpty(i);
-const ChatContainer = styled.div`
-  .chatbox {
-    position: initial;
-  }
-  .chatbox .msg_card_body {
-    height: calc(100vh - 195px);
-    overflow: scroll;
-  }
-`;
 function App({ socket }) {
   let params = useParams();
   const navigate = useNavigate();
@@ -69,7 +44,7 @@ function App({ socket }) {
     socket.emit("UPDATE_USER", user);
     socket.on("USER_UPDATED", () => {
       console.log("user updated");
-      console.log("navigating to", " /client/edit/" + user.id)
+      console.log("navigating to", " /client/edit/" + user.id);
       navigate("/clients");
     });
   };
@@ -121,6 +96,14 @@ function App({ socket }) {
             <div class="card-body">
               <div class="basic-form">
                 <form>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">
+                      Profile Picture
+                    </label>
+                    <div class="col-sm-8">
+                      <Uploader onChange={(url) => setDetail("picture", url)} />
+                    </div>
+                  </div>
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Name</label>
                     <div class="col-sm-8">
@@ -179,7 +162,10 @@ function App({ socket }) {
               <h4 class="card-title">Suspension</h4>
             </div>
             <div class="card-body">
-              <p>You can select one of he two options below to suspend a user from creating appointments or companies.</p>
+              <p>
+                You can select one of he two options below to suspend a user
+                from creating appointments or companies.
+              </p>
               <div class="basic-form">
                 <form>
                   <div class="form-group">
@@ -188,7 +174,9 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={user?.isSuspended === true}
-                        onChange={() => setDBUser(assoc("isSuspended", true, user))}
+                        onChange={() =>
+                          setDBUser(assoc("isSuspended", true, user))
+                        }
                       />
                       <label class="form-check-label" for="check1">
                         User is Suspended
@@ -199,7 +187,9 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={user?.isSuspended === false}
-                        onChange={() => setDBUser(assoc("isSuspended", false, user))}
+                        onChange={() =>
+                          setDBUser(assoc("isSuspended", false, user))
+                        }
                       />
                       <label class="form-check-label" for="check2">
                         User is not suspended

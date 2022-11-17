@@ -11,6 +11,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import moment from "moment";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 const CaratContainer = styled.div`
   ${(props) =>
@@ -40,6 +41,14 @@ const MessageBody = styled.div`
   }
   button {
     margin-left: 10px;
+  }
+  .msg_cotainer{
+    background: #FE634E;
+    margin-left: 10px;
+    border-radius: 0 1.25rem 1.25rem 1.25rem;
+    padding: 10px 15px;
+    color: #fff;
+    position: relative;
   }
 `;
 
@@ -182,6 +191,7 @@ const Dashboard = ({ socket }) => {
     }
   };
 
+  console.log("latest messages", latestMessages);
   return (
     <div className="container-fluid homedash">
       <div className="row">
@@ -354,22 +364,22 @@ const Dashboard = ({ socket }) => {
             <div className="card-body">
               <h4 className="fs-20">Latest Messages</h4>
               {latestMessages?.map((message) => (
-                <MessageBody className="media">
+                <MessageBody className="media ">
                   <div className="media-body">
                     <HeadContainer>
                       <h6 className="mt-0">{capitalize(message?.company)}</h6>
                       <p>{capitalize(message?.author?.name)}</p>
                     </HeadContainer>
-                    <small>{truncate(message?.message, 60)}</small>
+                    <p className="msg_cotainer"><small>{message?.message}</small></p>
                     <HeadContainer>
-                      <p>
+                      <small>
                         {getReadableTime(message.createdAt)} at{" "}
                         {getTimeFromDate(message.createdAt)}
-                      </p>
-                      <button className="btn">
-                        <FaReply size="1rem" color="grey" />
-                        Reply
-                      </button>
+                      </small>
+                      <Link to={`appointment/${message.appointment}`} className="btn">
+                        <FaReply size=".8rem" color="orange" />
+                        <small>reply</small>
+                      </Link>
                     </HeadContainer>
                   </div>
                 </MessageBody>
