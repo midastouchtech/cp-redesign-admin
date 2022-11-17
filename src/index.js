@@ -32,7 +32,7 @@ const Main = () => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io(`process.env.REACT_APP_IO_SERVER`);
+    const newSocket = io(process.env.REACT_APP_IO_SERVER);
     newSocket.onAny((event, ...args) => {
       console.log(`** Handling:  ${event}`);
       console.log(args);
