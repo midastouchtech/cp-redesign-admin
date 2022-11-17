@@ -69,7 +69,9 @@ export const Layout = (props) => {
         <link href="/css/style.css" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
       </Helmet>
-      <div>{children}</div>
+      {typeof window !== "undefined" && (
+        <div>{children}</div>
+      )}
       </div>
     )
   };
@@ -91,13 +93,14 @@ export const Layout = (props) => {
             <div class="sk-child sk-bounce3"></div>
         </div>
     </div> */}
-    <div id="main-wrapper" className="show">
+    {typeof window !== "undefined" && (
+      <div id="main-wrapper" className="show">
       <NavHeader toggleOpen={toggleOpen}/>
       <Header />
       <SideBar isOpen={isOpen} toggleOpen={toggleOpen}/>
       <ChildrenContainer className="content-body">{children}</ChildrenContainer>
       
-    </div>
+    </div>)}
     </div>
   );
 };
