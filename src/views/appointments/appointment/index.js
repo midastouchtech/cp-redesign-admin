@@ -67,7 +67,7 @@ function App({ socket, user }) {
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({});
   const [avatars, setAvatars] = useState({});
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
 
   if (socket && isLoading) {
@@ -105,7 +105,7 @@ function App({ socket, user }) {
       appointment
     );
     setAppointment(newApp);
-    setMessage(null);
+    setMessage("");
     socket.emit("UPDATE_APPOINTMENT", newApp);
     socket.on("APPOINTMENT_UPDATED", () => {
       console.log("appointment updated");
