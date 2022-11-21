@@ -4,12 +4,12 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import styled from "styled-components";
 import io from "socket.io-client";
-
+import layout from "./components/layout";
 import { Provider } from "react-redux";
 import store from "./store";
 import asyncRoute from './asyncRoute'
 
-const Layout = asyncRoute(() => import("./components/layout"));
+
 const Dashboard = asyncRoute(() => import('./views/dashboard'))
 const Appointments= asyncRoute(() => import("./views/appointments"));
 const Companies= asyncRoute(() => import("./views/companies"));
