@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
 const SearchModal =({name, show, handleClose, children, title}) => {
-  console.log("SearchModal", name);
+  //console.log("SearchModal", name);
   return (
     <>
       <Modal id={name} className={name} key={name} show={show} onHide={handleClose}>

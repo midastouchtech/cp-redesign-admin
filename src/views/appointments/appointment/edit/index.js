@@ -54,13 +54,13 @@ function App({ socket }) {
       setOriginalAppointment(appointment);
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM APPOINTMENT PAGE");
+      //console.log("Database updated FROM APPOINTMENT PAGE");
       socket.emit("GET_APPOINTMENT", { id: params.appId });
     });
   }
 
   const setDetail = (key, value) => {
-    console.log("setting detail", key, value)
+    //console.log("setting detail", key, value)
     setAppointment(assocPath(["details", key], value, appointment));
   };
 
@@ -126,20 +126,20 @@ function App({ socket }) {
       },
       0
     );
-    console.log('servicesPrice', servicesPrice)
-    console.log("site price",sitesPrice);
+    //console.log('servicesPrice', servicesPrice)
+    //console.log("site price",sitesPrice);
     const bookingPrice = servicesPrice + sitesPrice;
-    console.log("bookingPrice", bookingPrice);
+    //console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
 
   const saveAppointment = () => {
     const price = calculateBookingPrice();
     const appointmentWithNewPrice = assocPath(["payment", "amount"], price, appointment);
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("UPDATE_APPOINTMENT", appointmentWithNewPrice);
     socket.on("APPOINTMENT_UPDATED", () => {
-      console.log("appointment updated");
+      //console.log("appointment updated");
       navigate("/appointment/edit/" + appointment.id);
     });
   };
@@ -151,21 +151,21 @@ function App({ socket }) {
       services: [],
       sites: [],
     };
-    console.log("new employee", newEmployee);
+    //console.log("new employee", newEmployee);
     const newEmployees = [newEmployee, ...appointment?.details?.employees];
-    console.log("newEmployees", newEmployees);
+    //console.log("newEmployees", newEmployees);
     setDetail("employees", newEmployees);
   };
 
   const removeEmployee = (id) => ()=> {
-    console.log("removing employee", id);
+    //console.log("removing employee", id);
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
     setDetail("employees", newEmployees);
   };
 
   useEffect(() => {
-    console.log("use effect appointment", appointment);
+    //console.log("use effect appointment", appointment);
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });

@@ -142,7 +142,7 @@ const Dashboard = ({ socket }) => {
       setLatestMessages(messages);
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      console.log("database updated we are now going to update the stats")
+      //console.log("database updated we are now going to update the stats")
       socket.emit("GET_STATS");
       socket.emit("GET_LATEST_APPOINTMENTS");
       socket.emit("GET_LATEST_MESSAGES");
@@ -191,7 +191,7 @@ const Dashboard = ({ socket }) => {
     }
   };
 
-  console.log("latest messages", latestMessages);
+  //console.log("latest messages", latestMessages);
   return (
     <div className="container-fluid homedash">
       <div className="row">

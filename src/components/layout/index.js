@@ -33,7 +33,7 @@ export const Layout = (props) => {
   const [ firstLoad, setFirstLoad] = useState(0)
   const showLoader = () => {
     setTimeout(() => {
-      console.log("showing loader...");
+      //console.log("showing loader...");
       setFirstLoad(1);
     }, 2000);
   };

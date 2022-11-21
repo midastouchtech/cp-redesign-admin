@@ -8,7 +8,7 @@ function Uploader({ title, onChange }) {
   const [isUploading, setIsUploading] = useState(null);
 
   const onFileChange = (event) => {
-    console.log("doing onchane")
+    //console.log("doing onchane")
     setIsUploading(true);
     const url = "https://api.cloudinary.com/v1_1/clinic-plus/raw/upload";
     const formData = new FormData();

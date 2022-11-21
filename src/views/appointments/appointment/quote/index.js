@@ -97,7 +97,7 @@ function App({ socket }) {
         url,
       })
         .then((response) => {
-          console.log(response.data.secure_url);
+          //console.log(response.data.secure_url);
           socket.emit("SEND_INVOICE", { appointment, url: response.data.secure_url });
           setStatus("Sending...");
           socket.on("RECEIVE_SAVE_INVOICE_SUCCESS", (data) => {
@@ -147,7 +147,7 @@ function App({ socket }) {
         return accx;
       }, []);
 
-      console.log(services);
+      //console.log(services);
       const servicesPrice = services.reduce((acc, service) => {
         return acc + service.price;
       }, 0);
@@ -157,7 +157,7 @@ function App({ socket }) {
         },
         0
       );
-      console.log(sitesPrices);
+      //console.log(sitesPrices);
       setServicesPrice(servicesPrice);
       setSitesPrice(sitesPrices);
       setServices(services);
@@ -166,7 +166,7 @@ function App({ socket }) {
       }
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM APPOINTMENT PAGE");
+      //console.log("Database updated FROM APPOINTMENT PAGE");
       socket.emit("GET_APPOINTMENT", { id: params.appId });
     });
   }

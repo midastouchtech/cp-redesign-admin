@@ -33,13 +33,13 @@ function App({ socket }) {
   if (socket && isLoading) {
     socket.emit("GET_COMPANY", { id: params.companyId });
     socket.on("RECEIVE_COMPANY", (client) => {
-      console.log("client page RECEIVE_company", client);
+      //console.log("client page RECEIVE_company", client);
       setIsLoading(false);
       setCompany(client);
       setOriginalCompany(client);
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM CLient PAGE");
+      //console.log("Database updated FROM CLient PAGE");
       socket.emit("GET_COMPANY", { id: params.companyId });
     });
   }
@@ -52,13 +52,13 @@ function App({ socket }) {
     setCompany(originalCompany);
   };
 
-  console.log(company);
+  //console.log(company);
 
   const saveCompany = () => {
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("UPDATE_COMPANY", company);
     socket.on("COMPANY_UPDATED", () => {
-      console.log("company updated");
+      //console.log("company updated");
       navigate("/company/edit/" + company.id);
     });
   };

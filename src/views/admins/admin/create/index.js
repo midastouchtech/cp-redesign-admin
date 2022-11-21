@@ -59,7 +59,7 @@ function App({ socket }) {
   };
 
   const saveUser = () => {
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("SAVE_NEW_USER", user);
     socket.on("RECEIVE_SAVE_USER_SUCCESS", (data) => {
       navigate("/admin/edit/" + data.id);

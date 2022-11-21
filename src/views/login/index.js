@@ -25,7 +25,7 @@ function App({ socket }) {
     });
   };
 
-  console.log("loading", loading);
+  //console.log("loading", loading);
 
   return (
     <div class="h-100 mt-5">

@@ -104,7 +104,7 @@ const Appointments = ({ socket }) => {
 
 
   const getAppointmentsByMonth = (e) => {
-    console.log("getting first set appointments for monthtype", e.target.value);
+    //console.log("getting first set appointments for monthtype", e.target.value);
     const month = e.target.value;
     if (monthType !== month) {
       functionsByMonth[month](0);
@@ -121,15 +121,15 @@ const Appointments = ({ socket }) => {
         setPage(p);
       });
     } else {
-      console.log("getting next page appointments for", monthType, "month");
+      //console.log("getting next page appointments for", monthType, "month");
       functionsByMonth[monthType](p);
     }
   };
 
 
-  console.log("prevMonthPageCount", prevMonthPageCount)
-  console.log("currentMonthPageCount", currentMonthPageCount)
-  console.log("nextMonthPageCount", nextMonthPageCount)
+  //console.log("prevMonthPageCount", prevMonthPageCount)
+  //console.log("currentMonthPageCount", currentMonthPageCount)
+  //console.log("nextMonthPageCount", nextMonthPageCount)
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">

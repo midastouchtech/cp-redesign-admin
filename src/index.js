@@ -38,8 +38,8 @@ const Main = () => {
   useEffect(() => {
     const newSocket = io(process.env.REACT_APP_IO_SERVER);
     newSocket.onAny((event, ...args) => {
-      console.log(`** Handling:  ${event}`);
-      console.log(args);
+      //console.log(`** Handling:  ${event}`);
+      //console.log(args);
     });
     setSocket(newSocket);
     return () => newSocket.close();

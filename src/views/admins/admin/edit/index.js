@@ -42,7 +42,7 @@ function App({ socket }) {
   if (socket && isLoading) {
     socket.emit("GET_USER", { id: params.adminId });
     socket.on("RECEIVE_USER", (client) => {
-      console.log("client page RECEIVE_client", client);
+      //console.log("client page RECEIVE_client", client);
       setIsLoading(false);
       setDBUser(client);
       setOriginalUser(client);
@@ -57,10 +57,10 @@ function App({ socket }) {
     setDBUser(originalUser);
   };
 
-  console.log(user);
+  //console.log(user);
 
   const saveUser = () => {
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("UPDATE_USER", user);
     socket.on("USER_UPDATED", () => {
       navigate("/admins");

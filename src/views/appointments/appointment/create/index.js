@@ -70,7 +70,7 @@ function App({ socket }) {
   const [show, setShowCompanySearch] = useState(false);
 
   const setDetail = (key, value) => {
-    console.log("setting detail", key, value);
+    //console.log("setting detail", key, value);
     setAppointment(assocPath(["details", key], value, appointment));
   };
 
@@ -135,10 +135,10 @@ function App({ socket }) {
       },
       0
     );
-    console.log("servicesPrice", servicesPrice);
-    console.log("site price", sitesPrice);
+    //console.log("servicesPrice", servicesPrice);
+    //console.log("site price", sitesPrice);
     const bookingPrice = servicesPrice + sitesPrice;
-    console.log("bookingPrice", bookingPrice);
+    //console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
 
@@ -149,16 +149,16 @@ function App({ socket }) {
       price,
       appointment
     );
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("SAVE_NEW_APPOINTMENT", appointmentWithNewPrice);
     socket.on("APPOINTMENT_ADDED", (data) => {
-      console.log("appointment added", data);
+      //console.log("appointment added", data);
       navigate("/appointment/" + data.id);
     });
   };
 
   const selectCompany = (company) => {
-    console.log("selecting company", company);
+    //console.log("selecting company", company);
     
     const newAppointment = pipe(
       assocPath(["details", "company"], {id: company?.id, name: company?.details?.name}),
@@ -174,21 +174,21 @@ function App({ socket }) {
       services: [],
       sites: [],
     };
-    console.log("new employee", newEmployee);
+    //console.log("new employee", newEmployee);
     const newEmployees = [newEmployee, ...appointment?.details?.employees];
-    console.log("newEmployees", newEmployees);
+    //console.log("newEmployees", newEmployees);
     setDetail("employees", newEmployees);
   };
 
   const removeEmployee = (id) => () => {
-    console.log("removing employee", id);
+    //console.log("removing employee", id);
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
     setDetail("employees", newEmployees);
   };
 
   useEffect(() => {
-    console.log("use effect appointment", appointment);
+    //console.log("use effect appointment", appointment);
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });

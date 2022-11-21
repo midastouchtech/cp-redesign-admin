@@ -48,16 +48,16 @@ function App({ socket }) {
   };
 
   const saveCompany = () => {
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("SAVE_NEW_COMPANY", company);
     socket.on("COMPANY_ADDED", (c) => {
-      console.log("company updated");
+      //console.log("company updated");
       navigate("/company/edit/" + c.id);
     });
   };
 
   const selectUser = (user) => {
-    console.log("selecting user", user);
+    //console.log("selecting user", user);
     const companyAlreadyHasUser = any(
       (u) => u.id === user.id,
       company.usersWhoCanManage
@@ -78,7 +78,7 @@ function App({ socket }) {
   };
 
   const removeUser = (user) => {
-    console.log("removing user", user);
+    //console.log("removing user", user);
     const newCompany = pipe(
       assocPath(
         ["usersWhoCanManage"],

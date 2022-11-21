@@ -84,7 +84,7 @@ const services = values(MEDICAL_SERVICES);
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
 function Services({ onChange, selectedServices }) {
-  console.log("selectedServices", selectedServices);
+  //console.log("selectedServices", selectedServices);
   const [selected, setSelected] = useState([]);
   const [total, setTotal] = useState(0);
 

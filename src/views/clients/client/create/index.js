@@ -60,17 +60,17 @@ function App({ socket }) {
   };
 
   const saveUser = () => {
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("SAVE_NEW_USER", user);
     socket.on("RECEIVE_SAVE_USER_SUCCESS", (data) => {
-      console.log("user added");
-      console.log("navigating to", " /client/edit/" + data.id);
+      //console.log("user added");
+      //console.log("navigating to", " /client/edit/" + data.id);
       navigate("/client/edit/" + data.id);
     });
   };
 
   const selectCompany = (company) => {
-    console.log("selecting company", company);
+    //console.log("selecting company", company);
     const userAlreadyHasCompany = any(
       (c) => c.id === company.id,
       user.companiesManaging
@@ -91,7 +91,7 @@ function App({ socket }) {
   };
 
   const removeCompany = (company) => {
-    console.log("removing company", company);
+    //console.log("removing company", company);
     const newUser = pipe(
       assocPath(
         ["companiesManaging"],
@@ -102,7 +102,7 @@ function App({ socket }) {
   };
 
   const selectAppointment = (appointment) => {
-    console.log("selecting appointment", appointment);
+    //console.log("selecting appointment", appointment);
     const userAlreadyHasAppointment = any(
       (c) => c.id === appointment.id,
       user.appointmentsManaging
@@ -123,7 +123,7 @@ function App({ socket }) {
   };
 
   const removeAppointment = (appointment) => {
-    console.log("removing appointment", appointment);
+    //console.log("removing appointment", appointment);
     const newUser = pipe(
       assocPath(
         ["appointmentsManaging"],

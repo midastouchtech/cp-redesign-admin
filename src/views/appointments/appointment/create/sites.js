@@ -6,7 +6,7 @@ const Sites = ({ employeeSites, onChange }) => {
   const addSiteAndClear = (e) => {
     e.preventDefault();
     const sites = [...employeeSites, site];
-    console.log(sites);
+    //console.log(sites);
     onChange(sites);
     setSite("");
   };

@@ -73,19 +73,19 @@ function App({ socket, user }) {
   if (socket && isLoading) {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
     socket.on("RECEIVE_APPOINTMENT", (appointment) => {
-      console.log("appointment page RECEIVE_APPOINTMENT", appointment);
+      //console.log("appointment page RECEIVE_APPOINTMENT", appointment);
       setIsLoading(false);
       setAppointment(appointment);
       const messageUsers = appointment.messages.map((m) => m?.author?.id);
       socket.emit("GET_AVATARS", { ids: messageUsers });
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM APPOINTMENT PAGE");
+      //console.log("Database updated FROM APPOINTMENT PAGE");
       socket.emit("GET_APPOINTMENT", { id: params.appId });
     });
 
     socket.on("RECEIVE_AVATARS", (avatars) => {
-      console.log("RECEIVE_AVATARS", avatars);
+      //console.log("RECEIVE_AVATARS", avatars);
       setAvatars(avatars);
     });
   }

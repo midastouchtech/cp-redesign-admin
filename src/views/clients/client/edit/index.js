@@ -18,13 +18,13 @@ function App({ socket }) {
   if (socket && isLoading) {
     socket.emit("GET_USER", { id: params.clientId });
     socket.on("RECEIVE_USER", (client) => {
-      console.log("client page RECEIVE_client", client);
+      //console.log("client page RECEIVE_client", client);
       setIsLoading(false);
       setDBUser(client);
       setOriginalUser(client);
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM CLient PAGE");
+      //console.log("Database updated FROM CLient PAGE");
       socket.emit("GET_USER", { id: params.appId });
     });
   }
@@ -37,14 +37,14 @@ function App({ socket }) {
     setDBUser(originalUser);
   };
 
-  console.log(user);
+  //console.log(user);
 
   const saveUser = () => {
-    console.log("saving appza");
+    //console.log("saving appza");
     socket.emit("UPDATE_USER", user);
     socket.on("USER_UPDATED", () => {
-      console.log("user updated");
-      console.log("navigating to", " /client/edit/" + user.id);
+      //console.log("user updated");
+      //console.log("navigating to", " /client/edit/" + user.id);
       navigate("/clients");
     });
   };

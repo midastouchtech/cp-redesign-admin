@@ -26,13 +26,13 @@ function App({ socket }) {
   if (socket && isLoading) {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
     socket.on("RECEIVE_APPOINTMENT", (appointment) => {
-      console.log("appointment page RECEIVE_APPOINTMENT", appointment);
+      //console.log("appointment page RECEIVE_APPOINTMENT", appointment);
       setIsLoading(false);
       setAppointment(appointment);
       
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      console.log("Database updated FROM APPOINTMENT PAGE");
+      //console.log("Database updated FROM APPOINTMENT PAGE");
       socket.emit("GET_APPOINTMENT", { id: params.appId });
     });
   }
