@@ -99,7 +99,6 @@ export const Layout = (props) => {
         <meta name="description" content="App Description" />
         <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png" />
         <link href="/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet" />
-        <link href="/css/style.css" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
       </Helmet>
       {/* <div id="preloader">
@@ -110,8 +109,7 @@ export const Layout = (props) => {
         </div>
     </div> */}
     {firstLoad === 0 && (
-        <div style={{height: "100vh", width: "100vw", display: "flex", justifyContent: "center", alignItems:"center"}}>
-          <h1> Welcome to ClinicPlus Bookings</h1>
+        <div style={{bacground: "#fff", height: "100vh", width: "100vw", display: "flex", justifyContent: "center", alignItems:"center"}}>
           <img src="/infinity.svg" alt="loader" />
         </div>
       )}
