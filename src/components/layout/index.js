@@ -111,6 +111,7 @@ export const Layout = (props) => {
     </div> */}
     {firstLoad === 0 && (
         <div style={{height: "100vh", width: "100vw", display: "flex", justifyContent: "center", alignItems:"center"}}>
+          <h1> Welcome to ClinicPlus Bookings</h1>
           <img src="/infinity.svg" alt="loader" />
         </div>
       )}

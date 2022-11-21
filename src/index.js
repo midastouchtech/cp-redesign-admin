@@ -8,6 +8,7 @@ import Layout from "./components/layout";
 import { Provider } from "react-redux";
 import store from "./store";
 import asyncRoute from './asyncRoute'
+import "./style.css"
 
 
 const Dashboard = asyncRoute(() => import('./views/dashboard'))
