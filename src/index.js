@@ -3,28 +3,31 @@ import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import styled from "styled-components";
-import Layout from "./components/layout";
 import io from "socket.io-client";
-import Dashboard from "./views/dashboard";
-import Appointments from "./views/appointments";
-import Companies from "./views/companies";
-import Invoices from "./views/invoices";
-import CompanyEditor from "./views/companies/company/edit";
-import CopmanyCreator from "./views/companies/company/create";
-import Clients from "./views/clients";
-import ClientEditor from "./views/clients/client/edit";
-import ClientCreator from "./views/clients/client/create";
-import Admins from "./views/admins";
-import AdminEditor from "./views/admins/admin/edit";
-import AdminCreator from "./views/admins/admin/create";
-import Appointment from "./views/appointments/appointment";
-import AppointmentEditor from "./views/appointments/appointment/edit";
-import AppointmentCreator from "./views/appointments/appointment/create";
-import AppointmentQuotation from "./views/appointments/appointment/quote";
-import Login from "./views/login";
-import Logout from "./views/logout";
+
 import { Provider } from "react-redux";
 import store from "./store";
+import asyncRoute from './asyncRoute'
+
+const Layout = asyncRoute(() => import("./components/layout"));
+const Dashboard = asyncRoute(() => import('./views/dashboard'))
+const Appointments= asyncRoute(() => import("./views/appointments"));
+const Companies= asyncRoute(() => import("./views/companies"));
+const Invoices= asyncRoute(() => import("./views/invoices"));
+const CompanyEditor= asyncRoute(() => import("./views/companies/company/edit"));
+const CopmanyCreator= asyncRoute(() => import("./views/companies/company/create"));
+const Clients= asyncRoute(() => import("./views/clients"));
+const ClientEditor= asyncRoute(() => import("./views/clients/client/edit"));
+const ClientCreator= asyncRoute(() => import("./views/clients/client/create"));
+const Admins= asyncRoute(() => import("./views/admins"));
+const AdminEditor= asyncRoute(() => import("./views/admins/admin/edit"));
+const AdminCreator= asyncRoute(() => import("./views/admins/admin/create"));
+const Appointment= asyncRoute(() => import("./views/appointments/appointment"));
+const AppointmentEditor= asyncRoute(() => import("./views/appointments/appointment/edit"));
+const AppointmentCreator= asyncRoute(() => import("./views/appointments/appointment/create"));
+const AppointmentQuotation= asyncRoute(() => import("./views/appointments/appointment/quote"));
+const Login= asyncRoute(() => import("./views/login"));
+const Logout= asyncRoute(() => import("./views/logout"));
 
 const Container = styled.div``;
 
@@ -116,4 +119,4 @@ ReactDOM.render(
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+reportWebVitals(console.log);

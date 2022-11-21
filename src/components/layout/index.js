@@ -30,6 +30,17 @@ const exists = (i) => !isNil(i) && !isEmpty(i);
 export const Layout = (props) => {
   const [user , setUser] = React.useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [ firstLoad, setFirstLoad] = useState(0)
+  const showLoader = () => {
+    setTimeout(() => {
+      console.log("showing loader...");
+      setFirstLoad(1);
+    }, 2000);
+  };
+
+  if (firstLoad === 0) {
+    showLoader();
+  }
 
   const toggleOpen = () => {
     setIsOpen(!isOpen);
@@ -69,8 +80,13 @@ export const Layout = (props) => {
         <link href="/css/style.css" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
       </Helmet>
-      {typeof window !== "undefined" && (
+      {firstLoad === 1 && (
         <div>{children}</div>
+      )}
+      {firstLoad === 0 && (
+        <div style={{height: "100vh", width: "100vw", display: "flex", justifyContent: "center", alignItems:"center"}}>
+          <img src="/infinity.svg" alt="loader" />
+        </div>
       )}
       </div>
     )
@@ -93,7 +109,12 @@ export const Layout = (props) => {
             <div class="sk-child sk-bounce3"></div>
         </div>
     </div> */}
-    {typeof window !== "undefined" && (
+    {firstLoad === 0 && (
+        <div style={{height: "100vh", width: "100vw", display: "flex", justifyContent: "center", alignItems:"center"}}>
+          <img src="/infinity.svg" alt="loader" />
+        </div>
+      )}
+    {firstLoad === 1 && (
       <div id="main-wrapper" className="show">
       <NavHeader toggleOpen={toggleOpen}/>
       <Header />
