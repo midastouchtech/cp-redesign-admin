@@ -96,6 +96,7 @@ function App({ socket, user }) {
       author: {
         id: user?.id,
         name: `${user?.details?.name} ${user?.details?.surname}`,
+        role: user?.role,
       },
       createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
     };
@@ -108,7 +109,6 @@ function App({ socket, user }) {
     setMessage("");
     socket.emit("UPDATE_APPOINTMENT", newApp);
     socket.on("APPOINTMENT_UPDATED", () => {
-      console.log("appointment updated");
     });
   };
 
