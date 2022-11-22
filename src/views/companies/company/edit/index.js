@@ -100,7 +100,7 @@ function App({ socket }) {
                 Cancel Changes
               </button>
               <button
-                className={`btn btn-info  ml-3`}
+                className={`d-block d-sm-block d-md-block d-lg-block d-xl-block  btn btn-info  mt-3`}
                 onClick={() => navigate("/appointment/create/?companyId=" + company.id+"&companyName="+company.details.name)}
                 
               >
