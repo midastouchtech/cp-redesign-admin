@@ -7,28 +7,28 @@ import io from "socket.io-client";
 import Layout from "./components/layout";
 import { Provider } from "react-redux";
 import store from "./store";
-import asyncRoute from './asyncRoute'
+
+import  Dashboard from './views/dashboard'
+import  Appointments from "./views/appointments";
+import  Companies from "./views/companies";
+import  Invoices from "./views/invoices";
+import  CompanyEditor from "./views/companies/company/edit";
+import  CopmanyCreator from "./views/companies/company/create";
+import  Clients from "./views/clients";
+import  ClientEditor from "./views/clients/client/edit";
+import  ClientCreator from "./views/clients/client/create";
+import  Admins from "./views/admins";
+import  AdminEditor from "./views/admins/admin/edit";
+import  AdminCreator from "./views/admins/admin/create";
+import  Appointment from "./views/appointments/appointment";
+import  AppointmentEditor from "./views/appointments/appointment/edit";
+import  AppointmentCreator from "./views/appointments/appointment/create";
+import  AppointmentQuotation from "./views/appointments/appointment/quote";
+import  Login from "./views/login";
+import  Logout from "./views/logout";
 import "./style.css"
 
 
-const Dashboard = asyncRoute(() => import('./views/dashboard'))
-const Appointments= asyncRoute(() => import("./views/appointments"));
-const Companies= asyncRoute(() => import("./views/companies"));
-const Invoices= asyncRoute(() => import("./views/invoices"));
-const CompanyEditor= asyncRoute(() => import("./views/companies/company/edit"));
-const CopmanyCreator= asyncRoute(() => import("./views/companies/company/create"));
-const Clients= asyncRoute(() => import("./views/clients"));
-const ClientEditor= asyncRoute(() => import("./views/clients/client/edit"));
-const ClientCreator= asyncRoute(() => import("./views/clients/client/create"));
-const Admins= asyncRoute(() => import("./views/admins"));
-const AdminEditor= asyncRoute(() => import("./views/admins/admin/edit"));
-const AdminCreator= asyncRoute(() => import("./views/admins/admin/create"));
-const Appointment= asyncRoute(() => import("./views/appointments/appointment"));
-const AppointmentEditor= asyncRoute(() => import("./views/appointments/appointment/edit"));
-const AppointmentCreator= asyncRoute(() => import("./views/appointments/appointment/create"));
-const AppointmentQuotation= asyncRoute(() => import("./views/appointments/appointment/quote"));
-const Login= asyncRoute(() => import("./views/login"));
-const Logout= asyncRoute(() => import("./views/logout"));
 
 const Container = styled.div``;
 
