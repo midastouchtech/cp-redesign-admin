@@ -472,12 +472,12 @@ function App({ socket, user }) {
                     <div class="card active chat dz-chat-history-box">
                       <div class="card-header chat-list-header text-center">
                         <div className="row">
-                          <div className="col-sm-8 col-md-12 d-flex flex-column align-items-center justify-content-center">
+                          <div className="col-12 d-flex flex-column align-items-center justify-content-center">
                             <h6 class="mb-1">
                               Chat with {appointment?.details?.company?.name}
                             </h6>
                           </div>
-                          <div class="col-sm-4">
+                          <div class="col-12 d-flex flex-column align-items-center justify-content-center">
                             <button
                               className="btn btn-primary d-block d-sm-block d-md-none"
                               onClick={() => setChatOpen(!chatOpen)}
