@@ -536,12 +536,10 @@ function App({ socket }) {
           <div class="col-xl-6 col-lg-6 col-sm-6">
             <div class="card">
               <div class="card-header">
-                <h4 class="card-title">
-                  {" "}
-                  <span className="badge badge-secondary">Employee</span>{" "}
-                  {employee?.name}{" "}
-                </h4>
                 <div className="row">
+                  <h4 class="col-12 card-title mb-3">
+                    {employee?.name}{" "}
+                  </h4>
                   <div className="col-12 d-flex flex-row">
                     <button
                       className="btn btn-danger btn-xs"
@@ -663,7 +661,8 @@ function App({ socket }) {
                                     <a
                                       className="btn btn-primary mb-2"
                                       href={employee?.jobSpecFile}
-                                      target="_blank" rel="noreferrer"
+                                      target="_blank"
+                                      rel="noreferrer"
                                     >
                                       View Uploaded
                                     </a>
@@ -688,7 +687,7 @@ function App({ socket }) {
                       <label class="col-sm-4 col-form-label">Comments</label>
                       <div class="col-sm-8">
                         <Comments
-                          employeeComments={employee?.comments?? []}
+                          employeeComments={employee?.comments ?? []}
                           onChange={(comments) =>
                             setEmployeeDetail(employee.id, "comments", comments)
                           }
