@@ -1,5 +1,5 @@
 import moment from "moment";
-import { any, assoc, has, isEmpty, isNil, mathMod, values } from "ramda";
+import { any, assoc, has, isEmpty, isNil, mathMod, set, values } from "ramda";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -17,7 +17,7 @@ const ChatContainer = styled.div`
     top: 18vh;
   }
   .chatbox .msg_card_body {
-    height: 50vh;
+    height: 45vh;
     overflow-y: scroll;
   }
   @media (max-width: 800px) {
@@ -69,25 +69,32 @@ function App({ socket, user }) {
   const [avatars, setAvatars] = useState({});
   const [message, setMessage] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [hasFetchedAvatars, setHasFetchedAvatars] = useState(false);
 
-  if (socket && isLoading) {
+  if(socket && isLoading){
+    console.log("FETCHING APPointment");
+  socket.emit("GET_APPOINTMENT", { id: params.appId });
+  socket.on("RECEIVE_APPOINTMENT", (app) => {
+    console.log("RECEIVE_APPOINTMENT", app);
+    setAppointment(app);
+  });
+  socket.on("DATABASE_UPDATED", (u) => {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
-    socket.on("RECEIVE_APPOINTMENT", (appointment) => {
-      //console.log("appointment page RECEIVE_APPOINTMENT", appointment);
-      setIsLoading(false);
-      setAppointment(appointment);
-      const messageUsers = appointment.messages.map((m) => m?.author?.id);
-      socket.emit("GET_AVATARS", { ids: messageUsers });
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      //console.log("Database updated FROM APPOINTMENT PAGE");
-      socket.emit("GET_APPOINTMENT", { id: params.appId });
-    });
+  });
 
-    socket.on("RECEIVE_AVATARS", (avatars) => {
-      //console.log("RECEIVE_AVATARS", avatars);
-      setAvatars(avatars);
-    });
+  socket.on("RECEIVE_AVATARS", (avatars) => {
+    console.log("RECEIVE_AVATARS", avatars);
+    setAvatars(avatars);
+  });
+  setIsLoading(false);
+  }
+
+  if(appointment?.messages?.length > 0 && !hasFetchedAvatars) {
+    console.log("FETCHING AVATARS");
+    const messageUsers = appointment.messages.map((m) => m?.author?.id);
+    socket.emit("GET_AVATARS", { ids: messageUsers });
+    setHasFetchedAvatars(true);
   }
 
   const appendMessageToAppointment = () => {
@@ -108,8 +115,18 @@ function App({ socket, user }) {
     setAppointment(newApp);
     setMessage("");
     socket.emit("UPDATE_APPOINTMENT", newApp);
-    socket.on("APPOINTMENT_UPDATED", () => {
-    });
+    socket.on("APPOINTMENT_UPDATED", () => {});
+  };
+
+  const getBadgeType = (title) => {
+    if (title === "approved") {
+      return "badge-success";
+    }
+    if (title === "pending") {
+      return "badge-warning";
+    } else {
+      return "badge-danger";
+    }
   };
 
   return (
@@ -140,7 +157,7 @@ function App({ socket, user }) {
                       >
                         View Quote
                       </a>
-                      <a href="#" class="badge mr-3">
+                      <a href="#" class={`btn badge badge-rounded ${getBadgeType(appointment?.status)} mr-3`}>
                         {appointment.status}
                       </a>
                     </div>
@@ -455,12 +472,12 @@ function App({ socket, user }) {
                     <div class="card active chat dz-chat-history-box">
                       <div class="card-header chat-list-header text-center">
                         <div className="row">
-                          <div className="col-8 d-flex flex-column align-items-center justify-content-center">
+                          <div className="col-sm-8 col-md-12 d-flex flex-column align-items-center justify-content-center">
                             <h6 class="mb-1">
                               Chat with {appointment?.details?.company?.name}
                             </h6>
                           </div>
-                          <div class="col-4">
+                          <div class="col-sm-4">
                             <button
                               className="btn btn-primary d-block d-sm-block d-md-none"
                               onClick={() => setChatOpen(!chatOpen)}
@@ -526,7 +543,7 @@ function App({ socket, user }) {
                       </MessageContainer>
                       <div class="card-footer">
                         <textarea
-                          class="form-control"
+                          class="form-control mb-2"
                           placeholder="Type your message..."
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
@@ -534,7 +551,7 @@ function App({ socket, user }) {
                         ></textarea>
                         <button
                           type="button"
-                          class="btn btn-block btn-primary"
+                          class="btn btn-xs btn-block btn-primary"
                           onClick={appendMessageToAppointment}
                         >
                           send

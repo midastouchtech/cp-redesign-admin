@@ -182,12 +182,12 @@ const Dashboard = ({ socket }) => {
 
   const getBadgeType = (title) => {
     if (title === "approved") {
-      return "primary";
+      return "badge-success";
     }
     if (title === "pending") {
-      return "warning";
+      return "badge-warning";
     } else {
-      return "danger";
+      return "badge-danger";
     }
   };
 
@@ -350,7 +350,11 @@ const Dashboard = ({ socket }) => {
                           <td>{appointment?.details?.company?.name}</td>
                           <td>{appointment?.usersWhoCanManage ? appointment?.usersWhoCanManage[0].name : ""}</td>
                           <td>{appointment?.details?.date}</td>
-                          <td>{appointment?.status}</td>
+                          <td>
+                            <span className={`badge badge-pill ${getBadgeType(appointment?.status)}`}>
+                            {appointment?.status}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                   </tbody>

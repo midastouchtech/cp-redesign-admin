@@ -27398,7 +27398,7 @@ code {
   color: #000; }
 .table td {
   border-color: #f0f1f5;
-  padding: 22px 20px; }
+  padding: 5px 10px; }
   [data-theme-version="dark"] .table td {
     border-color: #333a54; }
 .table.shadow-hover tbody tr:hover {

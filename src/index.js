@@ -29,9 +29,6 @@ import  Logout from "./views/logout";
 import "./style.css"
 
 
-
-const Container = styled.div``;
-
 const Main = () => {
   const [socket, setSocket] = useState(null);
 

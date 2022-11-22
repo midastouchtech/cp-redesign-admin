@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import SearchModal from ".";
+import { useNavigate } from "react-router-dom";
 
 const UserSearch = ({name, onUserSelect, socket, show, close }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async () => {
     setLoading(true);
@@ -56,9 +58,11 @@ const UserSearch = ({name, onUserSelect, socket, show, close }) => {
           </div>
         )}
         {notFound && (
-          <div className="alert alert-danger" role="alert">
-            No results found!
-          </div>
+          <div className="alert alert-danger row" role="alert">
+          <p className="col-8">No results found! </p>
+          <button className="btn btn-primary col-4" onClick={() => navigate('/client/create')}> Create </button>
+          
+        </div>
         )}
         {results.map((result) => (
           <button

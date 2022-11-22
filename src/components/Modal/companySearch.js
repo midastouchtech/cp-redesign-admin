@@ -1,17 +1,22 @@
 import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
 import SearchModal from ".";
+import { useNavigate } from "react-router-dom";
+import { isEmpty } from "ramda";
 
-const CompanySearch = ({name, onCompanySelect, socket, show, close }) => {
+const CompanySearch = ({prefilledSearchTerm, clearPrefilledSearchTerm, name, onCompanySelect, socket, show, close }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSearch = async () => {
+  const handleSearch = async (term) => {
+    console.log("searching", term || searchTerm)
     setLoading(true);
     setNotFound(false);
     setResults([]);
-    socket.emit("SEARCH_COMPANY", {term: searchTerm});
+    socket.emit("SEARCH_COMPANY", {term: term || searchTerm});
     socket.on("RECEIVE_SEARCHED_COMPANY", (data) => {
       setResults(data);
       setLoading(false);
@@ -24,10 +29,16 @@ const CompanySearch = ({name, onCompanySelect, socket, show, close }) => {
   };
 
   const clearAndClose = () => {
+    clearPrefilledSearchTerm()
     setSearchTerm("");
     setResults([]);
     close();
     };
+
+  if(prefilledSearchTerm && prefilledSearchTerm !== searchTerm) {
+    setSearchTerm(prefilledSearchTerm)
+    handleSearch(prefilledSearchTerm)
+  }
 
   return (
     <SearchModal name={name} title="Company Search" show={show} handleClose={clearAndClose}>
@@ -43,7 +54,7 @@ const CompanySearch = ({name, onCompanySelect, socket, show, close }) => {
           <button
             className="btn btn-primary"
             type="button"
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
           >
             Search
           </button>
@@ -56,10 +67,13 @@ const CompanySearch = ({name, onCompanySelect, socket, show, close }) => {
           </div>
         )}
         {notFound && (
-          <div className="alert alert-danger" role="alert">
-            No results found!
+          <div className="alert alert-danger row" role="alert">
+            <p className="col-8">No results found! </p>
+            <button className="btn btn-primary col-4" onClick={() => navigate('/company/create')}> Create </button>
+            
           </div>
         )}
+        {!isEmpty(results) && <strong><p>Select a company</p></strong>}
         {results.map((result) => (
           <button
             type="button"
@@ -67,6 +81,7 @@ const CompanySearch = ({name, onCompanySelect, socket, show, close }) => {
             onClick={() => onCompanySelect(result)}
           >
             {result?.details?.name}
+            <span className="btn btn-primary float-right">Select</span>
           </button>
         ))}
       </div>

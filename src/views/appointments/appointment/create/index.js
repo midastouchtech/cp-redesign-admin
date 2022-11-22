@@ -17,7 +17,7 @@ import {
 } from "ramda";
 import short from "short-uuid";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
@@ -45,7 +45,7 @@ function App({ socket }) {
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({
     details: {
-      company:null,
+      company: null,
       date: null,
       purchaseOrderNumber: null,
       clinic: "Churchill",
@@ -55,8 +55,8 @@ function App({ socket }) {
     usersWhoCanEdit: [],
     usersWhoCanManage: [],
     payment: {
-      proofOfPayment:"",
-      amount: 0
+      proofOfPayment: "",
+      amount: 0,
     },
     isVoided: false,
     isComplete: false,
@@ -68,6 +68,10 @@ function App({ socket }) {
   const [hasUpdatedAppointmnent, setHasUpdatedAppointment] = useState(false);
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShowCompanySearch] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [searchParamCompanyName, setSearchParamCompanyName] = useState(searchParams.get("companyName") || null);
+
+  
 
   const setDetail = (key, value) => {
     //console.log("setting detail", key, value);
@@ -159,11 +163,14 @@ function App({ socket }) {
 
   const selectCompany = (company) => {
     //console.log("selecting company", company);
-    
+
     const newAppointment = pipe(
-      assocPath(["details", "company"], {id: company?.id, name: company?.details?.name}),
+      assocPath(["details", "company"], {
+        id: company?.id,
+        name: company?.details?.name,
+      }),
       assocPath(["usersWhoCanManage"], company?.usersWhoCanManage)
-    )(appointment)
+    )(appointment);
     setAppointment(newAppointment);
   };
 
@@ -192,6 +199,14 @@ function App({ socket }) {
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });
+
+  if(!isNil(searchParamCompanyName) && !isEmpty(searchParamCompanyName) && show === false) {
+    setShowCompanySearch(true);
+  }
+
+  const clearPrefilledSearchTerm = () => {
+    setSearchParamCompanyName(null);
+  }
 
   return (
     <div class="container-fluid">
@@ -244,10 +259,26 @@ function App({ socket }) {
                         disabled
                         value={appointment?.details?.company?.name}
                       />
-                      <button  onClick={(e) => {e.preventDefault();setShowCompanySearch(true)}} className="btn btn-sm btn-link">Search</button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowCompanySearch(true);
+                        }}
+                        className="btn btn-sm btn-link"
+                      >
+                        Search
+                      </button>
                     </div>
                   </div>
-                  <CompanySearch name="companysearch" socket={socket} show={show} onCompanySelect={selectCompany} close={() => setShowCompanySearch(false)} />
+                  <CompanySearch
+                    clearPrefilledSearchTerm={clearPrefilledSearchTerm}
+                    prefilledSearchTerm={searchParamCompanyName || null}
+                    name="companysearch"
+                    socket={socket}
+                    show={show}
+                    onCompanySelect={selectCompany}
+                    close={() => setShowCompanySearch(false)}
+                  />
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Date</label>
                     <div class="col-sm-8">
@@ -380,12 +411,10 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={appointment?.details?.ndaAccepted === true}
-                        onChange={() =>
-                          setDetail("ndaAccepted", true)
-                        }
+                        onChange={() => setDetail("ndaAccepted", true)}
                       />
                       <label class="form-check-label" for="check1">
-                       NDA has been accepted.
+                        NDA has been accepted.
                       </label>
                     </div>
                     <div class="form-check mb-2">
@@ -393,9 +422,7 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={appointment?.details?.ndaAccepted === false}
-                        onChange={() =>
-                          setDetail("ndaAccepted", false)
-                        }
+                        onChange={() => setDetail("ndaAccepted", false)}
                       />
                       <label class="form-check-label" for="check2">
                         NDA has not been accepted.
@@ -454,7 +481,7 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        
+
         <div class="col-xl-12 col-lg-12 text-center">
           <h2>Employees</h2>
           <button className="btn btn-primary mb-2" onClick={createNewEmployee}>

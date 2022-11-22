@@ -240,13 +240,8 @@ const Appointments = ({ socket }) => {
                             </span>
                           </td>
                           <td>
-                            <Link to={`/appointment/${appointment.id}`}  className="btn btn-primary text-nowrap">
-                              <i
-                                className="fa fa-info
-                                            scale5 mr-3"
-                                aria-hidden="true"
-                              ></i>
-                              Info
+                            <Link to={`/appointment/${appointment.id}`}  className="btn btn-xs btn-light  text-nowrap">
+                              Open
                             </Link>
                           </td>
                         </tr>
