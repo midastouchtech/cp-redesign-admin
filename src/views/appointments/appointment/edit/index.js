@@ -20,21 +20,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
-import { SegmentedControl } from "segmented-control-react";
 import { MEDICAL_SERVICES } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
+import Comments from "./comments";
 
-const exists = (i) => !isNil(i) && !isEmpty(i);
-const ChatContainer = styled.div`
-  .chatbox {
-    position: initial;
+const Card = styled.div`
+  height: auto;
+`;
+const CardBody = styled.div`
+  &.minimized {
+    display: none;
   }
-  .chatbox .msg_card_body {
-    height: calc(100vh - 195px);
-    overflow: scroll;
+  &.maximized {
+    display: block;
   }
 `;
+
 function App({ socket }) {
   let params = useParams();
   const navigate = useNavigate();
@@ -88,7 +90,6 @@ function App({ socket }) {
     return status === appointment.status ? "btn-primary" : "btn-secondary";
   };
 
-  
   const calculateBookingPrice = () => {
     const allServices = appointment?.details?.employees?.reduce(
       (acc, employee) => {
@@ -122,7 +123,7 @@ function App({ socket }) {
     }, 0);
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
-        return employee?.sites ? acc + (employee?.sites?.length * 35) : acc
+        return employee?.sites ? acc + employee?.sites?.length * 35 : acc;
       },
       0
     );
@@ -135,7 +136,11 @@ function App({ socket }) {
 
   const saveAppointment = () => {
     const price = calculateBookingPrice();
-    const appointmentWithNewPrice = assocPath(["payment", "amount"], price, appointment);
+    const appointmentWithNewPrice = assocPath(
+      ["payment", "amount"],
+      price,
+      appointment
+    );
     //console.log("saving appza");
     socket.emit("UPDATE_APPOINTMENT", appointmentWithNewPrice);
     socket.on("APPOINTMENT_UPDATED", () => {
@@ -148,6 +153,9 @@ function App({ socket }) {
     const newEmployee = {
       id: short.generate(),
       name: "",
+      idNumber: "",
+      comments: [],
+      occupation: "",
       services: [],
       sites: [],
     };
@@ -157,10 +165,45 @@ function App({ socket }) {
     setDetail("employees", newEmployees);
   };
 
-  const removeEmployee = (id) => ()=> {
+  const removeEmployee = (id) => () => {
     //console.log("removing employee", id);
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
+    setDetail("employees", newEmployees);
+  };
+
+  const minimizeEmployee = (id) => () => {
+    console.log("minimizing employee", id);
+    const employee = appointment?.details.employees?.find((e) => e.id === id);
+    const minimizedEmployee = assoc("isMinimized", true, employee);
+    const index = appointment?.details?.employees?.indexOf(employee);
+    const employeesWithoutEmployee = without(
+      [employee],
+      appointment?.details?.employees
+    );
+    const newEmployees = insert(
+      index,
+      minimizedEmployee,
+      employeesWithoutEmployee
+    );
+
+    setDetail("employees", newEmployees);
+  };
+
+  const maximizeEmployee = (id) => () => {
+    console.log("maximizing employee", id);
+    const employee = appointment?.details.employees?.find((e) => e.id === id);
+    const maximizedEmployee = assoc("isMinimized", false, employee);
+    const index = appointment?.details?.employees?.indexOf(employee);
+    const employeesWithoutEmployee = without(
+      [employee],
+      appointment?.details?.employees
+    );
+    const newEmployees = insert(
+      index,
+      maximizedEmployee,
+      employeesWithoutEmployee
+    );
     setDetail("employees", newEmployees);
   };
 
@@ -173,7 +216,7 @@ function App({ socket }) {
   return (
     <div class="container-fluid">
       <div class="row">
-      <div className="col-xl-12 col-lg-12">
+        <div className="col-xl-12 col-lg-12">
           <div className="card">
             <div className="card-body">
               <button
@@ -190,7 +233,7 @@ function App({ socket }) {
                 onClick={saveAppointment}
                 disabled={!hasUpdatedAppointmnent}
               >
-                Save Appointment
+                Save 
               </button>
               <button
                 className={`btn ${
@@ -199,13 +242,13 @@ function App({ socket }) {
                 onClick={resetAppointmentToOriginal}
                 disabled={!hasUpdatedAppointmnent}
               >
-                Cancel Changes
+                Cancel 
               </button>
             </div>
           </div>
         </div>
         <div class="col-xl-6 col-lg-12">
-          <div class="card">
+          <Card class="card">
             <div class="card-header">
               <h4 class="card-title">Details</h4>
             </div>
@@ -217,7 +260,7 @@ function App({ socket }) {
                     <div class="col-sm-8">
                       <input
                         class="form-control input-default "
-                        placeholder="col-form-label-sm"
+                        placeholder="Select company"
                         disabled
                         value={appointment?.details?.company?.name}
                       />
@@ -243,7 +286,7 @@ function App({ socket }) {
                       <input
                         type="email"
                         class="form-control input-default "
-                        placeholder="col-form-label"
+                        placeholder="Purchase order number"
                         onChange={(event) =>
                           setDetail("purchaseOrderNumber", event.target.value)
                         }
@@ -254,7 +297,7 @@ function App({ socket }) {
                 </form>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
         <div class="col-xl-6 col-lg-6">
           <div class="card">
@@ -340,25 +383,40 @@ function App({ socket }) {
         <div class="col-xl-6 col-lg-6">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title">Non disclosure agreement</h4>
+              <h4 class="card-title">Non disclosure Agreement</h4>
             </div>
             <div class="card-body">
-              <div class="row">
-                <div class="col-12">
-                  {appointment?.details?.ndaUrl && (
-                    <p>
-                      <a
-                        className="btn btn-primary mb-2"
-                        href={appointment.details.ndaUrl}
-                      >
-                        View Uploaded
-                      </a>
-                    </p>
-                  )}
-                  <Uploader
-                    onChange={(ndaUrl) => setDetail("ndaUrl", ndaUrl)}
-                  />
-                </div>
+              <p>
+                You can select one of the two options below to specify wether
+                the nda terms have been accepted or not.
+              </p>
+              <div class="basic-form">
+                <form>
+                  <div class="form-group">
+                    <div class="form-check mb-2">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        checked={appointment?.details?.ndaAccepted === true}
+                        onChange={() => setDetail("ndaAccepted", true)}
+                      />
+                      <label class="form-check-label" for="check1">
+                        NDA has been accepted.
+                      </label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        checked={appointment?.details?.ndaAccepted === false}
+                        onChange={() => setDetail("ndaAccepted", false)}
+                      />
+                      <label class="form-check-label" for="check2">
+                        NDA has not been accepted.
+                      </label>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -369,7 +427,10 @@ function App({ socket }) {
               <h4 class="card-title">Completion</h4>
             </div>
             <div class="card-body">
-              <p>You can select one of the two options below to specify wether this appointment has been completed or not.</p>
+              <p>
+                You can select one of the two options below to specify wether
+                this appointment has been completed or not.
+              </p>
               <div class="basic-form">
                 <form>
                   <div class="form-group">
@@ -378,7 +439,9 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={appointment?.isComplete === true}
-                        onChange={() => setAppointment(assoc("isComplete", true, appointment))}
+                        onChange={() =>
+                          setAppointment(assoc("isComplete", true, appointment))
+                        }
                       />
                       <label class="form-check-label" for="check1">
                         Appointment has been completed.
@@ -389,7 +452,11 @@ function App({ socket }) {
                         type="checkbox"
                         class="form-check-input"
                         checked={appointment?.isComplete === false}
-                        onChange={() => setAppointment(assoc("isComplete", false, appointment))}
+                        onChange={() =>
+                          setAppointment(
+                            assoc("isComplete", false, appointment)
+                          )
+                        }
                       />
                       <label class="form-check-label" for="check2">
                         Appointment is still in progress.
@@ -401,24 +468,57 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        <div class="col-xl-12 col-lg-12 text-center" >
+        <div class="col-xl-12 col-lg-12 text-center">
           <h2>Employees</h2>
-          <button className="btn btn-primary mb-2" onClick={createNewEmployee}> Add New Employee </button>
+          <button className="btn btn-primary mb-2" onClick={createNewEmployee}>
+            {" "}
+            Add New Employee{" "}
+          </button>
           <br />
-          <p>This appointment has {appointment?.details?.employees?.length} employees. </p>
+          <p>
+            This appointment has {appointment?.details?.employees?.length}{" "}
+            employees.{" "}
+          </p>
         </div>
         {appointment?.details?.employees?.map((employee) => (
           <div class="col-xl-6 col-lg-6 col-sm-6">
-            <div class="card">
+            <div className={`card ${
+                  employee.isMinimized ? "minimized" : "maximized"
+                }`}>
               <div class="card-header">
                 <h4 class="card-title">
                   {" "}
                   <span className="badge badge-secondary">Employee</span>{" "}
                   {employee?.name}{" "}
                 </h4>
-                <button className="btn btn-danger" onClick={removeEmployee(employee.id)}> Delete </button>
+                <div className="row">
+                  <div className="col-12">
+                    <button
+                      className="btn btn-danger btn-xs"
+                      onClick={removeEmployee(employee.id)}
+                    >
+                      {" "}
+                      Delete Employee{" "}
+                    </button>
+                    <button
+                      className="btn btn-outline-warning btn-xs ml-2"
+                      onClick={
+                        employee?.isMinimized
+                          ? maximizeEmployee(employee?.id)
+                          : minimizeEmployee(employee?.id)
+                      }
+                    >
+                      {" "}
+                      {employee?.isMinimized ? "View" : "Hide"} Details{" "}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div class="card-body">
+              <CardBody
+                className={`card-body ${
+                  employee.isMinimized ? "minimized" : "maximized"
+                }`}
+              >
                 <div class="basic-form">
                   <form>
                     <div class="form-group row">
@@ -436,6 +536,26 @@ function App({ socket }) {
                             )
                           }
                           value={employee?.name}
+                        />
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">
+                        ID/Passport Number
+                      </label>
+                      <div class="col-sm-8">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Identity Number"
+                          onChange={(event) =>
+                            setEmployeeDetail(
+                              employee.id,
+                              "idNumber",
+                              event.target.value
+                            )
+                          }
+                          value={employee?.idNumber}
                         />
                       </div>
                     </div>
@@ -460,13 +580,23 @@ function App({ socket }) {
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">Sites</label>
                       <div class="col-sm-8">
-                        <Sites employeeSites={employee?.sites || []} onChange={(sites) => setEmployeeDetail(employee.id, "sites", sites)} />
+                        <Sites
+                          employeeSites={employee?.sites || []}
+                          onChange={(sites) =>
+                            setEmployeeDetail(employee.id, "sites", sites)
+                          }
+                        />
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">Services</label>
                       <div class="col-sm-8">
-                        <Services selectedServices={employee?.services} onChange={(services) => setEmployeeDetail(employee.id, "services", services)} />
+                        <Services
+                          selectedServices={employee?.services}
+                          onChange={(services) =>
+                            setEmployeeDetail(employee.id, "services", services)
+                          }
+                        />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -478,11 +608,12 @@ function App({ socket }) {
                           <div class="card-body">
                             <div class="row">
                               <div class="col-12">
-                                {appointment?.details.ndaUrl && (
+                                {employee?.jobSpecFile && (
                                   <p>
                                     <a
                                       className="btn btn-primary mb-2"
                                       href={employee?.jobSpecFile}
+                                      target="_blank" rel="noreferrer"
                                     >
                                       View Uploaded
                                     </a>
@@ -503,9 +634,20 @@ function App({ socket }) {
                         </div>
                       </div>
                     </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">Comments</label>
+                      <div class="col-sm-8">
+                        <Comments
+                          employeeComments={employee?.comments?? []}
+                          onChange={(comments) =>
+                            setEmployeeDetail(employee.id, "comments", comments)
+                          }
+                        />
+                      </div>
+                    </div>
                   </form>
                 </div>
-              </div>
+              </CardBody>
             </div>
           </div>
         ))}

@@ -27,15 +27,14 @@ import Services from "./services";
 import Sites from "./sites";
 import SearchModal from "../../../../components/Modal";
 import CompanySearch from "../../../../components/Modal/companySearch";
+import Comments from "../edit/comments";
 
-const exists = (i) => !isNil(i) && !isEmpty(i);
-const ChatContainer = styled.div`
-  .chatbox {
-    position: initial;
+const CardBody = styled.div`
+  &.minimized {
+    display: none;
   }
-  .chatbox .msg_card_body {
-    height: calc(100vh - 195px);
-    overflow: scroll;
+  &.maximized {
+    display: block;
   }
 `;
 function App({ socket }) {
@@ -69,9 +68,9 @@ function App({ socket }) {
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShowCompanySearch] = useState(false);
   const [searchParams] = useSearchParams();
-  const [searchParamCompanyName, setSearchParamCompanyName] = useState(searchParams.get("companyName") || null);
-
-  
+  const [searchParamCompanyName, setSearchParamCompanyName] = useState(
+    searchParams.get("companyName") || null
+  );
 
   const setDetail = (key, value) => {
     //console.log("setting detail", key, value);
@@ -194,19 +193,58 @@ function App({ socket }) {
     setDetail("employees", newEmployees);
   };
 
+  const minimizeEmployee = (id) => () => {
+    console.log("minimizing employee", id);
+    const employee = appointment?.details.employees?.find((e) => e.id === id);
+    const minimizedEmployee = assoc("isMinimized", true, employee);
+    const index = appointment?.details?.employees?.indexOf(employee);
+    const employeesWithoutEmployee = without(
+      [employee],
+      appointment?.details?.employees
+    );
+    const newEmployees = insert(
+      index,
+      minimizedEmployee,
+      employeesWithoutEmployee
+    );
+
+    setDetail("employees", newEmployees);
+  };
+
+  const maximizeEmployee = (id) => () => {
+    console.log("maximizing employee", id);
+    const employee = appointment?.details.employees?.find((e) => e.id === id);
+    const maximizedEmployee = assoc("isMinimized", false, employee);
+    const index = appointment?.details?.employees?.indexOf(employee);
+    const employeesWithoutEmployee = without(
+      [employee],
+      appointment?.details?.employees
+    );
+    const newEmployees = insert(
+      index,
+      maximizedEmployee,
+      employeesWithoutEmployee
+    );
+    setDetail("employees", newEmployees);
+  };
+
   useEffect(() => {
     //console.log("use effect appointment", appointment);
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });
 
-  if(!isNil(searchParamCompanyName) && !isEmpty(searchParamCompanyName) && show === false) {
+  if (
+    !isNil(searchParamCompanyName) &&
+    !isEmpty(searchParamCompanyName) &&
+    show === false
+  ) {
     setShowCompanySearch(true);
   }
 
   const clearPrefilledSearchTerm = () => {
     setSearchParamCompanyName(null);
-  }
+  };
 
   return (
     <div class="container-fluid">
@@ -228,7 +266,7 @@ function App({ socket }) {
                 onClick={saveAppointment}
                 disabled={!hasUpdatedAppointmnent}
               >
-                Save Appointment
+                Save
               </button>
               <button
                 className={`btn ${
@@ -237,7 +275,7 @@ function App({ socket }) {
                 onClick={resetAppointmentToOriginal}
                 disabled={!hasUpdatedAppointmnent}
               >
-                Cancel Changes
+                Cancel
               </button>
             </div>
           </div>
@@ -503,15 +541,34 @@ function App({ socket }) {
                   <span className="badge badge-secondary">Employee</span>{" "}
                   {employee?.name}{" "}
                 </h4>
-                <button
-                  className="btn btn-danger"
-                  onClick={removeEmployee(employee.id)}
-                >
-                  {" "}
-                  Delete{" "}
-                </button>
+                <div className="row">
+                  <div className="col-12 d-flex flex-row">
+                    <button
+                      className="btn btn-danger btn-xs"
+                      onClick={removeEmployee(employee.id)}
+                    >
+                      {" "}
+                      Delete{" "}
+                    </button>
+                    <button
+                      className="btn btn-outline-warning btn-xs ml-2"
+                      onClick={
+                        employee?.isMinimized
+                          ? maximizeEmployee(employee?.id)
+                          : minimizeEmployee(employee?.id)
+                      }
+                    >
+                      {" "}
+                      {employee?.isMinimized ? "View" : "Hide"} Details{" "}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div class="card-body">
+              <CardBody
+                className={`card-body ${
+                  employee.isMinimized ? "minimized" : "maximized"
+                }`}
+              >
                 <div class="basic-form">
                   <form>
                     <div class="form-group row">
@@ -529,6 +586,26 @@ function App({ socket }) {
                             )
                           }
                           value={employee?.name}
+                        />
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">
+                        ID/Passport Number
+                      </label>
+                      <div class="col-sm-8">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Identity Number"
+                          onChange={(event) =>
+                            setEmployeeDetail(
+                              employee.id,
+                              "idNumber",
+                              event.target.value
+                            )
+                          }
+                          value={employee?.idNumber}
                         />
                       </div>
                     </div>
@@ -581,11 +658,12 @@ function App({ socket }) {
                           <div class="card-body">
                             <div class="row">
                               <div class="col-12">
-                                {appointment?.details.ndaUrl && (
+                                {employee?.jobSpecFile && (
                                   <p>
                                     <a
                                       className="btn btn-primary mb-2"
                                       href={employee?.jobSpecFile}
+                                      target="_blank" rel="noreferrer"
                                     >
                                       View Uploaded
                                     </a>
@@ -606,9 +684,20 @@ function App({ socket }) {
                         </div>
                       </div>
                     </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">Comments</label>
+                      <div class="col-sm-8">
+                        <Comments
+                          employeeComments={employee?.comments?? []}
+                          onChange={(comments) =>
+                            setEmployeeDetail(employee.id, "comments", comments)
+                          }
+                        />
+                      </div>
+                    </div>
                   </form>
                 </div>
-              </div>
+              </CardBody>
             </div>
           </div>
         ))}
