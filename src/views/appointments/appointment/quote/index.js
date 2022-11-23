@@ -21,6 +21,9 @@ const StyedContainer = styled.div`
   .quote-container {
     border: 1px solid #lightgrey;
   }
+  p {
+    padding: 0 !important;
+  }
   background-color: #fff;
   img {
     width: 100%;
@@ -30,7 +33,8 @@ const StyedContainer = styled.div`
   }
   td,
   th {
-    padding: 5px 0 !important;
+    padding: 5px !important;
+    font-size: 12px;
   }
   .details-row {
     p {
@@ -58,18 +62,22 @@ function App({ socket }) {
   const [sitesPrice, setSitesPrice] = useState(0);
   const [company, setCompany] = useState({});
   const [disableButton, setButtonDisabled] = useState(false);
-  const [status , setStatus] = useState("Email Invoice");
+  const [status, setStatus] = useState("Email Invoice");
 
   const savetopdf = () => {
     window.scrollTo(0, 0);
     const input = document.getElementById("quote-container");
-    html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jspdf("p", "mm", "a4");
-      var width = pdf.internal.pageSize.getWidth() - 20;
-      var height = pdf.internal.pageSize.getHeight() - 20;
-      pdf.addImage(imgData, "JPEG", 10, 0, width, height);
-      pdf.save("download.pdf");
+    var doc = new jspdf("p", "px", "a4");
+    doc.html(input, {
+      callback: function (pdf) {
+        // console.log(pdf)
+        pdf.save("mypdf.pdf");
+      },
+      html2canvas: {
+        scale: 0.36,
+      },
+      x: 20,
+      y: 20,
     });
   };
 
@@ -77,38 +85,43 @@ function App({ socket }) {
     setButtonDisabled(true);
     setStatus("Generating invoice...");
     window.scrollTo(0, 0);
+    window.scrollTo(0, 0);
     const input = document.getElementById("quote-container");
-    html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jspdf("p", "mm", "a4");
-      var width = pdf.internal.pageSize.getWidth() - 20;
-      var height = pdf.internal.pageSize.getHeight() - 20;
-      pdf.addImage(imgData, "JPEG", 10, 0, width, height);
-      var blob = pdf.output("blob");
-      const url = "https://api.cloudinary.com/v1_1/clinic-plus/raw/upload";
-      const formData = new FormData();
-      formData.append("file", blob, "quote.pdf");
-      formData.append("upload_preset", "pwdsm6sz");
-      setStatus("Uploading invoice...");
-      axios({
-        method: "POST",
-        data: formData,
-        headers: { "Content-Type": "multipart/form-data" },
-        url,
-      })
-        .then((response) => {
-          //console.log(response.data.secure_url);
-          socket.emit("SEND_INVOICE", { appointment, url: response.data.secure_url });
-          setStatus("Sending...");
-          socket.on("RECEIVE_SAVE_INVOICE_SUCCESS", (data) => {
-            setStatus("Invoice sent!");
-          });
+    var doc = new jspdf("p", "px", "a4");
+    doc.html(input, {
+      callback: function (pdf) {
+        var blob = pdf.output("blob");
+        const url = "https://api.cloudinary.com/v1_1/clinic-plus/raw/upload";
+        const formData = new FormData();
+        formData.append("file", blob, "quote.pdf");
+        formData.append("upload_preset", "pwdsm6sz");
+        setStatus("Uploading invoice...");
+        axios({
+          method: "POST",
+          data: formData,
+          headers: { "Content-Type": "multipart/form-data" },
+          url,
         })
-        .catch((errr) => setStatus("Error sending invoice"));
+          .then((response) => {
+            console.log(response.data.secure_url);
+            socket.emit("SEND_INVOICE", {
+              appointment,
+              url: response.data.secure_url,
+            });
+            setStatus("Sending...");
+            socket.on("RECEIVE_SAVE_INVOICE_SUCCESS", (data) => {
+              setStatus("Invoice sent!");
+            });
+          })
+          .catch((errr) => setStatus("Error sending invoice"));
+      },
+      html2canvas: {
+        scale: 0.36,
+      },
+      x: 20,
+      y: 20,
     });
   };
-
-  
 
   if (socket && isLoading) {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
@@ -171,7 +184,6 @@ function App({ socket }) {
     });
   }
 
-
   return (
     <StyedContainer>
       <div class="container">
@@ -210,7 +222,7 @@ function App({ socket }) {
           <br />
           <div className="row">
             <div className="col-1"></div>
-            <div id="quote-container" className="col-10 quote-container">
+            <div id="quote-container" className="quote-container">
               <br />
               <div class="row details-row">
                 <div class="col-md-6">
@@ -225,7 +237,7 @@ function App({ socket }) {
               <div class="row details-row">
                 <div class="col-md-6 text-left">
                   <h4>
-                    <strong>Clinicplus Pty (LTD)</strong>
+                    <strong>Postal Address</strong>
                   </h4>
                   <p>Postnet P156</p>
                   <p>Private Bag X 7260</p>
@@ -233,7 +245,9 @@ function App({ socket }) {
                   <p>1035</p>
                 </div>
                 <div class="col-md-6 text-left">
-                  <p>02 Churchill Avenue</p>
+                  <h4>
+                    <strong>Physical Address</strong>
+                  </h4>
                   <p>Extension 5</p>
                   <p>Witbank 1035</p>
                   <p>Tel 013 658 2020</p>
@@ -244,12 +258,20 @@ function App({ socket }) {
               <div class="row details-row">
                 <div class="col-md-6 text-left">
                   <h4>
-                    <strong>{company?.details?.name}</strong>
+                    <strong>Banking Details</strong>
                   </h4>
-                  <p>{company?.details?.postalAddress}</p>
+                  <p>ClinicPlus (PTY)LTD</p>
+                  <p>Bank: ABSA</p>
+                  <p>Account Number: 4069672703</p>
+                  <p>Account Type: Cheque</p>
+                  <p>Branch: 632005</p>
+                  <p>Reference: {company?.details?.name}</p>
                 </div>
                 <div class="col-md-6 text-left">
-                  <h4> </h4>
+                  <small>Bill To: </small>
+                  <h4>
+                    <strong>{company?.details?.name}</strong>
+                  </h4>
                   <p>{company?.details?.physicalAddress}</p>
                 </div>
               </div>
