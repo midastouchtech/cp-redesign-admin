@@ -1,7 +1,8 @@
-import { isNil, isEmpty, repeat } from "ramda";
+import { isNil, isEmpty, repeat, insert } from "ramda";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import {CSVLink, CSVDownload} from 'react-csv';
 
 const getBadgeclassName = (status) => {
   switch (status) {
@@ -22,7 +23,6 @@ const NoAppointments = styled.div`
   align-items: center;
   height: 500px;
   width: 100%;
-
 `;
 
 const Appointments = ({ socket }) => {
@@ -34,6 +34,25 @@ const Appointments = ({ socket }) => {
   const [currentMonthPageCount, setCurrentMonthPageCount] = useState(0);
   const [nextMonthPageCount, setNextMonthPageCount] = useState(0);
   const [prevMonthPageCount, setPrevMonthPageCount] = useState(0);
+
+  const csvData = insert(0,[
+    "appointmentId",
+    "userName",
+    "purchaseOrderNumber",
+    "companyName",
+    "location",
+    "appointmentDate",
+    "status",
+  ],appointments.map((appointment) => [
+    appointment?.id,
+    appointment?.usersWhoCanManage[0].name,
+    appointment?.details?.purchaseOrderNumber,
+    appointment?.details?.company?.name,
+    appointment?.details.clinic,
+    appointment?.details?.date,
+    appointment?.status,
+  ]))
+    console.log("csvData", csvData);
 
   const getAllAppointments = () => {
     socket.emit("GET_ALL_APPOINTMENTS");
@@ -61,13 +80,13 @@ const Appointments = ({ socket }) => {
 
   const getCurrentMonthsAppointments = (page) => {
     socket.emit("GET_CURRENT_MONTHS_APPOINTMENTS", {
-      page
+      page,
     });
     socket.on("RECEIVE_CURRENT_MONTHS_APPOINTMENTS", (data) => {
       setAppointments(data);
       setOriginalAppointments(data);
       setMonthType("current");
-      setPage(page); 
+      setPage(page);
     });
   };
 
@@ -79,10 +98,10 @@ const Appointments = ({ socket }) => {
       setAppointments(data);
       setOriginalAppointments(data);
       setMonthType("next");
-      setPage(p) 
+      setPage(p);
     });
   };
-  
+
   const getPrevMonthsAppointments = (p) => {
     socket.emit("GET_PREVIOUS_MONTHS_APPOINTMENTS", {
       page: p,
@@ -91,7 +110,7 @@ const Appointments = ({ socket }) => {
       setAppointments(data);
       setOriginalAppointments(data);
       setMonthType("prev");
-      setPage(p)     
+      setPage(p);
     });
   };
 
@@ -101,7 +120,6 @@ const Appointments = ({ socket }) => {
     next: getNextMonthsAppointments,
     prev: getPrevMonthsAppointments,
   };
-
 
   const getAppointmentsByMonth = (e) => {
     //console.log("getting first set appointments for monthtype", e.target.value);
@@ -114,7 +132,7 @@ const Appointments = ({ socket }) => {
 
   const getPageAppointments = (p) => {
     if (monthType === "any") {
-      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p});
+      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p });
       socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
         setAppointments(data);
         setOriginalAppointments(data);
@@ -125,7 +143,6 @@ const Appointments = ({ socket }) => {
       functionsByMonth[monthType](p);
     }
   };
-
 
   //console.log("prevMonthPageCount", prevMonthPageCount)
   //console.log("currentMonthPageCount", currentMonthPageCount)
@@ -193,10 +210,8 @@ const Appointments = ({ socket }) => {
               Prev Month
             </option>
           </select>
-          <a href="#" className="btn btn-primary text-nowrap">
-            <i className="fa fa-file-text scale5 mr-3" aria-hidden="true"></i>
-            Generate Report
-          </a>
+          <CSVLink data={csvData} filename={"report.csv"} className="btn btn-primary text-nowrap"> Generate Report</CSVLink>
+
         </div>
       </div>
       <div className="row">
@@ -240,7 +255,10 @@ const Appointments = ({ socket }) => {
                             </span>
                           </td>
                           <td>
-                            <Link to={`/appointment/${appointment.id}`}  className="btn btn-xs btn-light  text-nowrap">
+                            <Link
+                              to={`/appointment/${appointment.id}`}
+                              className="btn btn-xs btn-light  text-nowrap"
+                            >
                               Open
                             </Link>
                           </td>
@@ -266,26 +284,26 @@ const Appointments = ({ socket }) => {
           <li className="nav-item">
             <a
               className={`nav-link ${type === "approved" ? "active" : ""}`}
-              onClick={() => getPageAppointments(page === 0 ? 0 : page-1)}
+              onClick={() => getPageAppointments(page === 0 ? 0 : page - 1)}
             >
               Prev Page
             </a>
-          </li> 
+          </li>
           <li className="nav-item">
             <a
               className={`nav-link ${type === "pending" ? "active" : ""}`}
-              onClick={() => getPageAppointments(page+1)}
+              onClick={() => getPageAppointments(page + 1)}
             >
               Next Page
             </a>
           </li>
-          {repeat('i', page).map((i, index) => (
+          {repeat("i", page).map((i, index) => (
             <li className="nav-item">
               <a
                 className={`nav-link ${type === "pending" ? "active" : ""}`}
                 onClick={() => getPageAppointments(index)}
               >
-                Page {index+1}
+                Page {index + 1}
               </a>
             </li>
           ))}

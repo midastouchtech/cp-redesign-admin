@@ -69,7 +69,7 @@ const Admins = ({ socket }) => {
                           <td>{admin?.details.cell}</td>
                           <td>{admin?.isSuspended ?  "Yes" : "No"}</td>
                           <td>
-                            <Link to={`/admin/edit/${admin?.id}`}  className="btn btn-primary text-nowrap">                              
+                            <Link to={`/admin/edit/${admin?.id}`}  className="btn btn-xs btn-primary text-nowrap">                              
                               Edit
                             </Link>
                           </td>

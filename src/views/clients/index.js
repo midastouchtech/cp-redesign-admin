@@ -73,7 +73,7 @@ const Companies = ({ socket }) => {
                           <td>{client?.appointmentsManaging.length}</td>
                           <td>{client?.isSuspended ?  "Yes" : "No"}</td>
                           <td>
-                            <Link to={`/client/edit/${client?.id}`}  className="btn btn-primary text-nowrap">                              
+                            <Link to={`/client/edit/${client?.id}`}  className="btn btn-xs btn-primary text-nowrap">                              
                               Edit
                             </Link>
                           </td>

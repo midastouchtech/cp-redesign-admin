@@ -381,39 +381,6 @@ function App({ socket, user }) {
             </div>
             <div class="col-xl-12">
               <div class="card">
-                <div class="card-header">
-                  Clients who manage this appointment
-                </div>
-                <div class="card-body p-0">
-                  <div class="table-responsive fs-14">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th>
-                            <strong>Client Name</strong>
-                          </th>
-                          <th>
-                            <strong>View</strong>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {appointment?.usersWhoCanManage?.map((user) => (
-                          <tr>
-                            <td>{user?.name}</td>
-                            <td>
-                              <Link to={`/client/edit/${user.id}`}>Open</Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-12">
-              <div class="card">
                 <div class="card-body p-0">
                   <div class="table-responsive fs-14">
                     <table class="table">

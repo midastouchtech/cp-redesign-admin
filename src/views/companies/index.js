@@ -82,7 +82,7 @@ const Companies = ({ socket }) => {
                           <td>{company.details.vat}</td>
                           <td>{company.details.registrationNumber}</td>
                           <td>
-                            <Link to={`/company/edit/${company.id}`}  className="btn btn-primary text-nowrap">
+                            <Link to={`/company/edit/${company.id}`}  className="btn btn-xs btn-primary text-nowrap">
                               <i
                                 className="fa fa-info
                                             scale5 mr-3"
