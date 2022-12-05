@@ -35,7 +35,7 @@ const Appointments = ({ socket }) => {
   const [nextMonthPageCount, setNextMonthPageCount] = useState(0);
   const [prevMonthPageCount, setPrevMonthPageCount] = useState(0);
 
-  const csvData = insert(0,[
+  const csvData = appointments ? insert(0,[
     "appointmentId",
     "userName",
     "purchaseOrderNumber",
@@ -51,7 +51,7 @@ const Appointments = ({ socket }) => {
     appointment?.details?.clinic,
     appointment?.details?.date,
     appointment?.status,
-  ]))
+  ])) : []
     console.log("csvData", csvData);
 
   const getAllAppointments = () => {
