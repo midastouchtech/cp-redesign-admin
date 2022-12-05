@@ -9,6 +9,12 @@ function App({ socket }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotPassword , setForgotPassword] = useState(false);
+
+  const togleForotPassword = () => {
+    setForgotPassword(!forgotPassword);
+  }
+
 
   const doLogin = () => {
     setLoading(true);
@@ -22,6 +28,19 @@ function App({ socket }) {
       setError("");
       setLoading(false);
       window.location.replace("/");
+    });
+  };
+
+  const sendResetLink = () => {
+    setLoading(true);
+    socket.emit("SEND_RESET_LINK", { email });
+    socket.on("RECEIVE_RESET_LINK_SUCCESS", (user) => {
+      setLoading(false);
+      setError(user.message);
+    });
+    socket.on("RECEIVE_RESET_LINK_FAILED", (user) => {
+      setLoading(false);
+      setError(user.error);
     });
   };
 
@@ -45,7 +64,8 @@ function App({ socket }) {
                       <h4 class="text-center mb-4 text-white">
                         Sign in your account
                       </h4>
-                      <form>
+                      {!forgotPassword ? (
+                        <form>
                         <div class="form-group">
                           <label class="mb-1 text-white">
                             <strong>Email</strong>
@@ -83,9 +103,45 @@ function App({ socket }) {
                           </button>
                         </div>
                         <div class="text-center mt-3 text-light">
+                            <a href="#" class="text-white" onClick={togleForotPassword}>Forgot Password ?</a>
                             <p>{error}</p>
                         </div>
-                      </form>
+
+                      </form>) : (
+                        <form>
+                          <div class="form-group
+                          ">
+                            <label class="mb-1 text-white">
+                              <strong>Email</strong>
+                              </label>
+                              <input
+                                
+                                type="email"
+                                class="form-control"
+                                placeholder="Type email"
+                                value={email}
+                                onChange = {(e) => setEmail(e.target.value)}
+                              />
+                          </div>
+                          <div class="text-center">
+                            <button
+                              type="submit"
+                              class="btn bg-white text-primary btn-block"
+                              onClick={(e) => {
+                                  e.preventDefault();
+                                  sendResetLink();
+                              }}
+                            >
+                              Send Reset Link
+                            </button>
+                          </div>
+                          <div class="text-center mt-3 text-light">
+                              <a href="#" class="text-white" onClick={togleForotPassword}>Back to Login</a>
+                              <p>{error}</p>
+                          </div>
+                        </form>
+                      )}
+                                    
                     </div>
                   </div>
                 </div>

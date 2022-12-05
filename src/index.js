@@ -26,6 +26,8 @@ import  AppointmentCreator from "./views/appointments/appointment/create";
 import  AppointmentQuotation from "./views/appointments/appointment/quote";
 import  Login from "./views/login";
 import  Logout from "./views/logout";
+import Reset from "./views/reset";
+
 import "./style.css"
 
 
@@ -53,6 +55,10 @@ const Main = () => {
           <Route
             path="/appointment/:appId"
             element={<Appointment socket={socket} />}
+          />
+          <Route
+            path="/reset-password/:token"
+            element={<Reset socket={socket} />}
           />
           <Route
             path="/appointment/edit/:appId"
