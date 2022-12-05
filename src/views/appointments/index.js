@@ -43,12 +43,12 @@ const Appointments = ({ socket }) => {
     "location",
     "appointmentDate",
     "status",
-  ],appointments.map((appointment) => [
+  ],appointments?.map((appointment) => [
     appointment?.id,
     appointment?.usersWhoCanManage[0].name,
     appointment?.details?.purchaseOrderNumber,
     appointment?.details?.company?.name,
-    appointment?.details.clinic,
+    appointment?.details?.clinic,
     appointment?.details?.date,
     appointment?.status,
   ]))
