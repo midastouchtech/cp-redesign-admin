@@ -156,16 +156,58 @@ const Reports = ({ socket }) => {
     });
   };
 
+
+  const getTodayAppointments = () => {
+    socket.emit("GET_TODAYS_APPOINTMENTS");
+    socket.on("RECEIVE_TODAY_APPOINTMENTS", (data) => {
+      setAppointments(data);
+      setOriginalAppointments(data);
+      setMonthType("today");
+    });
+  };
+
+  const getTomorrowAppointments = () => {
+    socket.emit("GET_TOMORROWS_APPOINTMENTS");
+    socket.on("RECEIVE_TOMORROW_APPOINTMENTS", (data) => {
+      setAppointments(data);
+      setOriginalAppointments(data);
+      setMonthType("tomorrow");
+    });
+  };
+
+  const getThisWeekAppointments = () => {
+    socket.emit("GET_THIS_WEEKS_APPOINTMENTS");
+    socket.on("RECEIVE_THIS_WEEK_APPOINTMENTS", (data) => {
+      setAppointments(data);
+      setOriginalAppointments(data);
+      setMonthType("thisWeek");
+    });
+  };
+
+  const getThisYearAppointments = () => {
+    socket.emit("GET_THIS_YEARS_APPOINTMENTS");
+    socket.on("RECEIVE_THIS_YEAR_APPOINTMENTS", (data) => {
+      setAppointments(data);
+      setOriginalAppointments(data);
+      setMonthType("thisYear");
+    });
+  };
+
   const functionsByMonth = {
     any: getAllAppointments,
     current: getCurrentMonthsAppointments,
     next: getNextMonthsAppointments,
     prev: getPrevMonthsAppointments,
+    today: getTodayAppointments,
+    tomorrow: getTomorrowAppointments,
+    thisWeek: getThisWeekAppointments,
+    thisYear: getThisYearAppointments,
   };
 
   const getAppointmentsByMonth = (e) => {
     //console.log("getting first set appointments for monthtype", e.target.value);
     const month = e.target.value;
+    console.log("month", month);
     if (monthType !== month) {
       functionsByMonth[month](0);
       setMonthType(month);
@@ -271,6 +313,15 @@ const Reports = ({ socket }) => {
             <option value="any" selected={monthType === "any"}>
               All
             </option>
+            <option value="today" selected={monthType === "today"}>
+              Today
+            </option>
+            <option value="tomorrow" selected={monthType === "tomorrow"}>
+              Tomorrow
+            </option>
+            <option value="thisWeek" selected={monthType === "thisWeek"}>
+              This Week
+            </option>
             <option value="current" selected={monthType === "current"}>
               Current month
             </option>
@@ -279,6 +330,9 @@ const Reports = ({ socket }) => {
             </option>
             <option value="prev" selected={monthType === "prev"}>
               Prev Month
+            </option>
+            <option value="thisYear" selected={monthType === "thisYear"}>
+              This Year
             </option>
           </select>
           <CSVLink
