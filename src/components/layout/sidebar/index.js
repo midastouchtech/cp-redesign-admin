@@ -107,12 +107,12 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
               Reports
             </Link>
           </li>
-          <li className="has-arrow ai-icon" onClick={toggleOpen}>
+          {/* <li className="has-arrow ai-icon" onClick={toggleOpen}>
             <Link to="/profile" class="has-arrow ai-icon" aria-expanded="false">
               <MdPerson />
               Profile
             </Link>
-          </li>
+          </li> */}
         </ul>
 
         <Link to="appointment/create" class="btn btn-sm mt-3 btn-outline-primary ml-3" data-toggle="modal" data-target="#addOrderModalside" onClick={toggleOpen}>+ New Appointment</Link>
