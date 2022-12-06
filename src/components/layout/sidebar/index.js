@@ -102,9 +102,9 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
             </Link>
           </li>
           <li onClick={toggleOpen}>
-            <Link to="/doctors" class="has-arrow ai-icon" aria-expanded="false">
+            <Link to="/reports" class="has-arrow ai-icon" aria-expanded="false">
               <MdHealthAndSafety />
-              Doctors
+              Reports
             </Link>
           </li>
           <li className="has-arrow ai-icon" onClick={toggleOpen}>

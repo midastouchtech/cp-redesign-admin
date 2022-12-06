@@ -27,6 +27,7 @@ import  AppointmentQuotation from "./views/appointments/appointment/quote";
 import  Login from "./views/login";
 import  Logout from "./views/logout";
 import Reset from "./views/reset";
+import Reports from "./views/reports"
 
 import "./style.css"
 
@@ -92,6 +93,10 @@ const Main = () => {
           <Route
             path="/appointments"
             element={<Appointments socket={socket} />}
+          />
+          <Route
+            path="/reports"
+            element={<Reports socket={socket} />}
           />
           <Route path="/companies" element={<Companies socket={socket} />} />
           <Route path="/clients" element={<Clients socket={socket} />} />
