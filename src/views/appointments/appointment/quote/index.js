@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BasicDocument from "./BasicDocument";
 import { MEDICAL_SERVICES } from "../../../../config";
-import { keys } from "ramda";
+import { keys, values } from "ramda";
 import styled from "styled-components";
 import html2canvas from "html2canvas";
 import jspdf from "jspdf";
@@ -63,6 +63,7 @@ function App({ socket }) {
   const [company, setCompany] = useState({});
   const [disableButton, setButtonDisabled] = useState(false);
   const [status, setStatus] = useState("Email Invoice");
+  const [serviceCounts , setServiceCounts] = useState({});
 
   const savetopdf = () => {
     window.scrollTo(0, 0);
@@ -138,42 +139,33 @@ function App({ socket }) {
         },
         []
       );
-      const services = keys(MEDICAL_SERVICES).reduce((accx, service) => {
-        const filteredServices = allServices.filter((s) => s.id === service);
-        const reducedPriceFromFilteredServices = filteredServices.reduce(
-          (acc, service) => {
-            return acc + service.price;
-          },
-          0
-        );
-
-        if (filteredServices.length > 0) {
-          return [
-            ...accx,
-            {
-              id: service,
-              price: reducedPriceFromFilteredServices,
-              filter: filteredServices,
-            },
-          ];
-        }
-        return accx;
-      }, []);
+      console.log(allServices);
+      
 
       //console.log(services);
-      const servicesPrice = services.reduce((acc, service) => {
+      const servicesPrice = allServices.reduce((acc, service) => {
         return acc + service.price;
       }, 0);
+      const serviceCounts = allServices.reduce((acc, service) => {
+        if (acc[service.id]) {
+          acc[service.id] = acc[service.id] + 1;
+        } else {
+          acc[service.id] = 1;
+        }
+        return acc;
+      }, {});
+
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           return employee?.sites ? acc + employee?.sites?.length * 35 : acc;
         },
         0
       );
-      //console.log(sitesPrices);
+      console.log(serviceCounts);
       setServicesPrice(servicesPrice);
+      setServiceCounts(serviceCounts);
       setSitesPrice(sitesPrices);
-      setServices(services);
+      setServices(allServices);
       if (appointment.invoice) {
         setButtonDisabled(true);
       }
@@ -268,11 +260,15 @@ function App({ socket }) {
                   <p>Reference: {company?.details?.name}</p>
                 </div>
                 <div class="col-md-6 text-left">
-                  <small>Bill To: </small>
+                  <hr />
+                  <small>Bill To </small>
                   <h4>
                     <strong>{company?.details?.name}</strong>
                   </h4>
                   <p>{company?.details?.physicalAddress}</p>
+                  <hr />
+                  <small>Appointment ID</small> 
+                  <h4>{appointment.id}</h4>
                 </div>
               </div>
               <div class="row">
@@ -296,16 +292,16 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         <h5>Service prices</h5>
-                        {services?.map((service) => (
+                        {values(MEDICAL_SERVICES).map((service) => (
                           <tr>
                             <td class="col-md-8">
-                              {MEDICAL_SERVICES[service.id].title}
+                              {service.title}
                             </td>
                             <td
                               class="col-md-1"
                               style={{ textAlign: "center" }}
                             >
-                              {service.filter.length}
+                              {serviceCounts[service.id]}
                             </td>
                             <td class="col-md-5 text-right">
                               {formatPrice(service.price)}

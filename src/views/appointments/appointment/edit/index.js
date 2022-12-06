@@ -97,28 +97,7 @@ function App({ socket }) {
       },
       []
     );
-    const services = keys(MEDICAL_SERVICES).reduce((accx, service) => {
-      const filteredServices = allServices.filter((s) => s.id === service);
-      const reducedPriceFromFilteredServices = filteredServices.reduce(
-        (acc, service) => {
-          return acc + service.price;
-        },
-        0
-      );
-
-      if (filteredServices.length > 0) {
-        return [
-          ...accx,
-          {
-            id: service,
-            price: reducedPriceFromFilteredServices,
-            filter: filteredServices,
-          },
-        ];
-      }
-      return accx;
-    }, []);
-    const servicesPrice = services.reduce((acc, service) => {
+    const servicesPrice = allServices.reduce((acc, service) => {
       return acc + service.price;
     }, 0);
     const sitesPrice = appointment?.details?.employees?.reduce(
