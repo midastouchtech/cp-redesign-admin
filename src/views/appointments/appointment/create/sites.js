@@ -13,7 +13,8 @@ const Sites = ({ employeeSites, onChange }) => {
     setSite("");
   };
 
-  const setSiteHassAccessCard = (id, hasAccessCard) => {
+  const setSiteHassAccessCard = (id, hasAccessCard) => (e) => {
+    console.log("value", e.target.value);
     console.log("changing access card for site", id, hasAccessCard);
     console.log("old sites", employeeSites);
     const sites = employeeSites.map((site) => {
@@ -47,7 +48,7 @@ const Sites = ({ employeeSites, onChange }) => {
               </thead>
               <tbody>
                 {employeeSites.map((site) => (
-                  <tr key={site.id}>
+                  <tr key={site.id} >
                     <td>{site.name}</td>
                     <td>
                       <div class="custom-control custom-checkbox checkbox-warning">
@@ -55,17 +56,15 @@ const Sites = ({ employeeSites, onChange }) => {
                           type="checkbox"
                           class="custom-control-input"
                           checked={site.hasAccessCard}
-                          onChange={(e) => { 
-                            setSiteHassAccessCard(site.id, !site.hasAccessCard);
-                          }}
-                          id="customCheckBox4"
-                          required=""
+                          value={site.id}                          
+                          id={site.id}
+                          onClick={setSiteHassAccessCard(site.id, !site.hasAccessCard)}
                         />
                         <label
                           class="custom-control-label"
-                          for="customCheckBox4"
+                          for={site.id}
                         >
-                          Has Card?
+                          Has card?
                         </label>
                       </div>
                     </td>
