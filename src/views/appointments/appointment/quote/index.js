@@ -7,6 +7,7 @@ import styled from "styled-components";
 import html2canvas from "html2canvas";
 import jspdf from "jspdf";
 import axios from "axios";
+import { v4 as uuid } from 'uuid';
 
 const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
@@ -53,6 +54,7 @@ const StyedContainer = styled.div`
 
 function App({ socket }) {
   let params = useParams();
+  const invoiceId = uuid();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({});
@@ -108,6 +110,7 @@ function App({ socket }) {
             socket.emit("SEND_INVOICE", {
               appointment,
               url: response.data.secure_url,
+              invoiceId
             });
             setStatus("Sending...");
             socket.on("RECEIVE_SAVE_INVOICE_SUCCESS", (data) => {
@@ -246,29 +249,25 @@ function App({ socket }) {
                   <p>Fax 013 658 5036</p>
                 </div>
               </div>
-              <br />
+              <hr />
               <div class="row details-row">
                 <div class="col-md-6 text-left">
-                  <h4>
-                    <strong>Banking Details</strong>
-                  </h4>
-                  <p>ClinicPlus (PTY)LTD</p>
-                  <p>Bank: ABSA</p>
-                  <p>Account Number: 4069672703</p>
-                  <p>Account Type: Cheque</p>
-                  <p>Branch: 632005</p>
-                  <p>Reference: {company?.details?.name}</p>
+                  <h4>Purchase Order Number</h4>
+                  <p className="mb-3"><strong >{appointment?.details?.purchaseOrderNumber}</strong></p>
+                  <h4>Invoice Number</h4>
+                  <p className="mb-3"><strong >{appointment.invoice? appointment.invoice.id : invoiceId}</strong></p>
+                  <h4>Terms</h4>
+                  <p><strong>E&O E. Errors and ommisions expected</strong></p>
                 </div>
                 <div class="col-md-6 text-left">
-                  <hr />
-                  <small>Bill To </small>
-                  <h4>
+                  <h4>Bill To </h4>
+                  <strong>
                     <strong>{company?.details?.name}</strong>
-                  </h4>
+                  </strong>
                   <p>{company?.details?.physicalAddress}</p>
                   <hr />
-                  <small>Appointment ID</small> 
-                  <h4>{appointment.id}</h4>
+                  <h4>Appointment ID</h4> 
+                  <p><strong>{appointment.id}</strong></p>
                 </div>
               </div>
               <div class="row">
@@ -292,7 +291,7 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         <h5>Service prices</h5>
-                        {values(MEDICAL_SERVICES).map((service) => (
+                        {values(MEDICAL_SERVICES).map((service) => serviceCounts[service.id] ? (
                           <tr>
                             <td class="col-md-8">
                               {service.title}
@@ -307,7 +306,7 @@ function App({ socket }) {
                               {formatPrice(service.price)}
                             </td>
                           </tr>
-                        ))}
+                        ): "")}
                         <br />
                         <h5>Site Prices</h5>
                         {appointment?.details?.employees?.map((employee) => (
@@ -347,6 +346,19 @@ function App({ socket }) {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+              <div class="row details-row">
+              <div class="col-md-6 text-left">
+                  <h4>
+                    <strong>Banking Details</strong>
+                  </h4>
+                  <p>ClinicPlus (PTY)LTD</p>
+                  <p>Bank: ABSA</p>
+                  <p>Account Number: 4069672703</p>
+                  <p>Account Type: Cheque</p>
+                  <p>Branch: 632005</p>
+                  <p>Reference: {company?.details?.name}</p>
                 </div>
               </div>
             </div>
