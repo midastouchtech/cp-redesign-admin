@@ -33,6 +33,10 @@ function App({ socket }) {
     setDBUser(assocPath(["details", key], value, user));
   };
 
+  const setPassword = (key, value) => {
+    setDBUser(assocPath(["password"], value, user));
+  };
+
   const resetDBUserToOriginal = () => {
     setDBUser(originalUser);
   };
@@ -135,6 +139,18 @@ function App({ socket }) {
                         type="email"
                         onChange={(e) => setDetail("email", e.target.value)}
                         value={user?.details?.email}
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">Password</label>
+                    <div class="col-sm-8">
+                      <input
+                        class="form-control input-default"
+                        placeholder="enter password"
+                        type="email"
+                        onChange={(e) => setPassword("password", e.target.value)}
+                        value={user?.password}
                       />
                     </div>
                   </div>

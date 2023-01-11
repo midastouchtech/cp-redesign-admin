@@ -16,6 +16,30 @@ const Admins = ({ socket }) => {
   const [admins, setAdmins] = useState(null);
   const [originalAdmins, setoriginalAdmins] = useState(null);
   const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+
+  const handleSearch = async () => {
+    setLoading(true);
+    setNotFound(false);
+    socket.emit("SEARCH_ADMIN", { term: searchTerm });
+    socket.on("RECEIVE_SEARCHED_ADMIN", (data) => {
+      setAdmins(data);
+      setLoading(false);
+    });
+    socket.on("RECEIVE_SEARCHED_ADMIN_NOT_FOUND", (data) => {
+      setAdmins(originalAdmins);
+      setNotFound(true);
+      setLoading(false);
+    });
+  };
+
+  const clearSearch = () => {
+    setAdmins(originalAdmins);
+    setSearchTerm("");
+    setNotFound(false);
+  }
 
   const getPageAdmins = (p) => {
       socket.emit("GET_NEXT_PAGE_CLIENTS", { page: p, role:"admin" });
@@ -40,6 +64,38 @@ const Admins = ({ socket }) => {
           <span className="fs-14">All active administrators listed here </span>
         </div>
       </div>
+      <div className="row mb-3">
+        <div className="col-10">
+          <input
+            type="text"
+            className="form-control input-default"
+            placeholder="Enter user name"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
+          />
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={handleSearch}>Search</button>
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={clearSearch}>Clear</button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-12 d-flex justify-content-center">
+        {loading && (
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Searching for administrator</span>
+          </div>
+        )}
+        </div>
+        {notFound && (
+          <div className="alert alert-danger" role="alert">
+            Admin could not be found.
+          </div>
+        )}
+      </div>
+      <br />
       <div className="row">
         <div className="col-xl-12">
           <div className="tab-content">
