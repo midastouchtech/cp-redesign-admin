@@ -2,7 +2,7 @@ import { isNil, isEmpty, repeat, insert } from "ramda";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import {CSVLink, CSVDownload} from 'react-csv';
+import { CSVLink, CSVDownload } from "react-csv";
 
 const getBadgeclassName = (status) => {
   switch (status) {
@@ -31,28 +31,54 @@ const Appointments = ({ socket }) => {
   const [monthType, setMonthType] = useState("any");
   const [type, setStatusType] = useState("all");
   const [page, setPage] = useState(0);
-  const [currentMonthPageCount, setCurrentMonthPageCount] = useState(0);
-  const [nextMonthPageCount, setNextMonthPageCount] = useState(0);
-  const [prevMonthPageCount, setPrevMonthPageCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
-  const csvData = appointments ? insert(0,[
-    "appointmentId",
-    "userName",
-    "purchaseOrderNumber",
-    "companyName",
-    "location",
-    "appointmentDate",
-    "status",
-  ],appointments?.map((appointment) => [
-    appointment?.id,
-    appointment?.usersWhoCanManage[0].name,
-    appointment?.details?.purchaseOrderNumber,
-    appointment?.details?.company?.name,
-    appointment?.details?.clinic,
-    appointment?.details?.date,
-    appointment?.status,
-  ])) : []
-    console.log("csvData", csvData);
+  const handleSearch = async () => {
+    setLoading(true);
+    setNotFound(false);
+    socket.emit("SEARCH_APPOINTMENT", { term: searchTerm });
+    socket.on("RECEIVE_SEARCHED_APPOINTMENT", (data) => {
+      setAppointments(data);
+      setLoading(false);
+    });
+    socket.on("RECEIVE_SEARCHED_APPOINTMENT_NOT_FOUND", (data) => {
+      setAppointments(originalAppointments);
+      setNotFound(true);
+      setLoading(false);
+    });
+  };
+
+  const clearSearch = () => {
+    setAppointments(originalAppointments);
+    setSearchTerm("");
+  }
+
+  const csvData = appointments
+    ? insert(
+        0,
+        [
+          "appointmentId",
+          "userName",
+          "purchaseOrderNumber",
+          "companyName",
+          "location",
+          "appointmentDate",
+          "status",
+        ],
+        appointments?.map((appointment) => [
+          appointment?.id,
+          appointment?.usersWhoCanManage[0].name,
+          appointment?.details?.purchaseOrderNumber,
+          appointment?.details?.company?.name,
+          appointment?.details?.clinic,
+          appointment?.details?.date,
+          appointment?.status,
+        ])
+      )
+    : [];
 
   const getAllAppointments = () => {
     socket.emit("GET_ALL_APPOINTMENTS");
@@ -210,10 +236,48 @@ const Appointments = ({ socket }) => {
               Prev Month
             </option>
           </select>
-          <CSVLink data={csvData} filename={"report.csv"} className="btn btn-primary text-nowrap"> Generate Report</CSVLink>
-
+          <CSVLink
+            data={csvData}
+            filename={"report.csv"}
+            className="btn btn-primary text-nowrap"
+          >
+            {" "}
+            Generate Report
+          </CSVLink>
         </div>
       </div>
+      <div className="row mb-3">
+        <div className="col-10">
+          <input
+            type="text"
+            className="form-control input-default"
+            placeholder="Enter company name, user name or appointment id"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
+          />
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={handleSearch}>Search</button>
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={clearSearch}>Clear</button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-12 d-flex justify-content-center">
+        {loading && (
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Searching for appointment</span>
+          </div>
+        )}
+        </div>
+        {notFound && (
+          <div className="alert alert-danger" role="alert">
+            Appointment could not be found.
+          </div>
+        )}
+      </div>
+      <br />
       <div className="row">
         <div className="col-xl-12">
           <div className="tab-content">
