@@ -29,6 +29,9 @@ const Companies = ({ socket }) => {
   const [companies, setCompanies] = useState(null);
   const [originalCompanies, setOriginalCompanies] = useState(null);
   const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   const getPageCompanies = (p) => {
       socket.emit("GET_NEXT_PAGE_COMPANIES", { page: p});
@@ -43,6 +46,27 @@ const Companies = ({ socket }) => {
     getPageCompanies(0);
   }
 
+  const handleSearch = async (term) => {
+    setLoading(true);
+    setNotFound(false);
+    socket.emit("SEARCH_COMPANY", {term: searchTerm});
+    socket.on("RECEIVE_SEARCHED_COMPANY", (data) => {
+      setCompanies(data);
+      setLoading(false);
+    });
+    socket.on("RECEIVE_SEARCHED_COMPANY_NOT_FOUND", (data) => {
+      setCompanies([]);
+      setNotFound(true);
+      setLoading(false);
+    });
+  };
+
+  const clearSearch = () => {
+    setCompanies(originalCompanies);
+    setSearchTerm("");
+    setNotFound(false);
+  }
+
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
@@ -53,6 +77,38 @@ const Companies = ({ socket }) => {
           <span className="fs-14">All active companies listed here </span>
         </div>
       </div>
+      <div className="row mb-3">
+        <div className="col-10">
+          <input
+            type="text"
+            className="form-control input-default"
+            placeholder="Enter company name"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
+          />
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={handleSearch}>Search</button>
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={clearSearch}>Clear</button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-12 d-flex justify-content-center">
+        {loading && (
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Searching for appointment</span>
+          </div>
+        )}
+        </div>
+        {notFound && (
+          <div className="alert alert-danger" role="alert">
+            Company could not be found.
+          </div>
+        )}
+      </div>
+      <br />
       <div className="row">
         <div className="col-xl-12">
           <div className="tab-content">

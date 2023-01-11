@@ -54,6 +54,7 @@ const Appointments = ({ socket }) => {
   const clearSearch = () => {
     setAppointments(originalAppointments);
     setSearchTerm("");
+    setNotFound(false);
   }
 
   const csvData = appointments

@@ -16,6 +16,9 @@ const Companies = ({ socket }) => {
   const [clients, setClients] = useState(null);
   const [originalClients, setOriginalClients] = useState(null);
   const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   const getPageClients = (p) => {
       socket.emit("GET_NEXT_PAGE_CLIENTS", { page: p, role:"client"});
@@ -29,6 +32,27 @@ const Companies = ({ socket }) => {
   if (socket && !clients) {
     getPageClients(0);
   }
+  
+  const handleSearch = async () => {
+    setLoading(true);
+    setNotFound(false);
+    socket.emit("SEARCH_USER", {term: searchTerm});
+    socket.on("RECEIVE_SEARCHED_USER", (data) => {
+      setClients(data);
+      setLoading(false);
+    });
+    socket.on("RECEIVE_SEARCHED_USER_NOT_FOUND", (data) => {
+      setClients([]);
+      setNotFound(true);
+      setLoading(false);
+    });
+  };
+
+  const clearSearch = () => {
+    setClients(originalClients);
+    setSearchTerm("");
+    setNotFound(false);
+  }
 
   return (
     <div className="container-fluid">
@@ -40,6 +64,38 @@ const Companies = ({ socket }) => {
           <span className="fs-14">All active clients listed here </span>
         </div>
       </div>
+      <div className="row mb-3">
+        <div className="col-10">
+          <input
+            type="text"
+            className="form-control input-default"
+            placeholder="Enter user name"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
+          />
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={handleSearch}>Search</button>
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={clearSearch}>Clear</button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-12 d-flex justify-content-center">
+        {loading && (
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Searching for appointment</span>
+          </div>
+        )}
+        </div>
+        {notFound && (
+          <div className="alert alert-danger" role="alert">
+            Client could not be found.
+          </div>
+        )}
+      </div>
+      <br />
       <div className="row">
         <div className="col-xl-12">
           <div className="tab-content">
@@ -69,8 +125,8 @@ const Companies = ({ socket }) => {
                           <td>{client?.details.name}</td>
                           <td>{client?.details.email}</td>
                           <td>{client?.details.cell}</td>
-                          <td>{client?.companiesManaging.length}</td>
-                          <td>{client?.appointmentsManaging.length}</td>
+                          <td>{client?.companiesManaging?.length}</td>
+                          <td>{client?.appointmentsManaging?.length}</td>
                           <td>{client?.isSuspended ?  "Yes" : "No"}</td>
                           <td>
                             <Link to={`/client/edit/${client?.id}`}  className="btn btn-xs btn-primary text-nowrap">                              
