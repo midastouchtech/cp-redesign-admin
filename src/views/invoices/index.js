@@ -32,12 +32,38 @@ const NoAppointments = styled.div`
 
 const Invoices = ({ socket }) => {
   const [invoices, setInvoices] = useState(null);
+  const [originalInvoices, setOriginalInvoices] = useState([])
   const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+
+  const handleSearch = async () => {
+    setLoading(true);
+    setNotFound(false);
+    socket.emit("SEARCH_INVOICE", { term: searchTerm });
+    socket.on("RECEIVE_SEARCHED_INVOICE", (data) => {
+      setInvoices(data);
+      setLoading(false);
+    });
+    socket.on("RECEIVE_SEARCHED_INVOICE_NOT_FOUND", (data) => {
+      setInvoices(originalInvoices);
+      setNotFound(true);
+      setLoading(false);
+    });
+  };
+
+  const clearSearch = () => {
+    setInvoices(originalInvoices);
+    setSearchTerm("");
+    setNotFound(false);
+  }
 
   const getAllInvoices = () => {
     socket.emit("GET_ALL_INVOICES");
     socket.on("RECEIVE_ALL_INVOICES", (data) => {
       setInvoices(data);
+      setOriginalInvoices(data)
     });
   };
 
@@ -49,6 +75,7 @@ const Invoices = ({ socket }) => {
     socket.emit("GET_NEXT_PAGE_INVOICES", { page: p });
     socket.on("RECEIVE_NEXT_PAGE_INVOICES", (data) => {
       setInvoices(data);
+      setOriginalInvoices(data)
       setPage(p);
     });
   };
@@ -63,6 +90,38 @@ const Invoices = ({ socket }) => {
           <span className="fs-14"> All invoices sent listed here </span>
         </div>
       </div>
+      <div className="row mb-3">
+        <div className="col-10">
+          <input
+            type="text"
+            className="form-control input-default"
+            placeholder="Enter user name"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
+          />
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={handleSearch}>Search</button>
+        </div>
+        <div className="col-1">
+          <button type="button" class="btn btn-primary" onClick={clearSearch}>Clear</button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-12 d-flex justify-content-center">
+        {loading && (
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Searching for appointment</span>
+          </div>
+        )}
+        </div>
+        {notFound && (
+          <div className="alert alert-danger" role="alert">
+            Invoice could not be found.
+          </div>
+        )}
+      </div>
+      <br />
       <div className="row">
         <div className="col-xl-12">
           <div className="tab-content">
