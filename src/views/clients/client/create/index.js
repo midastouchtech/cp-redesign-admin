@@ -289,15 +289,13 @@ function App({ socket }) {
               >
                 Add Company
               </button>
-              {show && (
-                <CompanySearch
+              <CompanySearch
                   name="comsearch"
                   socket={socket}
                   show={show}
                   close={() => setShowCompanySearch(false)}
                   onCompanySelect={selectCompany}
                 />
-              )}
             </div>
             <div class="card-body p-0">
               <div class="table-responsive fs-14">

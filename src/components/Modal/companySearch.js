@@ -29,7 +29,6 @@ const CompanySearch = ({prefilledSearchTerm, clearPrefilledSearchTerm, name, onC
   };
 
   const clearAndClose = () => {
-    clearPrefilledSearchTerm()
     setSearchTerm("");
     setResults([]);
     close();
@@ -78,7 +77,10 @@ const CompanySearch = ({prefilledSearchTerm, clearPrefilledSearchTerm, name, onC
           <button
             type="button"
             className="list-group-item list-group-item-action"
-            onClick={() => onCompanySelect(result)}
+            onClick={() => {
+              onCompanySelect(result)
+              clearAndClose()
+            }}
           >
             {result?.details?.name}
             <span className="btn btn-primary float-right">Select</span>
