@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { CSVLink, CSVDownload } from "react-csv";
+import moment from "moment";
 
 const getBadgeclassName = (status) => {
   switch (status) {
@@ -35,6 +36,8 @@ const Appointments = ({ socket }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('')
 
   const handleSearch = async () => {
     setLoading(true);
@@ -55,6 +58,16 @@ const Appointments = ({ socket }) => {
     setAppointments(originalAppointments);
     setSearchTerm("");
     setNotFound(false);
+  };
+
+  const handleFilter = () => {
+    const newAppointments = appointments.filter(app => {
+      const bookedFor = moment(app?.details?.date)
+      const from = moment(fromDate).startOf('day')
+      const to = moment(toDate).endOf('day')
+      return bookedFor.isBetween(from, to)
+    })
+    setAppointments(newAppointments)
   }
 
   const csvData = appointments
@@ -248,29 +261,50 @@ const Appointments = ({ socket }) => {
         </div>
       </div>
       <div className="row mb-3">
-        <div className="col-10">
+        <div className="col-md-4 col-sm-12">
           <input
             type="text"
-            className="form-control input-default"
+            className="form-control input-default mb-2"
             placeholder="Enter company name, user name or appointment id"
             onChange={(e) => setSearchTerm(e.target.value)}
             value={searchTerm}
           />
         </div>
-        <div className="col-1">
-          <button type="button" class="btn btn-primary" onClick={handleSearch}>Search</button>
+        <div className="col-md-1 col-sm-12">
+          <button type="button" class="btn btn-primary btn-block mb-2" onClick={handleSearch}>
+            Search
+          </button>
         </div>
-        <div className="col-1">
-          <button type="button" class="btn btn-primary" onClick={clearSearch}>Clear</button>
+        <div className="col-md-1 col-sm-12">
+          <button type="button" class="btn btn-primary btn-block mb-3" onClick={clearSearch}>
+            Clear
+          </button>
+        </div>
+        <div className="col-md-4 col-sm-12">
+          <div class="input-group input-daterange mb-2">
+            <input type="date" class="form-control" value={fromDate} onChange={e => setFromDate(e.target.value)}/>
+            <div class="input-group-addon btn">to</div>
+            <input type="date" class="form-control" value={toDate} onChange={e => setToDate(e.target.value)}/>
+          </div>
+        </div>
+        <div className="col-md-1 col-sm-12">
+          <button type="button" class="btn btn-primary btn-block mb-2" onClick={handleFilter}>
+            Filter
+          </button>
+        </div>
+        <div className="col-md-1 col-sm-12">
+          <button type="button" class="btn btn-primary btn-block mb-3" onClick={clearSearch}>
+            Clear
+          </button>
         </div>
       </div>
       <div className="row">
         <div className="col-12 d-flex justify-content-center">
-        {loading && (
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Searching for appointment</span>
-          </div>
-        )}
+          {loading && (
+            <div className="spinner-border" role="status">
+              <span className="sr-only">Searching for appointment</span>
+            </div>
+          )}
         </div>
         {notFound && (
           <div className="alert alert-danger" role="alert">
