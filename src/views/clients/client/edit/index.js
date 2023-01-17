@@ -163,8 +163,7 @@ function App({ socket }) {
                             setPassword("password", e.target.value)
                           }
                           value={user?.password}
-                        />
-                        
+                        />                        
                           <span onClick={togglePasswordType} class="btn btn-primary" id="basic-addon2">
                             See Password
                           </span>
