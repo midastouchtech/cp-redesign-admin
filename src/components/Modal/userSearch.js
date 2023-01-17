@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import SearchModal from ".";
 import { useNavigate } from "react-router-dom";
 
-const UserSearch = ({name, onUserSelect, socket, show, close }) => {
+const UserSearch = ({ name, onUserSelect, socket, show, close }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ const UserSearch = ({name, onUserSelect, socket, show, close }) => {
     setLoading(true);
     setNotFound(false);
     setResults([]);
-    socket.emit("SEARCH_USER", {term: searchTerm});
+    socket.emit("SEARCH_USER", { term: searchTerm });
     socket.on("RECEIVE_SEARCHED_USER", (data) => {
       setResults(data);
       setLoading(false);
@@ -29,10 +29,15 @@ const UserSearch = ({name, onUserSelect, socket, show, close }) => {
     setSearchTerm("");
     setResults([]);
     close();
-    };
+  };
 
   return (
-    <SearchModal name={name} title="User Search" show={show} handleClose={clearAndClose}>
+    <SearchModal
+      name={name}
+      title="User Search"
+      show={show}
+      handleClose={clearAndClose}
+    >
       <div className="input-group mb-3">
         <input
           type="text"
@@ -59,19 +64,35 @@ const UserSearch = ({name, onUserSelect, socket, show, close }) => {
         )}
         {notFound && (
           <div className="alert alert-danger row" role="alert">
-          <p className="col-8">No results found! </p>
-          <button className="btn btn-primary col-4" onClick={() => navigate('/client/create')}> Create </button>
-          
-        </div>
+            <p className="col-8">No results found! </p>
+            <button
+              className="btn btn-primary col-4"
+              onClick={() => navigate("/client/create")}
+            >
+              {" "}
+              Create{" "}
+            </button>
+          </div>
         )}
         {results.map((result) => (
-          <button
-            type="button"
-            className="list-group-item list-group-item-action"
-            onClick={() => onUserSelect(result)}
-          >
-            {result?.details?.name}
-          </button>
+          <div class="input-group mb-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Recipient's username"
+              value={result?.details?.name}
+              disabled
+            />
+            <div
+              class="input-group-append"
+              onClick={() => {
+                onUserSelect(result);
+                clearAndClose();
+              }}
+            >
+              <span class="btn btn-primary">Add</span>
+            </div>
+          </div>
         ))}
       </div>
     </SearchModal>
