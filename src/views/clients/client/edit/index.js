@@ -14,7 +14,16 @@ function App({ socket }) {
   const [user, setDBUser] = useState({});
   const [originalUser, setOriginalUser] = useState({});
   const [hasUpdatedUser, setHasUpdatedUser] = useState(false);
+  const [passwordType, setPasswordType] = useState("password")
 
+  const togglePasswordType = () => {
+    if(passwordType === "password"){
+      setPasswordType("text")
+    }
+    else{
+      setPasswordType("password")
+    }
+  }
   if (socket && isLoading) {
     socket.emit("GET_USER", { id: params.clientId });
     socket.on("RECEIVE_USER", (client) => {
@@ -145,13 +154,21 @@ function App({ socket }) {
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">Password</label>
                     <div class="col-sm-8">
-                      <input
-                        class="form-control input-default"
-                        placeholder="enter password"
-                        type="email"
-                        onChange={(e) => setPassword("password", e.target.value)}
-                        value={user?.password}
-                      />
+                      <div class="input-group mb-3">
+                        <input
+                          class="form-control input-default"
+                          placeholder="enter password"
+                          type={passwordType}
+                          onChange={(e) =>
+                            setPassword("password", e.target.value)
+                          }
+                          value={user?.password}
+                        />
+                        
+                          <span onClick={togglePasswordType} class="btn btn-primary" id="basic-addon2">
+                            See Password
+                          </span>
+                      </div>
                     </div>
                   </div>
                   <div class="form-group row">
