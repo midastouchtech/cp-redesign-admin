@@ -160,7 +160,7 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites ? acc + employee?.sites?.length * 35 : acc;
+          return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 35 : acc;
         },
         0
       );
@@ -316,12 +316,12 @@ function App({ socket }) {
                               class="col-md-1"
                               style={{ textAlign: "center" }}
                             >
-                              {employee?.sites ? employee?.sites?.length : 0}
+                              {employee?.sites && employee?.sites.length > 0 ? employee?.sites?.length : 0}
                             </td>
                             <td class="col-md-5 text-right">
                               {formatPrice(
                                 employee?.sites
-                                  ? employee?.sites?.length * 35
+                                  ? (employee?.sites?.length - 1) * 35
                                   : 0
                               )}
                             </td>

@@ -46,7 +46,7 @@ const calculateEmployeeCost = (employee) => {
       );
   console.log("Services cost", servicesCost);
   console.log("Sites", employee?.sites);
-  const sitesCost = employee?.sites ? employee?.sites?.length * 35 : 0;
+  const sitesCost = employee?.sites && employee?.sites.length > 0 ? (employee?.sites?.length - 1) * 35 : 0;
   console.log("Sites cost", sitesCost);
   const totalCost = servicesCost + sitesCost;
   console.log("Total cost", totalCost);
