@@ -37,7 +37,6 @@ const Appointments = ({ socket }) => {
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('')
 
   const handleSearch = async () => {
     setLoading(true);
@@ -62,10 +61,8 @@ const Appointments = ({ socket }) => {
 
   const handleFilter = () => {
     const newAppointments = appointments.filter(app => {
-      const bookedFor = moment(app?.details?.date)
-      const from = moment(fromDate).startOf('day')
-      const to = moment(toDate).endOf('day')
-      return bookedFor.isBetween(from, to)
+      const bookedFor = app?.details?.date
+      return bookedFor === fromDate;
     })
     setAppointments(newAppointments)
   }
@@ -283,8 +280,6 @@ const Appointments = ({ socket }) => {
         <div className="col-md-4 col-sm-12">
           <div class="input-group input-daterange mb-2">
             <input type="date" class="form-control" value={fromDate} onChange={e => setFromDate(e.target.value)}/>
-            <div class="input-group-addon btn">to</div>
-            <input type="date" class="form-control" value={toDate} onChange={e => setToDate(e.target.value)}/>
           </div>
         </div>
         <div className="col-md-1 col-sm-12">
