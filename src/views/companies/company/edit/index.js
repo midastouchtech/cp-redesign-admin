@@ -12,6 +12,7 @@ import {
   without,
   insert,
   equals,
+  pipe
 } from "ramda";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
+import UserSearch from "../../../../components/Modal/userSearch";
 
 
 function App({ socket }) {
@@ -29,6 +31,7 @@ function App({ socket }) {
   const [company, setCompany] = useState({});
   const [originalCompany, setOriginalCompany] = useState({});
   const [hasUpdatedCompany, sethasUpdatedCompany] = useState(false);
+  const [show, setShow] = useState(false);
 
   if (socket && isLoading) {
     socket.emit("GET_COMPANY", { id: params.companyId });
@@ -63,6 +66,37 @@ function App({ socket }) {
     });
   };
 
+  const selectUser = (user) => {
+    //console.log("selecting user", user);
+    const companyAlreadyHasUser = any(
+      (u) => u.id === user.id,
+      company.usersWhoCanManage
+    );
+    if (companyAlreadyHasUser) {
+      return;
+    }
+    const newCompany = pipe(
+      assocPath(
+        ["usersWhoCanManage"],
+        [
+          ...company?.usersWhoCanManage,
+          { id: user?.id, name: user?.details?.name },
+        ]
+      )
+    )(company);
+    setCompany(newCompany);
+  };
+
+  const removeUser = (user) => {
+    //console.log("removing user", user);
+    const newCompany = pipe(
+      assocPath(
+        ["usersWhoCanManage"],
+        reject((u) => u.id === user.id, company.usersWhoCanManage)
+      )
+    )(user);
+    setCompany(newCompany);
+  };
   useEffect(() => {
     const hasUpdatedCompany = !equals(company, originalCompany);
     sethasUpdatedCompany(hasUpdatedCompany);
@@ -244,7 +278,19 @@ function App({ socket }) {
         </div>
         <div class="col-xl-12">
           <div class="card">
-            <div class="card-header">Users who manage this company</div>
+            <div class="card-header">
+              Users who manage this company
+              <button className="btn btn-primary" onClick={() => setShow(true)}>
+                Add User
+              </button>
+            </div>
+            <UserSearch
+              show={show}
+              setShow={setShow}
+              socket={socket}
+              close={() => setShow(false)}
+              onUserSelect={selectUser}
+            />
             <div class="card-body p-0">
               <div class="table-responsive fs-14">
                 <table class="table">
@@ -264,9 +310,7 @@ function App({ socket }) {
                       <tr>
                         <td>{c?.id}</td>
                         <td>{c?.name}</td>
-                        <td>
-                          <Link to={`/client/edit/${c?.id}`}> Open </Link>
-                        </td>
+                        <td  onClick={() => removeUser(c)}><button className="btn btn-primary">Remove</button></td>
                       </tr>
                     ))}
                   </tbody>
