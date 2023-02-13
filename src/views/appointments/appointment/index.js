@@ -20,16 +20,13 @@ const ChatContainer = styled.div`
     height: 45vh;
     overflow-y: scroll;
   }
-  @media (max-width: 800px) {
-    ${(props) => (props.isOpen ? "display: block" : "display: none")};
+  ${(props) => (props.isOpen ? "display: block" : "display: none")};
     .chatbox {
       position: fixed;
       top: 12vh;
-      left: 0;
       right: 0;
-      width: 100vw;
+      width: 20vw;
     }
-  }
 `;
 
 const StyledImg = styled.img`
@@ -421,7 +418,7 @@ function App({ socket, user }) {
         </div>
         <div class="col-xl-3 col-xxl-4">
           <FloatingButton
-            className="btn btn-primary d-block d-sm-block d-md-none"
+            className="btn btn-primary d-block d-sm-block d-md-block"
             onClick={() => setChatOpen(!chatOpen)}
           >
             {chatOpen ? "Close Messages" : "Open Messages"}
@@ -446,7 +443,7 @@ function App({ socket, user }) {
                           </div>
                           <div class="col-12 d-flex flex-column align-items-center justify-content-center">
                             <button
-                              className="btn btn-primary d-block d-sm-block d-md-none"
+                              className="btn btn-primary d-block d-sm-block d-md-block"
                               onClick={() => setChatOpen(!chatOpen)}
                             >
                               {chatOpen ? "Close" : "Open"}
