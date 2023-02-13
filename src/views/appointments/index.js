@@ -37,7 +37,7 @@ const Appointments = ({ socket }) => {
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [fromDate, setFromDate] = useState('');
-
+  const [pageLimit, setPageLimit] = useState(25);
   const handleSearch = async () => {
     setLoading(true);
     setNotFound(false);
@@ -60,11 +60,10 @@ const Appointments = ({ socket }) => {
   };
 
   const handleFilter = () => {
-    const newAppointments = appointments.filter(app => {
-      const bookedFor = app?.details?.date
-      return bookedFor === fromDate;
-    })
-    setAppointments(newAppointments)
+    socket.emit("GET_APPOINTMENTS_BY_DATE", { date: fromDate });
+    socket.on("RECEIVE_APPOINTMENTS_BY_DATE", (newAppointments) => {
+      setAppointments(newAppointments)
+    })    
   }
 
   const csvData = appointments
@@ -92,7 +91,7 @@ const Appointments = ({ socket }) => {
     : [];
 
   const getAllAppointments = () => {
-    socket.emit("GET_ALL_APPOINTMENTS");
+    socket.emit("GET_ALL_APPOINTMENTS", { pageLimit});
     socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
       setAppointments(data);
       setOriginalAppointments(data);
@@ -169,7 +168,7 @@ const Appointments = ({ socket }) => {
 
   const getPageAppointments = (p) => {
     if (monthType === "any") {
-      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p });
+      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, pageLimit });
       socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
         setAppointments(data);
         setOriginalAppointments(data);
@@ -256,7 +255,29 @@ const Appointments = ({ socket }) => {
             Generate Report
           </CSVLink>
         </div>
+        <div className="d-flex mb-3">
+          <select
+            className="form-control style-2 default-select mr-3"
+            onClick={(e) => { 
+              setPageLimit(e.target.value);
+              getAllAppointments();
+            }}
+          >
+            <option value='25' selected={pageLimit === "25"}>
+              25
+            </option>
+            <option value='50' selected={pageLimit === "50"}>
+              50
+            </option>
+            <option value='100' selected={pageLimit === "100"}>
+              100
+            </option>
+          </select>
       </div>
+      </div>
+
+      
+      
       <div className="row mb-3">
         <div className="col-md-4 col-sm-12">
           <input
