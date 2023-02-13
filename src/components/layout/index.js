@@ -6,10 +6,11 @@ import { connect } from "react-redux";
 import SideBar from "./sidebar";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isNil, isEmpty } from "ramda";
+import { isNil, isEmpty, concat } from "ramda";
 import cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
+import moment from "moment";
 
 const ChildrenContainer = styled.div`
   margin-left: 12rem;
@@ -31,6 +32,8 @@ export const Layout = (props) => {
   const [user, setUser] = React.useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [firstLoad, setFirstLoad] = useState(0);
+  const [latestAppointments, setLatestAppointments] =useState([]);
+  const [latestMessages, setLatestMessages] = useState([]);
   const showLoader = () => {
     setTimeout(() => {
       //console.log("showing loader...");
@@ -64,6 +67,16 @@ export const Layout = (props) => {
       saveUser(u);
       setUser(u);
       socket.off("RECEIVE_USER");
+    });
+    socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
+          setLatestAppointments(appointments);
+          console.log("set latest appointments", appointments)
+          socket.off('RECEIVE_LATEST_APPOINTMENTS')
+        });
+    socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
+      setLatestMessages(messages);
+      console.log("set latest messages", messages)
+      socket.off("RECEIVE_LATEST_MESSAGES")
     });
   }
   const isQuoteOrLoginPage =
@@ -103,6 +116,11 @@ export const Layout = (props) => {
       </div>
     );
   }
+  const appointmentStats = latestAppointments.map(a => ({created: a?.tracking[0]?.date, by: a?.details?.company?.name, type:"app", id: a?.id}))
+  const messageStats = latestMessages.map(m => ({created: m?.createdAt, by: m?.author?.name, type:"msg", id: m.appointment}))
+  const latestNotifications = concat(appointmentStats, messageStats).sort((a, b) => {
+    return moment(a.created).isBefore(moment(b.created)) ? 1 : -1;
+  });
 
   return (
     <div>
@@ -129,16 +147,9 @@ export const Layout = (props) => {
           rel="stylesheet"
         />
       </Helmet>
-      {/* <div id="preloader">
-        <div class="sk-three-bounce">
-            <div class="sk-child sk-bounce1"></div>
-            <div class="sk-child sk-bounce2"></div>
-            <div class="sk-child sk-bounce3"></div>
-        </div>
-    </div> */}
       <div id="main-wrapper" className="show">
         <NavHeader toggleOpen={toggleOpen} />
-        <Header />
+        <Header latestNotifications={latestNotifications} />
         <SideBar isOpen={isOpen} toggleOpen={toggleOpen} />
         <ChildrenContainer className="content-body">
           {children}

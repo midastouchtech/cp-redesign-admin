@@ -37,7 +37,7 @@ const Appointments = ({ socket }) => {
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [fromDate, setFromDate] = useState('');
-  const [pageLimit, setPageLimit] = useState(25);
+  const [pageLimit, setPageLimit] = useState("25");
   const handleSearch = async () => {
     setLoading(true);
     setNotFound(false);
