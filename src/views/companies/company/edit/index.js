@@ -21,9 +21,10 @@ import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import UserSearch from "../../../../components/Modal/userSearch";
+import { connect } from "react-redux";
 
 
-function App({ socket }) {
+function App({ socket, stateUser }) {
   let params = useParams();
   const navigate = useNavigate();
 
@@ -67,7 +68,8 @@ function App({ socket }) {
   };
 
   const selectUser = (user) => {
-    //console.log("selecting user", user);
+    socket.emit("ADD_NEW_COMPANY_TO_MANAGE",{ userResponsible: stateUser, userToUpdate: user, company: company})
+    console.log({ userResponsible: stateUser, userToUpdate: user, company: company})
     const companyAlreadyHasUser = any(
       (u) => u.id === user.id,
       company.usersWhoCanManage
@@ -89,6 +91,8 @@ function App({ socket }) {
 
   const removeUser = (user) => {
     //console.log("removing user", user);
+    socket.emit("REMOVE_COMPANY_FROM_MANAGER", { userResponsible: stateUser, user: user, company: company})
+    
     const newCompany = pipe(
       assocPath(
         ["usersWhoCanManage"],
@@ -97,6 +101,7 @@ function App({ socket }) {
     )(user);
     setCompany(newCompany);
   };
+  
   useEffect(() => {
     const hasUpdatedCompany = !equals(company, originalCompany);
     sethasUpdatedCompany(hasUpdatedCompany);
@@ -324,4 +329,10 @@ function App({ socket }) {
   );
 }
 
-export default App;
+const mapState = (state) => {
+  return {
+    stateUser: state.auth.user,
+  };
+};
+
+export default connect(mapState)(App)

@@ -472,6 +472,80 @@ function App({ socket }) {
             </div>
           </div>
         </div>
+        <div class="col-xl-6 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">Forms</h4>
+            </div>
+            <div class="card-body">
+              <ul>
+                <li>
+                  <a
+                    href="/forms/Annexure 3 - Medical Certificate of Fitness.pdf"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Annexure 3 - Medical Certificate of Fitness.pdf
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Man Job Spec.pdf"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Man Job Spec.pdf
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Man Job Spec ClinicPlus.xlsx"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Man Job Spec ClinicPlus.xlsx
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Man Job Spec for Working at Heights and Confined Spaces.xlsx"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Man Job Spec for Working at Heights and Confined Spaces.xlsx
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Non-disclosure agreement 2023.doc"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Non-disclosure agreement 2023.doc
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Record of Hazardous Work DMR.doc"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Record of Hazardous Work DMR.doc
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Training Banking Details Confirmation.pdf"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Training Banking Details Confirmation.pdf
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
         <div class="col-xl-12 col-lg-12">
           <div class="card">
             <div class="card-header">

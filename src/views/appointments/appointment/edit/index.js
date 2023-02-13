@@ -27,6 +27,7 @@ import Sites from "./sites";
 import Comments from "./comments";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { connect } from "react-redux";
+import SearchModal from "../../../../components/Modal";
 
 
 const Card = styled.div`
@@ -52,6 +53,7 @@ function App({ socket, stateUser }) {
   const [hasUpdatedAppointmnent, setHasUpdatedAppointment] = useState(false);
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShow] = useState(false);
+  const [showNdaModal, setNdaModalOpen] = useState(false);
 
 
   if (socket && isLoading) {
@@ -233,6 +235,21 @@ function App({ socket, stateUser }) {
     )(appointment);
     setAppointment(newAppointment);
   };
+  const handleNdaModalClose = () => {
+    setNdaModalOpen(!showNdaModal);
+  };
+
+  function printDiv(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+}
+
   return (
     <div class="container-fluid">
       <div class="row">
@@ -318,6 +335,80 @@ function App({ socket, stateUser }) {
               </div>
             </div>
           </Card>
+        </div>
+        <div class="col-xl-6 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">Forms</h4>
+            </div>
+            <div class="card-body">
+              <ul>
+                <li>
+                  <a
+                    href="/forms/Annexure 3 - Medical Certificate of Fitness.pdf"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Annexure 3 - Medical Certificate of Fitness.pdf
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Man Job Spec.pdf"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Man Job Spec.pdf
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Man Job Spec ClinicPlus.xlsx"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Man Job Spec ClinicPlus.xlsx
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Man Job Spec for Working at Heights and Confined Spaces.xlsx"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Man Job Spec for Working at Heights and Confined Spaces.xlsx
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Non-disclosure agreement 2023.doc"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Non-disclosure agreement 2023.doc
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Record of Hazardous Work DMR.doc"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Record of Hazardous Work DMR.doc
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/forms/Training Banking Details Confirmation.pdf"
+                    target="_blank"
+                    rel="no_rel"
+                  >
+                    Training Banking Details Confirmation.pdf
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div class="col-xl-6 col-lg-6">
           <div class="card">
@@ -453,6 +544,20 @@ function App({ socket, stateUser }) {
                 You can select one of the two options below to specify wether
                 the nda terms have been accepted or not.
               </p>
+              <button
+                className="btn btn-outline-secondary mb-3"
+                onClick={handleNdaModalClose}
+              >
+                Read NDA
+              </button>
+              <a
+                className="btn btn-outline-secondary mb-3"
+                href={appointment?.details?.ndaPdf}
+                target="_blank"
+                disabled={!appointment?.details?.pdf}
+              >
+                Download PDF
+              </a>
               <div class="basic-form">
                 <form>
                   <div class="form-group">
