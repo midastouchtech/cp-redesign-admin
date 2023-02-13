@@ -13,6 +13,7 @@ import {
   insert,
   keys,
   equals,
+  pipe
 } from "ramda";
 import short from "short-uuid";
 import React, { useEffect, useState } from "react";
@@ -24,6 +25,9 @@ import { MEDICAL_SERVICES } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
 import Comments from "./comments";
+import UserSearch from "../../../../components/Modal/userSearch";
+import { connect } from "react-redux";
+
 
 const Card = styled.div`
   height: auto;
@@ -37,7 +41,7 @@ const CardBody = styled.div`
   }
 `;
 
-function App({ socket }) {
+function App({ socket, stateUser }) {
   let params = useParams();
   const navigate = useNavigate();
 
@@ -47,6 +51,8 @@ function App({ socket }) {
   const [originalAppointment, setOriginalAppointment] = useState({});
   const [hasUpdatedAppointmnent, setHasUpdatedAppointment] = useState(false);
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
+  const [show, setShow] = useState(false);
+
 
   if (socket && isLoading) {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
@@ -191,7 +197,42 @@ function App({ socket }) {
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });
+  console.log(appointment)
 
+  const selectUser = (user) => {
+    //console.log("selecting user", user);
+    socket.emit("ADD_NEW_APPOINTMENT_TO_MANAGE", { userResponsible: stateUser, userToUpdate: user, appointment: appointment})
+    console.log({ userResponsible: stateUser, userToUpdate: user, appointment: appointment})
+    const appointmentAlreadyHasUser = any(
+      (u) => u.id === user.id,
+      appointment.usersWhoCanManage
+    );
+    if (appointmentAlreadyHasUser) {
+      return;
+    }
+    const newAppointment = pipe(
+      assocPath(
+        ["usersWhoCanManage"],
+        [
+          ...appointment?.usersWhoCanManage,
+          { id: user?.id, name: user?.details?.name },
+        ]
+      )
+    )(appointment);
+    setAppointment(newAppointment);
+  };
+
+  const removeUser = (user) => {
+    //console.log("removing user", user);
+    socket.emit("REMOVE_APPOINTMENT_FROM_USER", { userResponsible: {id: stateUser?.id, name: stateUser?.details?.name}, userToRemove: user, appointment: appointment})
+    const newAppointment = pipe(
+      assocPath(
+        ["usersWhoCanManage"],
+        reject((u) => u.id === user.id, appointment.usersWhoCanManage)
+      )
+    )(appointment);
+    setAppointment(newAppointment);
+  };
   return (
     <div class="container-fluid">
       <div class="row">
@@ -310,6 +351,49 @@ function App({ socket }) {
                 >
                   Declined
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-6 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              Users who manage this appointment
+              <button className="btn btn-primary" onClick={() => setShow(true)}>
+                Add User
+              </button>
+            </div>
+            <UserSearch
+              show={show}
+              setShow={setShow}
+              socket={socket}
+              close={() => setShow(false)}
+              onUserSelect={selectUser}
+            />
+            <div class="card-body p-0">
+              <div class="table-responsive fs-14">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>
+                        <strong>ID</strong>
+                      </th>
+                      <th>
+                        <strong>Name</strong>
+                      </th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {appointment?.usersWhoCanManage?.map((c) => (
+                      <tr>
+                        <td>{c?.id}</td>
+                        <td>{c?.name}</td>
+                        <td  onClick={() => removeUser(c)}><button className="btn btn-primary">Remove</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -636,4 +720,10 @@ function App({ socket }) {
   );
 }
 
-export default App;
+const mapState = (state) => {
+  return {
+    stateUser: state.auth.user,
+  };
+};
+
+export default connect(mapState)(App)
