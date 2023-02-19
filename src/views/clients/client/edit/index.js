@@ -67,6 +67,13 @@ function App({ socket }) {
     setHasUpdatedUser(hasUpdatedUser);
   });
 
+  const perfomDelete = () => {
+    socket.emit("DELETE_USER", user);
+    socket.on("USER_DELETE_SUCCESS", () => {
+      navigate("/clients");
+    });
+  };
+
   return (
     <div class="container-fluid">
       <div class="row">
@@ -97,6 +104,12 @@ function App({ socket }) {
                 disabled={!hasUpdatedUser}
               >
                 Cancel Changes
+              </button>
+              <button
+                className={`btn btn-primary btn-outline-primary mr-1`}
+                onClick={perfomDelete}
+              >
+                Delete
               </button>
             </div>
           </div>

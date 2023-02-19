@@ -13,7 +13,7 @@ import {
   insert,
   keys,
   equals,
-  pipe
+  pipe,
 } from "ramda";
 import short from "short-uuid";
 import React, { useEffect, useState } from "react";
@@ -28,7 +28,6 @@ import Comments from "./comments";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { connect } from "react-redux";
 import SearchModal from "../../../../components/Modal";
-
 
 const Card = styled.div`
   height: auto;
@@ -54,7 +53,6 @@ function App({ socket, stateUser }) {
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShow] = useState(false);
   const [showNdaModal, setNdaModalOpen] = useState(false);
-
 
   if (socket && isLoading) {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
@@ -110,7 +108,9 @@ function App({ socket, stateUser }) {
     }, 0);
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
-        return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 35 : acc;
+        return employee?.sites && employee?.sites.length > 0
+          ? acc + (employee?.sites?.length - 1) * 35
+          : acc;
       },
       0
     );
@@ -199,12 +199,20 @@ function App({ socket, stateUser }) {
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });
-  console.log(appointment)
+  console.log(appointment);
 
   const selectUser = (user) => {
     //console.log("selecting user", user);
-    socket.emit("ADD_NEW_APPOINTMENT_TO_MANAGE", { userResponsible: stateUser, userToUpdate: user, appointment: appointment})
-    console.log({ userResponsible: stateUser, userToUpdate: user, appointment: appointment})
+    socket.emit("ADD_NEW_APPOINTMENT_TO_MANAGE", {
+      userResponsible: stateUser,
+      userToUpdate: user,
+      appointment: appointment,
+    });
+    console.log({
+      userResponsible: stateUser,
+      userToUpdate: user,
+      appointment: appointment,
+    });
     const appointmentAlreadyHasUser = any(
       (u) => u.id === user.id,
       appointment.usersWhoCanManage
@@ -226,7 +234,11 @@ function App({ socket, stateUser }) {
 
   const removeUser = (user) => {
     //console.log("removing user", user);
-    socket.emit("REMOVE_APPOINTMENT_FROM_USER", { userResponsible: {id: stateUser?.id, name: stateUser?.details?.name}, userToRemove: user, appointment: appointment})
+    socket.emit("REMOVE_APPOINTMENT_FROM_USER", {
+      userResponsible: { id: stateUser?.id, name: stateUser?.details?.name },
+      userToRemove: user,
+      appointment: appointment,
+    });
     const newAppointment = pipe(
       assocPath(
         ["usersWhoCanManage"],
@@ -239,6 +251,15 @@ function App({ socket, stateUser }) {
     setNdaModalOpen(!showNdaModal);
   };
 
+  const perfomDelete = () => {
+    console.log(appointment);
+    socket.emit("DELETE_APPOINTMENT", appointment);
+
+    socket.on("APPOINTMENT_DELETE_SUCCESS", () => {
+      navigate("/companies");
+    });
+  };
+
   function printDiv(divName) {
     var printContents = document.getElementById(divName).innerHTML;
     var originalContents = document.body.innerHTML;
@@ -248,7 +269,7 @@ function App({ socket, stateUser }) {
     window.print();
 
     document.body.innerHTML = originalContents;
-}
+  }
 
   return (
     <div class="container-fluid">
@@ -280,6 +301,12 @@ function App({ socket, stateUser }) {
                 disabled={!hasUpdatedAppointmnent}
               >
                 Cancel
+              </button>
+              <button
+                className={`btn btn-primary btn-outline-primary mr-1`}
+                onClick={perfomDelete}
+              >
+                Delete
               </button>
             </div>
           </div>
@@ -480,7 +507,9 @@ function App({ socket, stateUser }) {
                       <tr>
                         <td>{c?.id}</td>
                         <td>{c?.name}</td>
-                        <td  onClick={() => removeUser(c)}><button className="btn btn-primary">Remove</button></td>
+                        <td onClick={() => removeUser(c)}>
+                          <button className="btn btn-primary">Remove</button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -657,9 +686,7 @@ function App({ socket, stateUser }) {
             >
               <div class="card-header">
                 <div className="row">
-                  <h4 class="col-12 card-title mb-3">
-                    {employee?.name}{" "}
-                  </h4>
+                  <h4 class="col-12 card-title mb-3">{employee?.name} </h4>
                   <div className="col-12">
                     <button
                       className="btn btn-danger btn-xs"
@@ -831,4 +858,4 @@ const mapState = (state) => {
   };
 };
 
-export default connect(mapState)(App)
+export default connect(mapState)(App);

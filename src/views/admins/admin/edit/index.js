@@ -57,6 +57,14 @@ function App({ socket }) {
     setDBUser(originalUser);
   };
 
+  const perfomDelete = () => {
+    socket.emit("DELETE_ADMIN", user);
+    socket.on("ADMIN_DELETE_SUCCESS", () => {
+      navigate("/admins");
+    });
+  };
+
+
   //console.log(user);
 
   const saveUser = () => {
@@ -85,6 +93,7 @@ function App({ socket }) {
               >
                 Close
               </button>
+              
               <button
                 className={`btn mr-1 ${
                   hasUpdatedUser ? "btn-primary" : "btn-secondary"
@@ -102,6 +111,12 @@ function App({ socket }) {
                 disabled={!hasUpdatedUser}
               >
                 Cancel Changes
+              </button>
+              <button
+                className={`btn btn-primary btn-outline-primary mr-1`}
+                onClick={perfomDelete}
+              >
+                Delete
               </button>
             </div>
           </div>

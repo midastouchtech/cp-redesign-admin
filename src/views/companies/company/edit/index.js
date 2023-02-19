@@ -89,6 +89,16 @@ function App({ socket, stateUser }) {
     setCompany(newCompany);
   };
 
+  const perfomDelete = () => {
+    console.log(company)
+    socket.emit("DELETE_COMPANY", company);
+
+    socket.on("COMPANY_DELETE_SUCCESS", () => {
+      navigate("/companies");
+    });
+  };
+
+
   const removeUser = (user) => {
     //console.log("removing user", user);
     socket.emit("REMOVE_COMPANY_FROM_MANAGER", { userResponsible: stateUser, user: user, company: company})
@@ -139,12 +149,19 @@ function App({ socket, stateUser }) {
                 Cancel Changes
               </button>
               <button
+                className={`btn btn-primary btn-outline-primary mr-1`}
+                onClick={perfomDelete}
+              >
+                Delete
+              </button>
+              <button
                 className={`d-block d-sm-block d-md-block d-lg-block d-xl-block  btn btn-info  mt-3`}
                 onClick={() => navigate("/appointment/create/?companyId=" + company.id+"&companyName="+company.details.name)}
                 
               >
                 Create Appointment For Company
               </button>
+              
             </div>
           </div>
         </div>

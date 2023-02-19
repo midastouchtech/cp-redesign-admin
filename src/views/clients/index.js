@@ -65,28 +65,6 @@ const Companies = ({ socket }) => {
     });
   };
 
-  const deleteUser = (user) => {
-    setDeleteLoading(true);
-    socket.emit("DELETE_USER", user);
-    socket.on("USER_DELETE_SUCCESS", () => {
-      setDeleteLoading(false);
-      const newClients = clients.map((c) => {
-        if (c._id === user._id) {
-          return assoc("isDeleted", true, c);
-        }
-        return c;
-      });
-      const newOriginalClients = originalClients.map((c) => {
-        if (c._id === user._id) {
-          return assoc("isDeleted", true, c);
-        }
-        return c;
-      });
-      setClients(newClients);
-      setOriginalClients(newOriginalClients);
-    });
-  };
-
   const clearSearch = () => {
     setClients(originalClients);
     setSearchTerm("");
@@ -99,7 +77,7 @@ const Companies = ({ socket }) => {
     buttons: [
       {
         label: "Yes",
-        onClick: () => deleteUser(client),
+        onClick: () => {},
       },
       {
         label: "No",
@@ -211,17 +189,6 @@ const Companies = ({ socket }) => {
                                 Edit
                               </Link>
                             )}
-                          </td>
-                          <td>
-                            <button
-                              onClick={() =>
-                                confirmAlert(deleteOptions(client))
-                              }
-                              className="btn btn-xs btn-primary text-nowrap"
-                              disabled={client.isDeleted === true}
-                            >
-                              Delete
-                            </button>
                           </td>
                         </tr>
                       ))}
