@@ -303,7 +303,7 @@ function App({ socket, stateUser }) {
                 Cancel
               </button>
               <button
-                className={`btn btn-primary btn-outline-primary mr-1`}
+                className={`btn btn-primary btn-outline-primary ml-1 mr-1`}
                 onClick={perfomDelete}
               >
                 Delete
