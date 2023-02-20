@@ -345,6 +345,38 @@ function App({ socket }) {
                       />
                     </div>
                   </div>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">
+                    Company name on medical
+                    </label>
+                    <div class="col-sm-8">
+                      <input
+                        type="email"
+                        class="form-control input-default "
+                        placeholder="Company name on medical"
+                        onChange={(event) =>
+                          setDetail("companyNameOnMedical", event.target.value)
+                        }
+                        value={appointment?.details?.companyNameOnMedical}
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">
+                    Company responsible for payment
+                    </label>
+                    <div class="col-sm-8">
+                      <input
+                        type="email"
+                        class="form-control input-default "
+                        placeholder="Company responsible for payment"
+                        onChange={(event) =>
+                          setDetail("companyResponsibleForPayment", event.target.value)
+                        }
+                        value={appointment?.details?.companyResponsibleForPayment}
+                      />
+                    </div>
+                  </div>
                 </form>
               </div>
             </div>
