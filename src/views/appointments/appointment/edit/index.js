@@ -699,7 +699,11 @@ function App({ socket, stateUser }) {
         </div>
         <div class="col-xl-12 col-lg-12 text-center">
           <h2>Employees</h2>
-          <button className="btn btn-primary mb-2" onClick={createNewEmployee}>
+          <button className="btn btn-primary mb-2" onClick={
+              appointment?.details?.employees?.length === 100
+                ? () => {}
+                : createNewEmployee
+            }>
             {" "}
             Add New Employee{" "}
           </button>
