@@ -109,15 +109,21 @@ function App({ socket, stateUser }) {
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return employee?.sites && employee?.sites.length > 0
-          ? acc + (employee?.sites?.length - 1) * 35
+          ? acc + (employee?.sites?.length - 1) * 38.40
           : acc;
       },
       0
     );
-    //console.log('servicesPrice', servicesPrice)
-    //console.log("site price",sitesPrice);
-    const bookingPrice = servicesPrice + sitesPrice;
-    //console.log("bookingPrice", bookingPrice);
+    const accessCardPrice =  appointment?.details?.employees?.reduce(
+      (acc, employee) => {
+        const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
+        return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 51.20 : acc;
+      }, 0)
+      console.log("servicesPrice", servicesPrice);
+      console.log("site price", sitesPrice);
+      console.log("accessCardPrice", accessCardPrice);
+    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice;
+    console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
 
@@ -208,11 +214,11 @@ function App({ socket, stateUser }) {
       userToUpdate: user,
       appointment: appointment,
     });
-    console.log({
-      userResponsible: stateUser,
-      userToUpdate: user,
-      appointment: appointment,
-    });
+    // console.log({
+    //   userResponsible: stateUser,
+    //   userToUpdate: user,
+    //   appointment: appointment,
+    // });
     const appointmentAlreadyHasUser = any(
       (u) => u.id === user.id,
       appointment.usersWhoCanManage
@@ -252,7 +258,7 @@ function App({ socket, stateUser }) {
   };
 
   const perfomDelete = () => {
-    console.log(appointment);
+    //console.log(appointment);
     socket.emit("DELETE_APPOINTMENT", appointment);
 
     socket.on("APPOINTMENT_DELETE_SUCCESS", () => {

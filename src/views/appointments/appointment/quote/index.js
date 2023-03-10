@@ -61,6 +61,7 @@ function App({ socket }) {
   const [services, setServices] = useState([]);
   const [total, setTotal] = useState(0);
   const [servicesPrice, setServicesPrice] = useState(0);
+  const [totalAccessCardPrice, setAccessCardPrice] = useState(0);
   const [sitesPrice, setSitesPrice] = useState(0);
   const [company, setCompany] = useState({});
   const [disableButton, setButtonDisabled] = useState(false);
@@ -160,14 +161,20 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 35 : acc;
+          return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 38.40 : acc;
         },
         0
       );
+      const accessCardPrices =  appointment?.details?.employees?.reduce(
+        (acc, employee) => {
+          const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
+          return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 51.20 : acc;
+        }, 0)
       console.log(serviceCounts);
       setServicesPrice(servicesPrice);
       setServiceCounts(serviceCounts);
       setSitesPrice(sitesPrices);
+      setAccessCardPrice(accessCardPrices)
       setServices(allServices);
       if (appointment.invoice) {
         setButtonDisabled(true);
@@ -311,7 +318,7 @@ function App({ socket }) {
                         <h5>Site Prices</h5>
                         {appointment?.details?.employees?.map((employee) => (
                           <tr>
-                            <td class="col-md-8">{employee?.name}</td>
+                            <td class="col-md-8 text-capitalize">{employee?.name}</td>
                             <td
                               class="col-md-1"
                               style={{ textAlign: "center" }}
@@ -320,13 +327,36 @@ function App({ socket }) {
                             </td>
                             <td class="col-md-5 text-right">
                               {formatPrice(
-                                employee?.sites
-                                  ? (employee?.sites?.length - 1) * 35
+                                employee?.sites?.length > 0
+                                  ? (employee?.sites?.length - 1) * 38.40
                                   : 0
                               )}
                             </td>
                           </tr>
                         ))}
+                        <br />
+                        <h5>Access Card Prices</h5>
+                        {appointment?.details?.employees?.map((employee) => {
+                          const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
+                          return (
+                            <tr>
+                              <td class="col-md-8 text-capitalize">{employee?.name}</td>
+                              <td
+                                class="col-md-1"
+                                style={{ textAlign: "center" }}
+                              >
+                                {accessCardSites.length}
+                              </td>
+                              <td class="col-md-5 text-right">
+                                {formatPrice(
+                                  accessCardSites.length > 0
+                                    ? (accessCardSites.length - 1) * 51.20
+                                    : 0
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        })}
                         <br />
                         <tr>
                           <td class="col-md-8"></td>
@@ -338,7 +368,7 @@ function App({ socket }) {
                           <td class="col-md-5 text-right">
                             <h4>
                               <strong>
-                                {formatPrice(servicesPrice + sitesPrice)}
+                                {formatPrice(servicesPrice + sitesPrice + totalAccessCardPrice)}
                               </strong>
                             </h4>
                           </td>

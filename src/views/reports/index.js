@@ -46,9 +46,12 @@ const calculateEmployeeCost = (employee) => {
       );
   console.log("Services cost", servicesCost);
   console.log("Sites", employee?.sites);
-  const sitesCost = employee?.sites && employee?.sites.length > 0 ? (employee?.sites?.length - 1) * 35 : 0;
+  const sitesCost = employee?.sites && employee?.sites.length > 0 ? (employee?.sites?.length - 1) * 38.40 : 0;
+  const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
+  const accessCardCost = accessCardSites.length > 0 ? (accessCardSites.length - 1) * 51.20 : 0;
+ 
   console.log("Sites cost", sitesCost);
-  const totalCost = servicesCost + sitesCost;
+  const totalCost = servicesCost + sitesCost + accessCardCost;
   console.log("Total cost", totalCost);
   return formatPrice(totalCost);
 };
@@ -96,7 +99,7 @@ const Reports = ({ socket }) => {
   ];
 
   const getAllAppointments = () => {
-    socket.emit("GET_ALL_APPOINTMENTS");
+    socket.emit("GET_ALL_APPOINTMENTS", { pageLimit: 50});
     socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
       setAppointments(data);
       setOriginalAppointments(data);
@@ -123,6 +126,7 @@ const Reports = ({ socket }) => {
   const getCurrentMonthsAppointments = (page) => {
     socket.emit("GET_CURRENT_MONTHS_APPOINTMENTS", {
       page,
+      pageLimit: 50
     });
     socket.on("RECEIVE_CURRENT_MONTHS_APPOINTMENTS", (data) => {
       setAppointments(data);
@@ -135,6 +139,7 @@ const Reports = ({ socket }) => {
   const getNextMonthsAppointments = (p) => {
     socket.emit("GET_NEXT_MONTHS_APPOINTMENTS", {
       page: p,
+      pageLimit: 50
     });
     socket.on("RECEIVE_NEXT_MONTHS_APPOINTMENTS", (data) => {
       setAppointments(data);
@@ -147,6 +152,7 @@ const Reports = ({ socket }) => {
   const getPrevMonthsAppointments = (p) => {
     socket.emit("GET_PREVIOUS_MONTHS_APPOINTMENTS", {
       page: p,
+      pageLimit: 50
     });
     socket.on("RECEIVE_PREVIOUS_MONTHS_APPOINTMENTS", (data) => {
       setAppointments(data);

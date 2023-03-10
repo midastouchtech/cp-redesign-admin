@@ -134,14 +134,18 @@ function App({ socket }) {
     }, 0);
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
-        return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 35 : acc;
+        return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 38.40 : acc;
       },
       0
     );
-    //console.log("servicesPrice", servicesPrice);
-    //console.log("site price", sitesPrice);
-    const bookingPrice = servicesPrice + sitesPrice;
-    //console.log("bookingPrice", bookingPrice);
+    const accessCardPrice =  appointment?.details?.employees?.reduce(
+      (acc, employee) => {
+        const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
+        return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 51.20 : acc;
+      }, 0)
+
+    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice;
+    console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
 
@@ -245,6 +249,8 @@ function App({ socket }) {
   const clearPrefilledSearchTerm = () => {
     setSearchParamCompanyName(null);
   };
+
+  console.log(appointment)
 
   return (
     <div class="container-fluid">
