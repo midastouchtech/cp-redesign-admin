@@ -266,8 +266,8 @@ function App({ socket }) {
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
     if (
       socket &&
-      exists(appointment.details.date) &&
-      exists(appointment.details.clinic)
+      exists(appointment?.details?.date) &&
+      exists(appointment?.details?.clinic)
     ) {
       socket.emit("GET_APPOINTMENTS_FOR_DATE_COUNT", {
         clinic: appointment.details.clinic,
