@@ -38,6 +38,16 @@ function App({ socket }) {
   const [user, setDBUser] = useState({});
   const [originalUser, setOriginalUser] = useState({});
   const [hasUpdatedUser, setHasUpdatedUser] = useState(false);
+  const [passwordType, setPasswordType] = useState("password")
+
+  const togglePasswordType = () => {
+    if(passwordType === "password"){
+      setPasswordType("text")
+    }
+    else{
+      setPasswordType("password")
+    }
+  }
 
   if (socket && isLoading) {
     socket.emit("GET_USER", { id: params.adminId });
@@ -51,6 +61,10 @@ function App({ socket }) {
 
   const setDetail = (key, value) => {
     setDBUser(assocPath(["details", key], value, user));
+  };
+
+  const setPassword = (key, value) => {
+    setDBUser(assocPath(["password"], value, user));
   };
 
   const resetDBUserToOriginal = () => {
@@ -167,6 +181,25 @@ function App({ socket }) {
                         onChange={(e) => setDetail("email", e.target.value)}
                         value={user?.details?.email}
                       />
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">Password</label>
+                    <div class="col-sm-8">
+                      <div class="input-group mb-3">
+                        <input
+                          class="form-control input-default"
+                          placeholder="enter password"
+                          type={passwordType}
+                          onChange={(e) =>
+                            setPassword("password", e.target.value)
+                          }
+                          value={user?.password}
+                        />                        
+                          <span onClick={togglePasswordType} class="btn btn-primary" id="basic-addon2">
+                            See Password
+                          </span>
+                      </div>
                     </div>
                   </div>
                   <div class="form-group row">
