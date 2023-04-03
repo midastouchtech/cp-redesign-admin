@@ -72,6 +72,8 @@ function App({ socket }) {
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShowCompanySearch] = useState(false);
   const [searchParams] = useSearchParams();
+
+  const [appointmentsForDateCount, setAppointmentsForDateCount] = useState();
   const [searchParamCompanyName, setSearchParamCompanyName] = useState(
     searchParams.get("companyName") || null
   );
@@ -257,10 +259,25 @@ function App({ socket }) {
     setDetail("employees", newEmployees);
   };
 
+  const exists = (i) => !isNil(i) && !isEmpty(i);
   useEffect(() => {
-    //
+    console.log("use effect appointment", appointment);
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
+    if (
+      socket &&
+      exists(appointment.details.date) &&
+      exists(appointment.details.clinic)
+    ) {
+      socket.emit("GET_APPOINTMENTS_FOR_DATE_COUNT", {
+        clinic: appointment.details.clinic,
+        date: appointment.details.date,
+      });
+      socket.on("RECEIVE_APPOINTMENTS_FOR_DATE_COUNT", ({ count }) => {
+        console.log("COUNT", count);
+        setAppointmentsForDateCount(count);
+      });
+    }
   });
 
   if (
@@ -301,15 +318,17 @@ function App({ socket }) {
               >
                 Close
               </button>
-              <button
-                className={`btn mr-1 ${
-                  hasUpdatedAppointmnent ? "btn-primary" : "btn-secondary"
-                }`}
-                onClick={saveAppointment}
-                disabled={!hasUpdatedAppointmnent}
-              >
-                Save
-              </button>
+              {!(appointmentsForDateCount >= 100) && (
+                <button
+                  className={`btn mr-1 ${
+                    hasUpdatedAppointmnent ? "btn-primary" : "btn-secondary"
+                  }`}
+                  onClick={saveAppointment}
+                  disabled={!hasUpdatedAppointmnent}
+                >
+                  Save
+                </button>
+              )}
               <button
                 className={`btn ${
                   hasUpdatedAppointmnent ? "btn-link" : "btn-secondary"
@@ -319,6 +338,23 @@ function App({ socket }) {
               >
                 Cancel
               </button>
+              <br />
+              <br />
+              {exists(appointmentsForDateCount) && (
+                <p>
+                  <small class="text-secondary">
+                    The number of appointments for {appointment?.details?.date}{" "}
+                    at {appointment?.details?.clinic} is{" "}
+                    {appointmentsForDateCount} the limit is 100{" "}
+                  </small>
+                  <br />
+                  <small class="text-danger">
+                    {appointmentsForDateCount >= 100
+                      ? "Please note you won't be able to save this appointment as the limit has been reached."
+                      : ""}
+                  </small>
+                </p>
+              )}
             </div>
           </div>
         </div>
