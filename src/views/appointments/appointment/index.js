@@ -1,5 +1,15 @@
 import moment from "moment";
-import { any, assoc, has, isEmpty, isNil, mathMod, set, values } from "ramda";
+import {
+  any,
+  assoc,
+  has,
+  isEmpty,
+  isNil,
+  last,
+  mathMod,
+  set,
+  values,
+} from "ramda";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -21,12 +31,12 @@ const ChatContainer = styled.div`
     overflow-y: scroll;
   }
   ${(props) => (props.isOpen ? "display: block" : "display: none")};
-    .chatbox {
-      position: fixed;
-      top: 12vh;
-      right: 0;
-      width: 20vw;
-    }
+  .chatbox {
+    position: fixed;
+    top: 12vh;
+    right: 0;
+    width: 20vw;
+  }
 `;
 
 const StyledImg = styled.img`
@@ -69,25 +79,25 @@ function App({ socket, user }) {
   const [messages, setMessages] = useState([]);
   const [hasFetchedAvatars, setHasFetchedAvatars] = useState(false);
 
-  if(socket && isLoading){
+  if (socket && isLoading) {
     console.log("FETCHING APPointment");
-  socket.emit("GET_APPOINTMENT", { id: params.appId });
-  socket.on("RECEIVE_APPOINTMENT", (app) => {
-    console.log("RECEIVE_APPOINTMENT", app);
-    setAppointment(app);
-  });
-  socket.on("DATABASE_UPDATED", (u) => {
     socket.emit("GET_APPOINTMENT", { id: params.appId });
-  });
+    socket.on("RECEIVE_APPOINTMENT", (app) => {
+      console.log("RECEIVE_APPOINTMENT", app);
+      setAppointment(app);
+    });
+    socket.on("DATABASE_UPDATED", (u) => {
+      socket.emit("GET_APPOINTMENT", { id: params.appId });
+    });
 
-  socket.on("RECEIVE_AVATARS", (avatars) => {
-    console.log("RECEIVE_AVATARS", avatars);
-    setAvatars(avatars);
-  });
-  setIsLoading(false);
+    socket.on("RECEIVE_AVATARS", (avatars) => {
+      console.log("RECEIVE_AVATARS", avatars);
+      setAvatars(avatars);
+    });
+    setIsLoading(false);
   }
 
-  if(appointment?.messages?.length > 0 && !hasFetchedAvatars) {
+  if (appointment?.messages?.length > 0 && !hasFetchedAvatars) {
     console.log("FETCHING AVATARS");
     const messageUsers = appointment.messages.map((m) => m?.author?.id);
     socket.emit("GET_AVATARS", { ids: messageUsers });
@@ -154,7 +164,12 @@ function App({ socket, user }) {
                       >
                         View Quote
                       </a>
-                      <a href="#" class={`btn badge badge-rounded ${getBadgeType(appointment?.status)} mr-3`}>
+                      <a
+                        href="#"
+                        class={`btn badge badge-rounded ${getBadgeType(
+                          appointment?.status
+                        )} mr-3`}
+                      >
                         {appointment.status}
                       </a>
                     </div>
@@ -339,6 +354,38 @@ function App({ socket, user }) {
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-12">
+              <div class="card">
+
+                <div class="card-body p-0">
+                  <div class="table-responsive fs-14">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>
+                            <strong>Proof of payment</strong>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {exists(appointment?.payment?.proofOfPayment) &&
+                          appointment?.payment?.proofOfPayment.map((ex) => (
+                            <tr>
+                              <td>
+                                <small>
+                                  <a href={ex} target="_blank" rel="noreferrer">
+                                    {last(ex.split("/"))}
+                                  </a>
+                                </small>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>

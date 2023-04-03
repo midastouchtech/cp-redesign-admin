@@ -271,7 +271,7 @@ function App({ socket }) {
                   </h4>
                   <p>Extension 5</p>
                   <p>Witbank 1035</p>
-                  <p>Tel 013 658 2020</p>
+                  <p>Tel 013 656 2020</p>
                   <p>Fax 013 658 5036</p>
                 </div>
               </div>
