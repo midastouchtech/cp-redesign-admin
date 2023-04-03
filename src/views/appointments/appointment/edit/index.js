@@ -14,6 +14,8 @@ import {
   keys,
   equals,
   pipe,
+  last,
+  append,
 } from "ramda";
 import short from "short-uuid";
 import React, { useEffect, useState } from "react";
@@ -850,6 +852,8 @@ function App({ socket, stateUser }) {
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">
                         Dover Service
+                        <br />
+                        <small>Only done in Witbank</small>
                       </label>
                       <div class="col-sm-8">
                         <div className="row">
@@ -906,6 +910,52 @@ function App({ socket, stateUser }) {
                                       jobSpecFileUrl
                                     )
                                   }
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">
+                        Extra Job Spec Files
+                      </label>
+                      <div class="col-sm-8">
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col-12">
+                                <ol>
+                                  {employee?.extraJobSpecFiles &&
+                                    employee?.extraJobSpecFiles.map((ex) => (
+                                      <li>
+                                        <small>
+                                          <a
+                                            href={ex}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                          >
+                                            {last(ex.split("/"))}
+                                          </a>
+                                        </small>
+                                      </li>
+                                    ))}
+                                </ol>
+                                <Uploader
+                                  onChange={(jobSpecFileUrl) => {
+                                    const extraJobSpecFiles =
+                                      employee.extraJobSpecFiles;
+                                    const newFiles = append(
+                                      jobSpecFileUrl,
+                                      extraJobSpecFiles
+                                    );
+                                    setEmployeeDetail(
+                                      employee?.id,
+                                      "extraJobSpecFiles",
+                                      newFiles
+                                    );
+                                  }}
                                 />
                               </div>
                             </div>

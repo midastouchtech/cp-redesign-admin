@@ -14,6 +14,8 @@ import {
   keys,
   equals,
   pipe,
+  append,
+  last,
 } from "ramda";
 import short from "short-uuid";
 import React, { useEffect, useState } from "react";
@@ -153,22 +155,21 @@ function App({ socket }) {
       },
       0
     );
-    const doverPrices =  appointment?.details?.employees?.reduce(
+    const doverPrices = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         const requiresDover = employee.dover?.required;
         return requiresDover ? acc + DOVER_PRICE : acc;
-      }, 0)
-      console.log("doverPrice", doverPrices);
-      console.log("servicesPrice", servicesPrice);
-      console.log("site price", sitesPrice);
-      console.log("accessCardPrice", accessCardPrice);
-      
-      
-      
-    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice + doverPrices;
-    
+      },
+      0
+    );
+    console.log("doverPrice", doverPrices);
+    console.log("servicesPrice", servicesPrice);
+    console.log("site price", sitesPrice);
+    console.log("accessCardPrice", accessCardPrice);
 
-    
+    const bookingPrice =
+      servicesPrice + sitesPrice + accessCardPrice + doverPrices;
+
     return bookingPrice;
   };
 
@@ -224,7 +225,6 @@ function App({ socket }) {
   };
 
   const minimizeEmployee = (id) => () => {
-    
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const minimizedEmployee = assoc("isMinimized", true, employee);
     const index = appointment?.details?.employees?.indexOf(employee);
@@ -242,7 +242,6 @@ function App({ socket }) {
   };
 
   const maximizeEmployee = (id) => () => {
-    
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const maximizedEmployee = assoc("isMinimized", false, employee);
     const index = appointment?.details?.employees?.indexOf(employee);
@@ -809,6 +808,8 @@ function App({ socket }) {
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">
                         Dover Service
+                        <br />
+                        <small>Only done in Witbank</small>
                       </label>
                       <div class="col-sm-8">
                         <div className="row">
@@ -830,7 +831,9 @@ function App({ socket }) {
                                   Require dover test
                                 </label>
                               </div>
-                              <div className="col-4">{getFormattedPrice(DOVER_PRICE)}</div>
+                              <div className="col-4">
+                                {getFormattedPrice(DOVER_PRICE)}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -865,6 +868,52 @@ function App({ socket }) {
                                       jobSpecFileUrl
                                     )
                                   }
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">
+                        Extra Job Spec Files
+                      </label>
+                      <div class="col-sm-8">
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col-12">
+                                <ol>
+                                  {employee?.extraJobSpecFiles &&
+                                    employee?.extraJobSpecFiles.map((ex) => (
+                                      <li>
+                                        <small>
+                                          <a
+                                            href={ex}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                          >
+                                            {last(ex.split("/"))}
+                                          </a>
+                                        </small>
+                                      </li>
+                                    ))}
+                                </ol>
+                                <Uploader
+                                  onChange={(jobSpecFileUrl) => {
+                                    const extraJobSpecFiles =
+                                      employee.extraJobSpecFiles;
+                                    const newFiles = append(
+                                      jobSpecFileUrl,
+                                      extraJobSpecFiles
+                                    );
+                                    setEmployeeDetail(
+                                      employee?.id,
+                                      "extraJobSpecFiles",
+                                      newFiles
+                                    );
+                                  }}
                                 />
                               </div>
                             </div>
