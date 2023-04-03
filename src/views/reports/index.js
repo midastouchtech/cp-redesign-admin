@@ -92,6 +92,8 @@ const Reports = ({ socket }) => {
     "purchaseOrderNumber",
     "company",
     "name",
+    "idNumber",
+    "occupation",
     "clinic",
     "price",
     "date",
@@ -368,6 +370,9 @@ const Reports = ({ socket }) => {
                         <th>PON</th>
                         <th>Company </th>
                         <th>Employee</th>
+                        <th>ID Number</th>
+                        <th>Occupation</th>
+                        <th>Sites</th>
                         <th>Location</th>
                         <th>Price</th>
                         <th>Date</th>
@@ -384,6 +389,9 @@ const Reports = ({ socket }) => {
                             <td>{employee?.purchaseOrderNumber}</td>
                             <td>{employee?.company}</td>
                             <td>{employee.name}</td>
+                            <td>{employee.idNumber}</td>
+                            <td>{employee.occupation}</td>
+                            <td>{employee.sites.length}</td>
                             <td>{employee?.clinic}</td>
                             <td>{employee?.price}</td>
                             <td>
