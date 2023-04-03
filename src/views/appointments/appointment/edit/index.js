@@ -21,13 +21,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
-import { MEDICAL_SERVICES } from "../../../../config";
+import { DOVER_PRICE, MEDICAL_SERVICES } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
 import Comments from "./comments";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { connect } from "react-redux";
 import SearchModal from "../../../../components/Modal";
+
+const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
 const Card = styled.div`
   height: auto;
@@ -50,7 +52,6 @@ function App({ socket, stateUser }) {
   const [appointment, setAppointment] = useState({});
   const [originalAppointment, setOriginalAppointment] = useState({});
   const [hasUpdatedAppointmnent, setHasUpdatedAppointment] = useState(false);
-  const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShow] = useState(false);
   const [showNdaModal, setNdaModalOpen] = useState(false);
 
@@ -119,10 +120,17 @@ function App({ socket, stateUser }) {
         const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
         return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 51.20 : acc;
       }, 0)
+    
+    const doverPrices =  appointment?.details?.employees?.reduce(
+      (acc, employee) => {
+        const requiresDover = employee.dover?.required;
+        return requiresDover ? acc + DOVER_PRICE : acc;
+      }, 0)
+      console.log("doverPrice", doverPrices);
       console.log("servicesPrice", servicesPrice);
       console.log("site price", sitesPrice);
       console.log("accessCardPrice", accessCardPrice);
-    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice;
+    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice + doverPrices;
     console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
@@ -200,6 +208,19 @@ function App({ socket, stateUser }) {
     setDetail("employees", newEmployees);
   };
 
+  const toggleDoverRequested = (id) => {
+    const employee = appointment?.details.employees?.find((e) => e.id === id);
+    const index = appointment?.details?.employees?.indexOf(employee);
+    const employeesWithoutEmployee = without(
+      [employee],
+      appointment?.details?.employees
+    );
+    const isRequired = employee.dover?.required;
+    const newEmployee = assocPath(["dover", "required"], !isRequired, employee);
+    const newEmployees = insert(index, newEmployee, employeesWithoutEmployee);
+    setDetail("employees", newEmployees);
+  };
+
   useEffect(() => {
     //console.log("use effect appointment", appointment);
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
@@ -266,16 +287,6 @@ function App({ socket, stateUser }) {
     });
   };
 
-  function printDiv(divName) {
-    var printContents = document.getElementById(divName).innerHTML;
-    var originalContents = document.body.innerHTML;
-
-    document.body.innerHTML = printContents;
-
-    window.print();
-
-    document.body.innerHTML = originalContents;
-  }
 
   return (
     <div class="container-fluid">
@@ -834,6 +845,36 @@ function App({ socket, stateUser }) {
                             setEmployeeDetail(employee.id, "services", services)
                           }
                         />
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">
+                        Dover Service
+                      </label>
+                      <div class="col-sm-8">
+                        <div className="row">
+                          <div className="col-12">
+                            <div className="row">
+                              <div className="col-8">
+                                <input
+                                  type="checkbox"
+                                  id={`dover-checkbox}`}
+                                  className="mr-2"
+                                  name={"dover test"}
+                                  value={employee.dover?.required}
+                                  checked={employee.dover?.required}
+                                  onClick={() =>
+                                    toggleDoverRequested(employee.id)
+                                  }
+                                />
+                                <label htmlFor={`dover-checkbox`}>
+                                  Require dover test
+                                </label>
+                              </div>
+                              <div className="col-4">{getFormattedPrice(DOVER_PRICE)}</div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div class="form-group row">

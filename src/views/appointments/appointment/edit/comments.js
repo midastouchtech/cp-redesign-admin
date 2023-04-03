@@ -25,7 +25,7 @@ const Comments = ({ employeeComments, onChange }) => {
     onChange(comments);
   };
 
-  console.log("employee commenst",employeeComments);
+  //console.log("employee commenst",employeeComments);
 
   return (
     <>

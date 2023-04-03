@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BasicDocument from "./BasicDocument";
-import { MEDICAL_SERVICES } from "../../../../config";
+import { DOVER_PRICE, MEDICAL_SERVICES } from "../../../../config";
 import { keys, values } from "ramda";
 import styled from "styled-components";
 import html2canvas from "html2canvas";
 import jspdf from "jspdf";
 import axios from "axios";
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
@@ -66,7 +66,9 @@ function App({ socket }) {
   const [company, setCompany] = useState({});
   const [disableButton, setButtonDisabled] = useState(false);
   const [status, setStatus] = useState("Email Invoice");
-  const [serviceCounts , setServiceCounts] = useState({});
+  const [serviceCounts, setServiceCounts] = useState({});
+  const [doverCount, setDoverCount] = useState(0);
+  const [doverPrice, setDoverPrice] = useState(0);
 
   const savetopdf = () => {
     window.scrollTo(0, 0);
@@ -74,7 +76,7 @@ function App({ socket }) {
     var doc = new jspdf("p", "px", "a4");
     doc.html(input, {
       callback: function (pdf) {
-        // console.log(pdf)
+        //
         pdf.save("mypdf.pdf");
       },
       html2canvas: {
@@ -107,11 +109,10 @@ function App({ socket }) {
           url,
         })
           .then((response) => {
-            console.log(response.data.secure_url);
             socket.emit("SEND_INVOICE", {
               appointment,
               url: response.data.secure_url,
-              invoiceId
+              invoiceId,
             });
             setStatus("Sending...");
             socket.on("RECEIVE_SAVE_INVOICE_SUCCESS", (data) => {
@@ -143,10 +144,8 @@ function App({ socket }) {
         },
         []
       );
-      console.log(allServices);
-      
 
-      //console.log(services);
+      //
       const servicesPrice = allServices.reduce((acc, service) => {
         return acc + service.price;
       }, 0);
@@ -161,27 +160,47 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 38.40 : acc;
+          return employee?.sites && employee?.sites.length > 0
+            ? acc + (employee?.sites?.length - 1) * 38.4
+            : acc;
         },
         0
       );
-      const accessCardPrices =  appointment?.details?.employees?.reduce(
+      const accessCardPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
-          return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 51.20 : acc;
-        }, 0)
-      console.log(serviceCounts);
+          const accessCardSites = employee.sites.filter(
+            (s) => s.hasAccessCard === true
+          );
+          return accessCardSites.length > 0
+            ? acc + (accessCardSites.length - 1) * 51.2
+            : acc;
+        },
+        0
+      );
+      const doverPrices = appointment?.details?.employees?.reduce(
+        (acc, employee) => {
+          const requiresDover = employee.dover?.required;
+          return requiresDover ? acc + DOVER_PRICE : acc;
+        },
+        0
+      );
+      const employeesDoingDOver = appointment?.details?.employees?.filter(
+        (employee) => employee.dover?.required
+      ).length;
+
+      setDoverPrice(doverPrices);
+      setDoverCount(employeesDoingDOver);
       setServicesPrice(servicesPrice);
       setServiceCounts(serviceCounts);
       setSitesPrice(sitesPrices);
-      setAccessCardPrice(accessCardPrices)
+      setAccessCardPrice(accessCardPrices);
       setServices(allServices);
       if (appointment.invoice) {
         setButtonDisabled(true);
       }
     });
     socket.on("DATABASE_UPDATED", (u) => {
-      //console.log("Database updated FROM APPOINTMENT PAGE");
+      //
       socket.emit("GET_APPOINTMENT", { id: params.appId });
     });
   }
@@ -260,11 +279,19 @@ function App({ socket }) {
               <div class="row details-row">
                 <div class="col-md-6 text-left">
                   <h4>Purchase Order Number</h4>
-                  <p className="mb-3"><strong >{appointment?.details?.purchaseOrderNumber}</strong></p>
+                  <p className="mb-3">
+                    <strong>{appointment?.details?.purchaseOrderNumber}</strong>
+                  </p>
                   <h4>Invoice Number</h4>
-                  <p className="mb-3"><strong >{appointment.invoice? appointment.invoice.id : invoiceId}</strong></p>
+                  <p className="mb-3">
+                    <strong>
+                      {appointment.invoice ? appointment.invoice.id : invoiceId}
+                    </strong>
+                  </p>
                   <h4>Terms</h4>
-                  <p><strong>E&O E. Errors and ommisions expected</strong></p>
+                  <p>
+                    <strong>E&O E. Errors and ommisions expected</strong>
+                  </p>
                 </div>
                 <div class="col-md-6 text-left">
                   <h4>Bill To </h4>
@@ -273,8 +300,10 @@ function App({ socket }) {
                   </strong>
                   <p>{company?.details?.physicalAddress}</p>
                   <hr />
-                  <h4>Appointment ID</h4> 
-                  <p><strong>{appointment.id}</strong></p>
+                  <h4>Appointment ID</h4>
+                  <p>
+                    <strong>{appointment.id}</strong>
+                  </p>
                 </div>
               </div>
               <div class="row">
@@ -298,49 +327,61 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         <h5>Service prices</h5>
-                        {values(MEDICAL_SERVICES).map((service) => serviceCounts[service.id] ? (
-                          <tr>
-                            <td class="col-md-8">
-                              {service.title}
-                            </td>
-                            <td
-                              class="col-md-1"
-                              style={{ textAlign: "center" }}
-                            >
-                              {serviceCounts[service.id]}
-                            </td>
-                            <td class="col-md-5 text-right">
-                              {formatPrice(service.price)}
-                            </td>
-                          </tr>
-                        ): "")}
+                        {values(MEDICAL_SERVICES).map((service) =>
+                          serviceCounts[service.id] ? (
+                            <tr>
+                              <td class="col-md-8">{service.title}</td>
+                              <td
+                                class="col-md-1"
+                                style={{ textAlign: "center" }}
+                              >
+                                {serviceCounts[service.id]}
+                              </td>
+                              <td class="col-md-5 text-right">
+                                {formatPrice(service.price)}
+                              </td>
+                            </tr>
+                          ) : (
+                            ""
+                          )
+                        )}
+
                         <br />
                         <h5>Site Prices</h5>
                         {appointment?.details?.employees?.map((employee) => (
                           <tr>
-                            <td class="col-md-8 text-capitalize">{employee?.name}</td>
+                            <td class="col-md-8 text-capitalize">
+                              {employee?.name}
+                            </td>
                             <td
                               class="col-md-1"
                               style={{ textAlign: "center" }}
                             >
-                              {employee?.sites && employee?.sites.length > 0 ? employee?.sites?.length : 0}
+                              {employee?.sites && employee?.sites.length > 0
+                                ? employee?.sites?.length
+                                : 0}
                             </td>
                             <td class="col-md-5 text-right">
                               {formatPrice(
                                 employee?.sites?.length > 0
-                                  ? (employee?.sites?.length - 1) * 38.40
+                                  ? (employee?.sites?.length - 1) * 38.4
                                   : 0
                               )}
                             </td>
                           </tr>
                         ))}
+
                         <br />
                         <h5>Access Card Prices</h5>
                         {appointment?.details?.employees?.map((employee) => {
-                          const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
+                          const accessCardSites = employee.sites.filter(
+                            (s) => s.hasAccessCard === true
+                          );
                           return (
                             <tr>
-                              <td class="col-md-8 text-capitalize">{employee?.name}</td>
+                              <td class="col-md-8 text-capitalize">
+                                {employee?.name}
+                              </td>
                               <td
                                 class="col-md-1"
                                 style={{ textAlign: "center" }}
@@ -350,12 +391,12 @@ function App({ socket }) {
                               <td class="col-md-5 text-right">
                                 {formatPrice(
                                   accessCardSites.length > 0
-                                    ? (accessCardSites.length - 1) * 51.20
+                                    ? (accessCardSites.length - 1) * 51.2
                                     : 0
                                 )}
                               </td>
                             </tr>
-                          )
+                          );
                         })}
                         <br />
                         <tr>
@@ -368,18 +409,33 @@ function App({ socket }) {
                           <td class="col-md-5 text-right">
                             <h4>
                               <strong>
-                                {formatPrice(servicesPrice + sitesPrice + totalAccessCardPrice)}
+                                {formatPrice(
+                                  servicesPrice +
+                                    sitesPrice +
+                                    totalAccessCardPrice
+                                )}
                               </strong>
                             </h4>
                           </td>
                         </tr>
+                        <br />
+                        <br />
+                        <h5>Dover Service</h5>
+                        <tr>
+                          <td class="col-md-8 text-capitalize">Employees</td>
+                          <td class="col-md-1">{doverCount}</td>
+                          <td class="col-md-5 text-right">
+                            {formatPrice(doverPrice)}
+                          </td>
+                        </tr>
+                        <br />
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
               <div class="row details-row">
-              <div class="col-md-6 text-left">
+                <div class="col-md-6 text-left">
                   <h4>
                     <strong>Banking Details</strong>
                   </h4>
@@ -389,6 +445,17 @@ function App({ socket }) {
                   <p>Account Type: Cheque</p>
                   <p>Branch: 632005</p>
                   <p>Reference: {company?.details?.name}</p>
+                </div>
+                <div class="col-md-6 text-left">
+                  <h4>
+                    <strong>Dover Service Banking Details</strong>
+                  </h4>
+                  <p>ClinicPlus Health And Safety Training</p>
+                  <p>Bank: FNB</p>
+                  <p>Account Number: 62763932243</p>
+                  <p>Account Type: Gold Business Account</p>
+                  <p>Branch Code: 270250</p>
+                  <p>Branch Name: WITBANK 430</p>
                 </div>
               </div>
             </div>

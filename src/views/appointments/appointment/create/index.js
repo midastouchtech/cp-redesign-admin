@@ -22,12 +22,14 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
-import { MEDICAL_SERVICES } from "../../../../config";
+import { DOVER_PRICE, MEDICAL_SERVICES } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
 import SearchModal from "../../../../components/Modal";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import Comments from "../edit/comments";
+
+const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
 const CardBody = styled.div`
   &.minimized {
@@ -73,7 +75,7 @@ function App({ socket }) {
   );
 
   const setDetail = (key, value) => {
-    //console.log("setting detail", key, value);
+    //
     setAppointment(assocPath(["details", key], value, appointment));
   };
 
@@ -134,18 +136,39 @@ function App({ socket }) {
     }, 0);
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
-        return employee?.sites && employee?.sites.length > 0 ? acc + (employee?.sites?.length - 1) * 38.40 : acc;
+        return employee?.sites && employee?.sites.length > 0
+          ? acc + (employee?.sites?.length - 1) * 38.4
+          : acc;
       },
       0
     );
-    const accessCardPrice =  appointment?.details?.employees?.reduce(
+    const accessCardPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
-        const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
-        return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 51.20 : acc;
+        const accessCardSites = employee.sites.filter(
+          (s) => s.hasAccessCard === true
+        );
+        return accessCardSites.length > 0
+          ? acc + (accessCardSites.length - 1) * 51.2
+          : acc;
+      },
+      0
+    );
+    const doverPrices =  appointment?.details?.employees?.reduce(
+      (acc, employee) => {
+        const requiresDover = employee.dover?.required;
+        return requiresDover ? acc + DOVER_PRICE : acc;
       }, 0)
+      console.log("doverPrice", doverPrices);
+      console.log("servicesPrice", servicesPrice);
+      console.log("site price", sitesPrice);
+      console.log("accessCardPrice", accessCardPrice);
+      
+      
+      
+    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice + doverPrices;
+    
 
-    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice;
-    console.log("bookingPrice", bookingPrice);
+    
     return bookingPrice;
   };
 
@@ -156,16 +179,16 @@ function App({ socket }) {
       price,
       appointment
     );
-    //console.log("saving appza");
+    //
     socket.emit("SAVE_NEW_APPOINTMENT", appointmentWithNewPrice);
     socket.on("APPOINTMENT_ADDED", (data) => {
-      //console.log("appointment added", data);
+      //
       navigate("/appointment/" + data.id);
     });
   };
 
   const selectCompany = (company) => {
-    //console.log("selecting company", company);
+    //
 
     const newAppointment = pipe(
       assocPath(["details", "company"], {
@@ -183,22 +206,25 @@ function App({ socket }) {
       name: "",
       services: [],
       sites: [],
+      dover: {
+        required: false,
+      },
     };
-    //console.log("new employee", newEmployee);
+    //
     const newEmployees = [newEmployee, ...appointment?.details?.employees];
-    //console.log("newEmployees", newEmployees);
+    //
     setDetail("employees", newEmployees);
   };
 
   const removeEmployee = (id) => () => {
-    //console.log("removing employee", id);
+    //
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
     setDetail("employees", newEmployees);
   };
 
   const minimizeEmployee = (id) => () => {
-    console.log("minimizing employee", id);
+    
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const minimizedEmployee = assoc("isMinimized", true, employee);
     const index = appointment?.details?.employees?.indexOf(employee);
@@ -216,7 +242,7 @@ function App({ socket }) {
   };
 
   const maximizeEmployee = (id) => () => {
-    console.log("maximizing employee", id);
+    
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const maximizedEmployee = assoc("isMinimized", false, employee);
     const index = appointment?.details?.employees?.indexOf(employee);
@@ -233,7 +259,7 @@ function App({ socket }) {
   };
 
   useEffect(() => {
-    //console.log("use effect appointment", appointment);
+    //
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });
@@ -250,7 +276,18 @@ function App({ socket }) {
     setSearchParamCompanyName(null);
   };
 
-  console.log(appointment)
+  const toggleDoverRequested = (id) => {
+    const employee = appointment?.details.employees?.find((e) => e.id === id);
+    const index = appointment?.details?.employees?.indexOf(employee);
+    const employeesWithoutEmployee = without(
+      [employee],
+      appointment?.details?.employees
+    );
+    const isRequired = employee.dover?.required;
+    const newEmployee = assocPath(["dover", "required"], !isRequired, employee);
+    const newEmployees = insert(index, newEmployee, employeesWithoutEmployee);
+    setDetail("employees", newEmployees);
+  };
 
   return (
     <div class="container-fluid">
@@ -353,7 +390,7 @@ function App({ socket }) {
                   </div>
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">
-                    Company name on medical
+                      Company name on medical
                     </label>
                     <div class="col-sm-8">
                       <input
@@ -369,7 +406,7 @@ function App({ socket }) {
                   </div>
                   <div class="form-group row">
                     <label class="col-sm-4 col-form-label">
-                    Company responsible for payment
+                      Company responsible for payment
                     </label>
                     <div class="col-sm-8">
                       <input
@@ -377,9 +414,14 @@ function App({ socket }) {
                         class="form-control input-default "
                         placeholder="Company responsible for payment"
                         onChange={(event) =>
-                          setDetail("companyResponsibleForPayment", event.target.value)
+                          setDetail(
+                            "companyResponsibleForPayment",
+                            event.target.value
+                          )
                         }
-                        value={appointment?.details?.companyResponsibleForPayment}
+                        value={
+                          appointment?.details?.companyResponsibleForPayment
+                        }
                       />
                     </div>
                   </div>
@@ -634,11 +676,14 @@ function App({ socket }) {
 
         <div class="col-xl-12 col-lg-12 text-center">
           <h2>Employees</h2>
-          <button className="btn btn-primary mb-2" onClick={
+          <button
+            className="btn btn-primary mb-2"
+            onClick={
               appointment?.details?.employees?.length === 100
                 ? () => {}
                 : createNewEmployee
-            }>
+            }
+          >
             {" "}
             Add New Employee{" "}
           </button>
@@ -653,9 +698,7 @@ function App({ socket }) {
             <div class="card">
               <div class="card-header">
                 <div className="row">
-                  <h4 class="col-12 card-title mb-3">
-                    {employee?.name}{" "}
-                  </h4>
+                  <h4 class="col-12 card-title mb-3">{employee?.name} </h4>
                   <div className="col-12 d-flex flex-row">
                     <button
                       className="btn btn-danger btn-xs"
@@ -761,6 +804,36 @@ function App({ socket }) {
                             setEmployeeDetail(employee.id, "services", services)
                           }
                         />
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">
+                        Dover Service
+                      </label>
+                      <div class="col-sm-8">
+                        <div className="row">
+                          <div className="col-12">
+                            <div className="row">
+                              <div className="col-8">
+                                <input
+                                  type="checkbox"
+                                  id={`dover-checkbox}`}
+                                  className="mr-2"
+                                  name={"dover test"}
+                                  value={employee.dover?.required}
+                                  checked={employee.dover?.required}
+                                  onClick={() =>
+                                    toggleDoverRequested(employee.id)
+                                  }
+                                />
+                                <label htmlFor={`dover-checkbox`}>
+                                  Require dover test
+                                </label>
+                              </div>
+                              <div className="col-4">{getFormattedPrice(DOVER_PRICE)}</div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div class="form-group row">

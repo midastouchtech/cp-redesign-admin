@@ -10,7 +10,7 @@ const Header = ({ title, onBack, user, latestNotifications }) => {
   const toggleNotifications = () => {
     setShow(!showNotifications);
   };
-  console.log("latest notifications", latestNotifications);
+  
   return (
     <div className="header">
       <div className="header-content">

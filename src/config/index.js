@@ -1,4 +1,5 @@
 export const CLINIC_LOCATIONS = ["Hendrina", "Churchill"];
+export const DOVER_PRICE = 710.70
 export const MEDICAL_SERVICES = {
   "medical-examination": {
     price: 525.54,
@@ -48,29 +49,11 @@ export const MEDICAL_SERVICES = {
     id: "clearance",
     info: "What is the creatinine clearance test? The creatinine clearance test is an older test used to check your kidney function. This test allows your healthcare provider to look at samples of your urine and blood to see how much of the waste product — creatinine — is filtered out by your kidneys",
   },
-  "vienna-test": {
-    price: 710.70,
-    title: "Dover Test",
-    id: "vienna-test",
-    info: "The test is a valuable preventative measure for employees working with moving machinery, staff operating vehicles and office staff. Skills are assessed as they currently exist. ... A computerised assessment report will give an indication on corrective measures to be taken into account.",
-  },
   hiv: {
     price: 124.41,
     title: "HIV",
     id: "hiv",
     info: "HIV tests are used to detect the presence of the human immunodeficiency virus, the virus that causes acquired immunodeficiency syndrome, in serum, saliva, or urine. Such tests may detect antibodies, antigens, or RNA. ",
-  },
-  "fire-training": {
-    price: 999,
-    title: "Fire Awareness Training",
-    id: "fire-awareness-training",
-    info: "Basic Fire Safety Awareness training is developed to equip you with all the basic skills and knowledge required in the event of a fire, such as what to do if you discover a fire, locating and using extinguishers and evacuation routes, and the best way to deal with vulnerable individuals, such as the elderly and disabled.",
-  },
-  "first-aid-training": {
-    price: 999,
-    title: "First Aid Training",
-    id: "first-aid-training",
-    info: "When you understand first aid, you'll gain the ability to help those in need. Through our first aid certification classes you'll learn how to respond to specific situations, which will help you care for people in crisis as they wait for medical professionals to arrive.",
   },
   "full-exit-medical": {
     price: 756.27,
