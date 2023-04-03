@@ -391,7 +391,7 @@ const Reports = ({ socket }) => {
                             <td>{employee.name}</td>
                             <td>{employee.idNumber}</td>
                             <td>{employee.occupation}</td>
-                            <td>{employee.sites.length}</td>
+                            <td>{employee.sites.map(s => <p>{s.name}</p>)}</td>
                             <td>{employee?.clinic}</td>
                             <td>{employee?.price}</td>
                             <td>
