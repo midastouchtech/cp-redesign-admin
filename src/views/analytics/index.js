@@ -10,7 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { keys, range, values } from "ramda";
+import { isNil, keys, mergeAll, range, values } from "ramda";
 import moment from "moment";
 
 const Wrapper = styled.div`
@@ -23,7 +23,7 @@ const Wrapper = styled.div`
 `;
 
 const ChartContainer = styled.div`
-  width: 45%;
+  width: 100%;
 `;
 ChartJS.register(
   CategoryScale,
@@ -74,23 +74,89 @@ const Analytics = ({ socket }) => {
     });
   };
 
-  const options = {
+  const amountOptions = {
     responsive: true,
     plugins: {
       legend: {
         position: "top",
       },
+      title: {
+        display: true,
+        text: "Gross Appointment Pay",
+      },
     },
   };
 
-  const labels = keys(analytics?.amountsMade);
+  const appOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Appointments",
+      },
+    },
+  };
+
+  const employeeOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Employees Serviced",
+      },
+    },
+  };
+
+  const serviceOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Services Rendered",
+      },
+    },
+  };
+
+  const labels = range(1, moment(selectedMonth, "MMMM").daysInMonth()).map(
+    (d) =>
+      `${selectedYear}-${moment(selectedMonth, "MMMM").format(
+        "MM"
+      )}-${d.toLocaleString("en-US", {
+        minimumIntegerDigits: 2,
+        useGrouping: false,
+      })}`
+  );
+  const getValues = (data, type, location)=> {
+    const i = !isNil(data) ? values(mergeAll(labels.map(d => ({[d]: data[d] ?? 0})))) : [];
+    return i;
+  }
+
   const financeData = {
     labels,
     datasets: [
       {
-        label: "Amount Paid",
-        data: values(analytics?.amountsMade),
-        backgroundColor: "pink",
+        label: "All Clinics",
+        data: getValues(analytics?.allClinics?.amountsMade),
+        backgroundColor: "lightslategrey",
+      },
+      {
+        label: "Hendrina",
+        data: getValues(analytics?.hendrina?.amountsMade),
+        backgroundColor: "blue",
+      },
+      {
+        label: "Churchill",
+        data: getValues(analytics?.churchill?.amountsMade),
+        backgroundColor: "lightgreen",
       },
     ],
   };
@@ -99,9 +165,19 @@ const Analytics = ({ socket }) => {
     labels,
     datasets: [
       {
-        label: "Appointments",
-        data: values(analytics?.appointments),
-        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        label: "All Clinics",
+        data: getValues(analytics?.allClinics?.appointments),
+        backgroundColor: "lightslategrey",
+      },
+      {
+        label: "Hendrina",
+        data: getValues(analytics?.hendrina?.appointments),
+        backgroundColor: "blue",
+      },
+      {
+        label: "Churchill",
+        data: getValues(analytics?.churchill?.appointments),
+        backgroundColor: "lightgreen",
       },
     ],
   };
@@ -110,9 +186,19 @@ const Analytics = ({ socket }) => {
     labels,
     datasets: [
       {
-        label: "Employees Serviced",
-        data: values(analytics?.employeesCateredTo),
-        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        label: "All Clinics",
+        data: getValues(analytics?.allClinics?.employeesCateredTo),
+        backgroundColor: "lightslategrey",
+      },
+      {
+        label: "Hendrina",
+        data: getValues(analytics?.hendrina?.employeesCateredTo),
+        backgroundColor: "blue",
+      },
+      {
+        label: "Churchill",
+        data: getValues(analytics?.churchill?.employeesCateredTo),
+        backgroundColor: "lightgreen",
       },
     ],
   };
@@ -121,9 +207,19 @@ const Analytics = ({ socket }) => {
     labels,
     datasets: [
       {
-        label: "Services Performed",
-        data: values(analytics?.servicesPerformed),
-        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        label: "All Clinics",
+        data: getValues(analytics?.allClinics?.servicesPerformed),
+        backgroundColor: "lightslategrey",
+      },
+      {
+        label: "Hendrina",
+        data: getValues(analytics?.hendrina?.servicesPerformed),
+        backgroundColor: "blue",
+      },
+      {
+        label: "Churchill",
+        data: getValues(analytics?.churchill?.servicesPerformed),
+        backgroundColor: "lightgreen",
       },
     ],
   };
@@ -138,18 +234,14 @@ const Analytics = ({ socket }) => {
           </span>
         </div>
         <div className="d-flex mb-3">
-        <button
+          <button
             type="button"
             class="btn btn-primary  mb-3"
             onClick={getAnalytics}
           >
             View
           </button>
-        <button
-            type="button"
-            class="btn btn-primary mb-3"
-            onClick={clear}
-          >
+          <button type="button" class="btn btn-primary mb-3" onClick={clear}>
             Clear
           </button>
           <select
@@ -187,22 +279,26 @@ const Analytics = ({ socket }) => {
         <Wrapper>
           <ChartContainer>
             <div>
-              {analytics && <Bar options={options} data={financeData} />}
+              {analytics && <Bar options={amountOptions} data={financeData} />}
             </div>
           </ChartContainer>
           <ChartContainer>
             <div>
-              {analytics && <Bar options={options} data={appointmentData} />}
+              {analytics && <Bar options={appOptions} data={appointmentData} />}
             </div>
           </ChartContainer>
           <ChartContainer>
             <div>
-              {analytics && <Bar options={options} data={employeeData} />}
+              {analytics && (
+                <Bar options={employeeOptions} data={employeeData} />
+              )}
             </div>
           </ChartContainer>
           <ChartContainer>
             <div>
-              {analytics && <Bar options={options} data={servicesData} />}
+              {analytics && (
+                <Bar options={serviceOptions} data={servicesData} />
+              )}
             </div>
           </ChartContainer>
         </Wrapper>
