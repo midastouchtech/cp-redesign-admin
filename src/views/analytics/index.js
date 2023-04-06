@@ -24,6 +24,14 @@ const Wrapper = styled.div`
 
 const ChartContainer = styled.div`
   width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  div{
+    height: 100% ;
+    width: 100% ;
+  }
 `;
 ChartJS.register(
   CategoryScale,
@@ -148,10 +156,12 @@ const Analytics = ({ socket }) => {
         useGrouping: false,
       })}`
   );
-  const getValues = (data, type, location)=> {
-    const i = !isNil(data) ? values(mergeAll(labels.map(d => ({[d]: data[d] ?? 0})))) : [];
+  const getValues = (data, type, location) => {
+    const i = !isNil(data)
+      ? values(mergeAll(labels.map((d) => ({ [d]: data[d] ?? 0 }))))
+      : [];
     return i;
-  }
+  };
 
   const financeData = {
     labels,
@@ -307,16 +317,46 @@ const Analytics = ({ socket }) => {
       {!loading && (
         <Wrapper>
           <ChartContainer>
+            <p>
+              <strong>Net pay: </strong>
+              {analytics &&
+                formatPrice(
+                  getValues(analytics?.allClinics?.amountsMade).reduce(
+                    (acc, curr) => curr + acc,
+                    0
+                  )
+                )}
+            </p>
             <div>
               {analytics && <Bar options={amountOptions} data={financeData} />}
             </div>
           </ChartContainer>
           <ChartContainer>
+            <hr />
+            <p>
+              <strong>Total Appointments: </strong>
+              {analytics &&
+                  getValues(analytics?.allClinics?.appointments).reduce(
+                    (acc, curr) => curr + acc,
+                    0
+                  )
+                }
+            </p>
             <div>
               {analytics && <Bar options={appOptions} data={appointmentData} />}
             </div>
           </ChartContainer>
           <ChartContainer>
+          <hr />
+            <p>
+              <strong>Total employees serviced: </strong>
+              {analytics &&
+                  getValues(analytics?.allClinics?.employeesCateredTo).reduce(
+                    (acc, curr) => curr + acc,
+                    0
+                  )
+                }
+            </p>
             <div>
               {analytics && (
                 <Bar options={employeeOptions} data={employeeData} />
@@ -324,6 +364,16 @@ const Analytics = ({ socket }) => {
             </div>
           </ChartContainer>
           <ChartContainer>
+          <hr />
+            <p>
+              <strong>Total services rendered: </strong>
+              {analytics &&
+                  getValues(analytics?.allClinics?.servicesPerformed).reduce(
+                    (acc, curr) => curr + acc,
+                    0
+                  )
+                }
+            </p>
             <div>
               {analytics && (
                 <Bar options={serviceOptions} data={servicesData} />
