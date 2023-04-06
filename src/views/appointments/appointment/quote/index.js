@@ -188,6 +188,13 @@ function App({ socket }) {
         (employee) => employee.dover?.required
       ).length;
 
+      console.log("doverPrice", doverPrices);
+      console.log("servicesPrice", servicesPrice);
+      console.log("site price", sitesPrice);
+      console.log("accessCardPrice", accessCardPrices);
+    const bookingPrice = servicesPrice + sitesPrice + accessCardPrices + doverPrices;
+    console.log("bookingPrice", bookingPrice);
+
       setDoverPrice(doverPrices);
       setDoverCount(employeesDoingDOver);
       setServicesPrice(servicesPrice);
