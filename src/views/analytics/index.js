@@ -132,30 +132,26 @@ const Analytics = ({ socket }) => {
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
         <div className="mb-3 mr-3">
-          <h6 className="fs-16 text-black font-w600 mb-0">Finance reports</h6>
+          <h6 className="fs-16 text-black font-w600 mb-0">Analytics</h6>
           <span className="fs-14">
-            Listed below is information for each employee
+            Listed below is monthly analytical information
           </span>
         </div>
         <div className="d-flex mb-3">
-          <button
+        <button
             type="button"
-            class="btn btn-primary btn-block mb-3"
+            class="btn btn-primary  mb-3"
             onClick={getAnalytics}
           >
             View
           </button>
-        </div>
-        <div className="d-flex mb-3">
-          <button
+        <button
             type="button"
-            class="btn btn-primary btn-block mb-3"
+            class="btn btn-primary mb-3"
             onClick={clear}
           >
             Clear
           </button>
-        </div>
-        <div className="d-flex mb-3">
           <select
             className="form-control style-2 default-select mr-3"
             onClick={(e) => {

@@ -107,6 +107,12 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
               Reports
             </Link>
           </li>
+          <li onClick={toggleOpen}>
+            <Link to="/analytics" class="has-arrow ai-icon" aria-expanded="false">
+              <MdHealthAndSafety />
+              Analytics
+            </Link>
+          </li>
           {/* <li className="has-arrow ai-icon" onClick={toggleOpen}>
             <Link to="/profile" class="has-arrow ai-icon" aria-expanded="false">
               <MdPerson />
