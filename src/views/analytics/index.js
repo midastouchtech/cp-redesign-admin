@@ -126,6 +126,19 @@ const Analytics = ({ socket }) => {
     },
   };
 
+  const companiesOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Companies Created vs New Users",
+      },
+    },
+  };
+
   const labels = range(1, moment(selectedMonth, "MMMM").daysInMonth()).map(
     (d) =>
       `${selectedYear}-${moment(selectedMonth, "MMMM").format(
@@ -224,6 +237,22 @@ const Analytics = ({ socket }) => {
     ],
   };
 
+  const compsAndUsersData = {
+    labels,
+    datasets: [
+      {
+        label: "Companies Created",
+        data: getValues(analytics?.companiesJoined),
+        backgroundColor: "lightslategrey",
+      },
+      {
+        label: "New Users",
+        data: getValues(analytics?.usersJoined),
+        backgroundColor: "blue",
+      },
+    ],
+  };
+
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
@@ -298,6 +327,13 @@ const Analytics = ({ socket }) => {
             <div>
               {analytics && (
                 <Bar options={serviceOptions} data={servicesData} />
+              )}
+            </div>
+          </ChartContainer>
+          <ChartContainer>
+            <div>
+              {analytics && (
+                <Bar options={companiesOptions} data={compsAndUsersData} />
               )}
             </div>
           </ChartContainer>
