@@ -138,13 +138,13 @@ function App({ socket }) {
       socket.emit("GET_COMPANY", { id: appointment?.details?.company?.id });
       setIsLoading(false);
       setAppointment(appointment);
-      const allServices = appointment?.details?.employees?.reduce(
+      const allServicesWithVienna = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           return [...acc, ...employee.services];
         },
         []
       );
-
+      const allServices = allServicesWithVienna.filter(s => s.id !== "vienna-test")
       //
       console.log("all services", allServices)
       const servicesPrice = allServices.reduce((acc, service) => {

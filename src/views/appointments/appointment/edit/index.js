@@ -100,12 +100,13 @@ function App({ socket, stateUser }) {
   };
 
   const calculateBookingPrice = () => {
-    const allServices = appointment?.details?.employees?.reduce(
+    const allServicesWithVienna = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return [...acc, ...employee.services];
       },
       []
     );
+    const allServices = allServicesWithVienna.filter(s => s.id !== "vienna-test")
     const servicesPrice = allServices.reduce((acc, service) => {
       return acc + service.price;
     }, 0);

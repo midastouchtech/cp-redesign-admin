@@ -108,12 +108,13 @@ function App({ socket }) {
   };
 
   const calculateBookingPrice = () => {
-    const allServices = appointment?.details?.employees?.reduce(
+    const allServicesWithVienna = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return [...acc, ...employee.services];
       },
       []
     );
+    const allServices = allServicesWithVienna.filter(s => s.id !== "vienna-test")
     const services = keys(MEDICAL_SERVICES).reduce((accx, service) => {
       const filteredServices = allServices.filter((s) => s.id === service);
       const reducedPriceFromFilteredServices = filteredServices.reduce(
