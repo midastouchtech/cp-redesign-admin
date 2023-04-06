@@ -391,7 +391,7 @@ const Analytics = ({ socket }) => {
                         Hendrina :{" "}
                         <span className="fs-12 text-black font-w600">
                           {analytics &&
-                            formatPrice(
+                            new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(
                               getValues(
                                 analytics?.hendrina?.amountsMade
                               ).reduce((acc, curr) => curr + acc, 0)
@@ -402,7 +402,7 @@ const Analytics = ({ socket }) => {
                         Churchill :{" "}
                         <span className="fs-12 text-black font-w600">
                           {analytics &&
-                            formatPrice(
+                            new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(
                               getValues(
                                 analytics?.churchill?.amountsMade
                               ).reduce((acc, curr) => curr + acc, 0)
