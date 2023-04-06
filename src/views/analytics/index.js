@@ -540,7 +540,7 @@ const Analytics = ({ socket }) => {
            <Line
              percent={(counter / 60)* 100}
              strokeWidth={2}
-             strokeColor="##fe4128"
+             strokeColor="#fe4128"
            />
          </div>
        </div>
