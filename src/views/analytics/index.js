@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import {
   Chart as ChartJS,
@@ -12,6 +12,7 @@ import {
 import { Bar } from "react-chartjs-2";
 import { isNil, keys, mergeAll, range, values } from "ramda";
 import moment from "moment";
+import { Line } from "rc-progress";
 
 import { BsPeopleFill } from "react-icons/bs";
 import { GiReceiveMoney } from "react-icons/gi";
@@ -69,8 +70,32 @@ const Analytics = ({ socket }) => {
   const [selectedMonth, setSelectedMonth] = useState(moment().format("MMMM"));
   const [selectedYear, setSelectedYear] = useState(moment().format("YYYY"));
   const [loading, setLoading] = useState(true);
+  const [counter, setCounter] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const myInterval = useRef();
 
-  if (socket && !analytics) {
+
+  useEffect(() => {
+    return () => clearInterval(myInterval.current);
+  }, []);
+
+  useEffect(() => {
+    if (isRunning && counter < 5) {
+      myInterval.current = setInterval(
+        () => setCounter((counter) => counter + 1),
+        1000
+      );
+    } else {
+      clearInterval(myInterval.current);
+      myInterval.current = null;
+    }
+  }, [isRunning]);
+
+ 
+  if (socket && !analytics && !isRunning) {
+    setCounter(0)
+    setIsRunning(true);
+    
     socket.emit("GET_FINANCE_ANALYTICS", {
       date: `01-${selectedMonth}-${selectedYear}`,
     });
@@ -79,6 +104,8 @@ const Analytics = ({ socket }) => {
       setAnalytics(data);
       setOriginalAnalytics(data);
       setLoading(false);
+      setCounter(0)
+      setIsRunning(false);
     });
   }
 
@@ -87,8 +114,9 @@ const Analytics = ({ socket }) => {
   };
 
   const getAnalytics = () => {
+    setCounter(0)
+    setIsRunning(true);
     setLoading(true);
-
     socket.emit("GET_FINANCE_ANALYTICS", {
       date: `01-${selectedMonth}-${selectedYear}`,
     });
@@ -96,6 +124,8 @@ const Analytics = ({ socket }) => {
       console.log(data);
       setAnalytics(data);
       setLoading(false);
+      setCounter(0)
+      setIsRunning(false);
     });
   };
 
@@ -279,7 +309,7 @@ const Analytics = ({ socket }) => {
       },
     ],
   };
-
+  console.log("timeElapsed", counter);
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
@@ -390,7 +420,9 @@ const Analytics = ({ socket }) => {
                 <div className="card-body">
                   <div className="d-flex align-items-end">
                     <div>
-                      <p className="fs-14 text-black mb-1 bold">Total Appointments</p>
+                      <p className="fs-14 text-black mb-1 bold">
+                        Total Appointments
+                      </p>
                       <span className="fs-35 text-black font-w600">
                         {analytics &&
                           getValues(analytics?.allClinics?.appointments).reduce(
@@ -402,9 +434,10 @@ const Analytics = ({ socket }) => {
                         Hendrina :{" "}
                         <span className="fs-12 text-black font-w600">
                           {analytics &&
-                            getValues(
-                              analytics?.hendrina?.appointments
-                            ).reduce((acc, curr) => curr + acc, 0)}
+                            getValues(analytics?.hendrina?.appointments).reduce(
+                              (acc, curr) => curr + acc,
+                              0
+                            )}
                         </span>
                       </p>
                       <p className="fs-14 mb-1 bold">
@@ -426,7 +459,9 @@ const Analytics = ({ socket }) => {
                 <div className="card-body">
                   <div className="d-flex align-items-end">
                     <div>
-                      <p className="fs-14 text-black mb-1 bold">Total Employees Serviced</p>
+                      <p className="fs-14 text-black mb-1 bold">
+                        Total Employees Serviced
+                      </p>
                       <span className="fs-35 text-black font-w600">
                         {analytics &&
                           getValues(
@@ -461,7 +496,9 @@ const Analytics = ({ socket }) => {
                 <div className="card-body">
                   <div className="d-flex align-items-end">
                     <div>
-                      <p className="fs-14 text-black mb-1 bold">Total Services Rendered</p>
+                      <p className="fs-14 text-black mb-1 bold">
+                        Total Services Rendered
+                      </p>
                       <span className="fs-35 text-black font-w600">
                         {analytics &&
                           getValues(
@@ -495,6 +532,19 @@ const Analytics = ({ socket }) => {
         </div>
       </div>
       <h3 class="card-title">Breakdown</h3>
+     
+      {loading && (
+         <div class="row">
+         <div class="col-md-12 text-center">
+           <h1> Generating analytical data, please wait ....</h1>
+           <Line
+             percent={(counter / 60)* 100}
+             strokeWidth={2}
+             strokeColor="##fe4128"
+           />
+         </div>
+       </div>
+      )}
       {!loading && (
         <Wrapper>
           <ChartContainer>
@@ -535,13 +585,6 @@ const Analytics = ({ socket }) => {
             </div>
           </ChartContainer>
         </Wrapper>
-      )}
-      {loading && (
-        <div class="row">
-          <div class="col-md-12 text-center">
-            <h1> Generating analytical data, please wait ....</h1>
-          </div>
-        </div>
       )}
     </div>
   );
