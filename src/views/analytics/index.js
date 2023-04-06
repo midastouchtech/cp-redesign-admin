@@ -17,9 +17,9 @@ const Wrapper = styled.div`
   width: 100%;
   height: 300px;
   display: flex;
-  flex-direction:row;
+  flex-direction: row;
   justify-content: space-between;
-  flex-wrap:wrap;
+  flex-wrap: wrap;
 `;
 
 const ChartContainer = styled.div`
@@ -40,30 +40,39 @@ const formatPrice = (price) => {
 
 const Analytics = ({ socket }) => {
   const [analytics, setAnalytics] = useState(null);
-  const [originalAnalytics, setOriginalAnalytics] = useState(null)
+  const [originalAnalytics, setOriginalAnalytics] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(moment().format("MMMM"));
   const [selectedYear, setSelectedYear] = useState(moment().format("YYYY"));
+  const [loading, setLoading] = useState(true);
+
   if (socket && !analytics) {
-    socket.emit("GET_FINANCE_ANALYTICS", {date: `01-${selectedMonth}-${selectedYear}`});
+    socket.emit("GET_FINANCE_ANALYTICS", {
+      date: `01-${selectedMonth}-${selectedYear}`,
+    });
     socket.on("RECEIVE_FINANCE_ANALYTICS", (data) => {
       console.log(data);
       setAnalytics(data);
-      setOriginalAnalytics(data)
+      setOriginalAnalytics(data);
+      setLoading(false);
     });
   }
 
-  const clear =() => {
-    setAnalytics(originalAnalytics)
-  }
+  const clear = () => {
+    setAnalytics(originalAnalytics);
+  };
 
   const getAnalytics = () => {
-    socket.emit("GET_FINANCE_ANALYTICS", {date: `01-${selectedMonth}-${selectedYear}`});
+    setLoading(true);
+
+    socket.emit("GET_FINANCE_ANALYTICS", {
+      date: `01-${selectedMonth}-${selectedYear}`,
+    });
     socket.on("RECEIVE_FINANCE_ANALYTICS", (data) => {
       console.log(data);
       setAnalytics(data);
+      setLoading(false);
     });
-  }
-  
+  };
 
   const options = {
     responsive: true,
@@ -129,12 +138,20 @@ const Analytics = ({ socket }) => {
           </span>
         </div>
         <div className="d-flex mb-3">
-          <button type="button" class="btn btn-primary btn-block mb-3" onClick={getAnalytics}>
+          <button
+            type="button"
+            class="btn btn-primary btn-block mb-3"
+            onClick={getAnalytics}
+          >
             View
           </button>
         </div>
         <div className="d-flex mb-3">
-          <button type="button" class="btn btn-primary btn-block mb-3" onClick={clear}>
+          <button
+            type="button"
+            class="btn btn-primary btn-block mb-3"
+            onClick={clear}
+          >
             Clear
           </button>
         </div>
@@ -170,26 +187,37 @@ const Analytics = ({ socket }) => {
           </select>
         </div>
       </div>
-      <Wrapper>
-      <ChartContainer>
-        <div>{analytics && <Bar options={options} data={financeData} />}</div>
-      </ChartContainer>
-      <ChartContainer>
-        <div>
-          {analytics && <Bar options={options} data={appointmentData} />}
+      {!loading && (
+        <Wrapper>
+          <ChartContainer>
+            <div>
+              {analytics && <Bar options={options} data={financeData} />}
+            </div>
+          </ChartContainer>
+          <ChartContainer>
+            <div>
+              {analytics && <Bar options={options} data={appointmentData} />}
+            </div>
+          </ChartContainer>
+          <ChartContainer>
+            <div>
+              {analytics && <Bar options={options} data={employeeData} />}
+            </div>
+          </ChartContainer>
+          <ChartContainer>
+            <div>
+              {analytics && <Bar options={options} data={servicesData} />}
+            </div>
+          </ChartContainer>
+        </Wrapper>
+      )}
+      {loading && (
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <h1> Generating analytical data, please wait ....</h1>
+          </div>
         </div>
-      </ChartContainer>
-      <ChartContainer>
-        <div>
-          {analytics && <Bar options={options} data={employeeData} />}
-        </div>
-      </ChartContainer>
-      <ChartContainer>
-        <div>
-          {analytics && <Bar options={options} data={servicesData} />}
-        </div>
-      </ChartContainer>
-      </Wrapper>
+      )}
     </div>
   );
 };
