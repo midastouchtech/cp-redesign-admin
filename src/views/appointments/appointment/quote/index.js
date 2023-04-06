@@ -146,6 +146,7 @@ function App({ socket }) {
       );
 
       //
+      console.log("all services", allServices)
       const servicesPrice = allServices.reduce((acc, service) => {
         return acc + service.price;
       }, 0);
