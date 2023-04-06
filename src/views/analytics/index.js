@@ -71,10 +71,6 @@ const Analytics = ({ socket }) => {
       legend: {
         position: "top",
       },
-      title: {
-        display: true,
-        text: "Sales",
-      },
     },
   };
 
