@@ -40,6 +40,7 @@ const Wrapper = styled.div`
   flex-wrap: wrap;
   @media (max-width: 768px) {
     overflow-x: scroll;
+    height:auto;
   }
 `;
 
@@ -51,16 +52,16 @@ const ChartContainer = styled.div`
   flex-direction: column;
   @media (max-width: 768px) {
     overflow-x: scroll;
-    width: 300vw;
-    height: 500px;
+    width: 200vw;
+    height: 400px;
   }
   div {
     height: 100%;
     width: 100%;
     @media (max-width: 768px) {
       overflow-x: scroll;
-      width: 300vw;
-      height: 500px;
+      width: 200vw;
+      height: 400px;
     }
   }
 `;
