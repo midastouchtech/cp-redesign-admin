@@ -13,6 +13,23 @@ import { Bar } from "react-chartjs-2";
 import { isNil, keys, mergeAll, range, values } from "ramda";
 import moment from "moment";
 
+import { BsPeopleFill } from "react-icons/bs";
+import { GiReceiveMoney } from "react-icons/gi";
+import { BiNotepad } from "react-icons/bi";
+import { FaSyringe } from "react-icons/fa";
+
+const iconsByTitle = {
+  money: GiReceiveMoney,
+  employees: BsPeopleFill,
+  pad: BiNotepad,
+  syringe: FaSyringe,
+};
+
+const getIcon = (title) => {
+  const Icon = iconsByTitle[title];
+  return Icon ? <Icon /> : null;
+};
+
 const Wrapper = styled.div`
   width: 100%;
   height: 300px;
@@ -28,9 +45,9 @@ const ChartContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  div{
-    height: 100% ;
-    width: 100% ;
+  div {
+    height: 100%;
+    width: 100%;
   }
 `;
 ChartJS.register(
@@ -275,12 +292,12 @@ const Analytics = ({ socket }) => {
         <div className="d-flex mb-3">
           <button
             type="button"
-            class="btn btn-primary  mb-3"
+            class="btn btn-primary  mb-3 mr-2"
             onClick={getAnalytics}
           >
-            View
+            Generate
           </button>
-          <button type="button" class="btn btn-primary mb-3" onClick={clear}>
+          <button type="button" class="btn btn-primary mb-3 mr-2" onClick={clear}>
             Clear
           </button>
           <select
@@ -314,49 +331,107 @@ const Analytics = ({ socket }) => {
           </select>
         </div>
       </div>
+
+      <div >
+        <div >
+          <h3 class="card-title">Summary</h3>
+          <h6 class="card-subtitle mb-2 text-muted">
+            This is how ClinicPlus performed for the month of {selectedMonth} in
+            the year {selectedYear}
+          </h6>
+          <div className="row">
+            <div className="col-xl-3 col-xxl-3 col-lg-3 col-sm-6">
+              <div className="card">
+                <div className="card-body">
+                  <div className="d-flex align-items-end">
+                    <div>
+                      <p className="fs-14 mb-1">Net Pay</p>
+                      <span className="fs-35 text-black font-w600">
+                        {analytics &&
+                          formatPrice(
+                            getValues(
+                              analytics?.allClinics?.amountsMade
+                            ).reduce((acc, curr) => curr + acc, 0)
+                          )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-xl-3 col-xxl-3 col-lg-3 col-sm-6">
+              <div className="card">
+                <div className="card-body">
+                  <div className="d-flex align-items-end">
+                    <div>
+                      <p className="fs-14 mb-1">Total Appointments</p>
+                      <span className="fs-35 text-black font-w600">
+                        {analytics &&
+                          getValues(analytics?.allClinics?.appointments).reduce(
+                            (acc, curr) => curr + acc,
+                            0
+                          )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-xl-3 col-xxl-3 col-lg-3 col-sm-6">
+              <div className="card">
+                <div className="card-body">
+                  <div className="d-flex align-items-end">
+                    <div>
+                      <p className="fs-14 mb-1">Total Employees Serviced</p>
+                      <span className="fs-35 text-black font-w600">
+                        {analytics &&
+                          getValues(
+                            analytics?.allClinics?.employeesCateredTo
+                          ).reduce((acc, curr) => curr + acc, 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-xl-3 col-xxl-3 col-lg-3 col-sm-6">
+              <div className="card">
+                <div className="card-body">
+                  <div className="d-flex align-items-end">
+                    <div>
+                      <p className="fs-14 mb-1">Total Services Rendered</p>
+                      <span className="fs-35 text-black font-w600">
+                        {analytics &&
+                          getValues(
+                            analytics?.allClinics?.servicesPerformed
+                          ).reduce((acc, curr) => curr + acc, 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3 class="card-title">Breakdown</h3>
       {!loading && (
         <Wrapper>
           <ChartContainer>
-            <p>
-              <strong>Net pay: </strong>
-              {analytics &&
-                formatPrice(
-                  getValues(analytics?.allClinics?.amountsMade).reduce(
-                    (acc, curr) => curr + acc,
-                    0
-                  )
-                )}
-            </p>
             <div>
               {analytics && <Bar options={amountOptions} data={financeData} />}
             </div>
           </ChartContainer>
           <ChartContainer>
             <hr />
-            <p>
-              <strong>Total Appointments: </strong>
-              {analytics &&
-                  getValues(analytics?.allClinics?.appointments).reduce(
-                    (acc, curr) => curr + acc,
-                    0
-                  )
-                }
-            </p>
+
             <div>
               {analytics && <Bar options={appOptions} data={appointmentData} />}
             </div>
           </ChartContainer>
           <ChartContainer>
-          <hr />
-            <p>
-              <strong>Total employees serviced: </strong>
-              {analytics &&
-                  getValues(analytics?.allClinics?.employeesCateredTo).reduce(
-                    (acc, curr) => curr + acc,
-                    0
-                  )
-                }
-            </p>
+            <hr />
+
             <div>
               {analytics && (
                 <Bar options={employeeOptions} data={employeeData} />
@@ -364,16 +439,8 @@ const Analytics = ({ socket }) => {
             </div>
           </ChartContainer>
           <ChartContainer>
-          <hr />
-            <p>
-              <strong>Total services rendered: </strong>
-              {analytics &&
-                  getValues(analytics?.allClinics?.servicesPerformed).reduce(
-                    (acc, curr) => curr + acc,
-                    0
-                  )
-                }
-            </p>
+            <hr />
+
             <div>
               {analytics && (
                 <Bar options={serviceOptions} data={servicesData} />
