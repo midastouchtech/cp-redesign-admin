@@ -380,7 +380,7 @@ const Analytics = ({ socket }) => {
                   <div className="d-flex align-items-end">
                     <div>
                       <p className="fs-14 text-black mb-1 bold">Net Pay</p>
-                      <span className="fs-30 text-black font-w600">
+                      <span className="fs-34 text-black font-w600">
                         {analytics && new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(getValues(
                               analytics?.allClinics?.amountsMade
                             ).reduce((acc, curr) => curr + acc, 0))}
