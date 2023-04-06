@@ -5,6 +5,7 @@ import {HiUserGroup} from "react-icons/hi";
 import styled from "styled-components";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 import { MdAdminPanelSettings } from "react-icons/md";
+import { AiOutlineLineChart } from 'react-icons/ai';
 
 const NavContainer = styled.div`
   .deznav {
@@ -109,7 +110,7 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
           </li>
           <li onClick={toggleOpen}>
             <Link to="/analytics" class="has-arrow ai-icon" aria-expanded="false">
-              <MdHealthAndSafety />
+              <AiOutlineLineChart />
               Analytics
             </Link>
           </li>

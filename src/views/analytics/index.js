@@ -147,7 +147,7 @@ const Analytics = ({ socket }) => {
     },
   };
 
-  const labels = range(1, moment(selectedMonth, "MMMM").daysInMonth()).map(
+  const labels = range(1, moment(selectedMonth, "MMMM").daysInMonth() + 1).map(
     (d) =>
       `${selectedYear}-${moment(selectedMonth, "MMMM").format(
         "MM"
