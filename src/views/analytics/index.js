@@ -285,7 +285,7 @@ const Analytics = ({ socket }) => {
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
         <div className="mb-3 mr-3">
           <h6 className="fs-16 text-black font-w600 mb-0">Analytics</h6>
-          <span className="fs-14">
+          <span className="fs-14 text-black">
             Listed below is monthly analytical information
           </span>
         </div>
@@ -297,7 +297,11 @@ const Analytics = ({ socket }) => {
           >
             Generate
           </button>
-          <button type="button" class="btn btn-primary mb-3 mr-2" onClick={clear}>
+          <button
+            type="button"
+            class="btn btn-primary mb-3 mr-2"
+            onClick={clear}
+          >
             Clear
           </button>
           <select
@@ -332,8 +336,8 @@ const Analytics = ({ socket }) => {
         </div>
       </div>
 
-      <div >
-        <div >
+      <div>
+        <div>
           <h3 class="card-title">Summary</h3>
           <h6 class="card-subtitle mb-2 text-muted">
             This is how ClinicPlus performed for the month of {selectedMonth} in
@@ -345,7 +349,7 @@ const Analytics = ({ socket }) => {
                 <div className="card-body">
                   <div className="d-flex align-items-end">
                     <div>
-                      <p className="fs-14 mb-1">Net Pay</p>
+                      <p className="fs-14 text-black mb-1 bold">Net Pay</p>
                       <span className="fs-35 text-black font-w600">
                         {analytics &&
                           formatPrice(
@@ -354,6 +358,28 @@ const Analytics = ({ socket }) => {
                             ).reduce((acc, curr) => curr + acc, 0)
                           )}
                       </span>
+                      <p className="fs-14 mb-1 bold">
+                        Hendrina :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            formatPrice(
+                              getValues(
+                                analytics?.hendrina?.amountsMade
+                              ).reduce((acc, curr) => curr + acc, 0)
+                            )}
+                        </span>
+                      </p>
+                      <p className="fs-14 mb-1 bold">
+                        Churchill :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            formatPrice(
+                              getValues(
+                                analytics?.churchill?.amountsMade
+                              ).reduce((acc, curr) => curr + acc, 0)
+                            )}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -364,7 +390,7 @@ const Analytics = ({ socket }) => {
                 <div className="card-body">
                   <div className="d-flex align-items-end">
                     <div>
-                      <p className="fs-14 mb-1">Total Appointments</p>
+                      <p className="fs-14 text-black mb-1 bold">Total Appointments</p>
                       <span className="fs-35 text-black font-w600">
                         {analytics &&
                           getValues(analytics?.allClinics?.appointments).reduce(
@@ -372,6 +398,24 @@ const Analytics = ({ socket }) => {
                             0
                           )}
                       </span>
+                      <p className="fs-14 mb-1 bold">
+                        Hendrina :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            getValues(
+                              analytics?.hendrina?.appointments
+                            ).reduce((acc, curr) => curr + acc, 0)}
+                        </span>
+                      </p>
+                      <p className="fs-14 mb-1 bold">
+                        Churchill :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            getValues(
+                              analytics?.churchill?.appointments
+                            ).reduce((acc, curr) => curr + acc, 0)}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -382,13 +426,31 @@ const Analytics = ({ socket }) => {
                 <div className="card-body">
                   <div className="d-flex align-items-end">
                     <div>
-                      <p className="fs-14 mb-1">Total Employees Serviced</p>
+                      <p className="fs-14 text-black mb-1 bold">Total Employees Serviced</p>
                       <span className="fs-35 text-black font-w600">
                         {analytics &&
                           getValues(
                             analytics?.allClinics?.employeesCateredTo
                           ).reduce((acc, curr) => curr + acc, 0)}
                       </span>
+                      <p className="fs-14  mb-1 bold">
+                        Hendrina :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            getValues(
+                              analytics?.hendrina?.employeesCateredTo
+                            ).reduce((acc, curr) => curr + acc, 0)}
+                        </span>
+                      </p>
+                      <p className="fs-14  mb-1 bold">
+                        Churchill :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            getValues(
+                              analytics?.churchill?.employeesCateredTo
+                            ).reduce((acc, curr) => curr + acc, 0)}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -399,13 +461,31 @@ const Analytics = ({ socket }) => {
                 <div className="card-body">
                   <div className="d-flex align-items-end">
                     <div>
-                      <p className="fs-14 mb-1">Total Services Rendered</p>
+                      <p className="fs-14 text-black mb-1 bold">Total Services Rendered</p>
                       <span className="fs-35 text-black font-w600">
                         {analytics &&
                           getValues(
                             analytics?.allClinics?.servicesPerformed
                           ).reduce((acc, curr) => curr + acc, 0)}
                       </span>
+                      <p className="fs-14  mb-1 bold">
+                        Hendrina :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            getValues(
+                              analytics?.hendrina?.servicesPerformed
+                            ).reduce((acc, curr) => curr + acc, 0)}
+                        </span>
+                      </p>
+                      <p className="fs-14  mb-1 bold">
+                        Churchill :{" "}
+                        <span className="fs-12 text-black font-w600">
+                          {analytics &&
+                            getValues(
+                              analytics?.churchill?.servicesPerformed
+                            ).reduce((acc, curr) => curr + acc, 0)}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>
