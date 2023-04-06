@@ -38,6 +38,9 @@ const Wrapper = styled.div`
   flex-direction: row;
   justify-content: space-between;
   flex-wrap: wrap;
+  @media (max-width: 768px) {
+    overflow-x: scroll;
+  }
 `;
 
 const ChartContainer = styled.div`
@@ -46,9 +49,19 @@ const ChartContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  @media (max-width: 768px) {
+    overflow-x: scroll;
+    width: 300vw;
+    height: 500px;
+  }
   div {
     height: 100%;
     width: 100%;
+    @media (max-width: 768px) {
+      overflow-x: scroll;
+      width: 300vw;
+      height: 500px;
+    }
   }
 `;
 ChartJS.register(
@@ -74,7 +87,6 @@ const Analytics = ({ socket }) => {
   const [isRunning, setIsRunning] = useState(false);
   const myInterval = useRef();
 
-
   useEffect(() => {
     return () => clearInterval(myInterval.current);
   }, []);
@@ -91,11 +103,10 @@ const Analytics = ({ socket }) => {
     }
   }, [isRunning]);
 
- 
   if (socket && !analytics && !isRunning) {
-    setCounter(0)
+    setCounter(0);
     setIsRunning(true);
-    
+
     socket.emit("GET_FINANCE_ANALYTICS", {
       date: `01-${selectedMonth}-${selectedYear}`,
     });
@@ -104,7 +115,7 @@ const Analytics = ({ socket }) => {
       setAnalytics(data);
       setOriginalAnalytics(data);
       setLoading(false);
-      setCounter(0)
+      setCounter(0);
       setIsRunning(false);
     });
   }
@@ -114,7 +125,7 @@ const Analytics = ({ socket }) => {
   };
 
   const getAnalytics = () => {
-    setCounter(0)
+    setCounter(0);
     setIsRunning(true);
     setLoading(true);
     socket.emit("GET_FINANCE_ANALYTICS", {
@@ -124,7 +135,7 @@ const Analytics = ({ socket }) => {
       console.log(data);
       setAnalytics(data);
       setLoading(false);
-      setCounter(0)
+      setCounter(0);
       setIsRunning(false);
     });
   };
@@ -381,17 +392,24 @@ const Analytics = ({ socket }) => {
                     <div>
                       <p className="fs-14 text-black mb-1 bold">Net Pay</p>
                       <span className="fs-34 text-black font-w600">
-                        {analytics && new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(getValues(
+                        {analytics &&
+                          new Intl.NumberFormat("en-ZA", {
+                            style: "currency",
+                            currency: "ZAR",
+                          }).format(
+                            getValues(
                               analytics?.allClinics?.amountsMade
-                            ).reduce((acc, curr) => curr + acc, 0))}
-
-                        
+                            ).reduce((acc, curr) => curr + acc, 0)
+                          )}
                       </span>
                       <p className="fs-14 mb-1 bold">
                         Hendrina :{" "}
                         <span className="fs-12 text-black font-w600">
                           {analytics &&
-                            new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(
+                            new Intl.NumberFormat("en-ZA", {
+                              style: "currency",
+                              currency: "ZAR",
+                            }).format(
                               getValues(
                                 analytics?.hendrina?.amountsMade
                               ).reduce((acc, curr) => curr + acc, 0)
@@ -402,7 +420,10 @@ const Analytics = ({ socket }) => {
                         Churchill :{" "}
                         <span className="fs-12 text-black font-w600">
                           {analytics &&
-                            new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(
+                            new Intl.NumberFormat("en-ZA", {
+                              style: "currency",
+                              currency: "ZAR",
+                            }).format(
                               getValues(
                                 analytics?.churchill?.amountsMade
                               ).reduce((acc, curr) => curr + acc, 0)
@@ -531,18 +552,18 @@ const Analytics = ({ socket }) => {
         </div>
       </div>
       <h3 class="card-title">Breakdown</h3>
-     
+
       {loading && (
-         <div class="row">
-         <div class="col-md-12 text-center">
-           <h1> Generating analytical data, please wait ....</h1>
-           <Line
-             percent={(counter / 60)* 100}
-             strokeWidth={2}
-             strokeColor="#fe4128"
-           />
-         </div>
-       </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <h1> Generating analytical data, please wait ....</h1>
+            <Line
+              percent={(counter / 60) * 100}
+              strokeWidth={2}
+              strokeColor="#fe4128"
+            />
+          </div>
+        </div>
       )}
       {!loading && (
         <Wrapper>
