@@ -33,7 +33,9 @@ const Operations = ({ socket }) => {
   }
 
   useEffect(()=>{
+    console.log("runnign effect")
     if (socket) {
+      socket.off("LOG")
       socket.on("LOG", (data) => {
         console.log("saving event", data.event)        
         addEvent({ name: data.event, time: moment().format("HH:mm:ss"), args: data.args })
