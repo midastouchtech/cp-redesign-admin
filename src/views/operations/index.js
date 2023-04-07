@@ -28,10 +28,9 @@ const Operations = ({ socket }) => {
           ...events,
           { name: data.event, time: moment().format("HH:mm:ss"), args: data.args },
         ]
-        if(!equals(events, newEvents)){
-          console.log("saving", newEvents)
-          setEvents(newEvents)
-        }
+        console.log("current events", events)
+        console.log("saving", newEvents)
+        setEvents(newEvents)
       });
     }
   }, [socket]);
