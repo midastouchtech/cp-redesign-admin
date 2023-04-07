@@ -24,7 +24,7 @@ function App({ socket }) {
       setError(user.error);
     });
     socket.on("RECEIVE_LOGIN_USER_SUCCESS", (user) => {
-      cookies.set("clinicplus_admin_logged_in_user", user.id, { expires: 1 });
+      cookies.set("clinicplus_admin_logged_in_user", user.id, { expires: 3 });
       setError("");
       setLoading(false);
       window.location.replace("/");
