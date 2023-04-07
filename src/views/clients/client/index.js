@@ -22,20 +22,22 @@ function App({ socket }) {
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({});
   const [avatars, setAvatars] = useState({});
+  const [hasRequested , setHasRequested] = useState(false)
 
-  if (socket && isLoading) {
-    socket.emit("GET_APPOINTMENT", { id: params.appId });
-    socket.on("RECEIVE_APPOINTMENT", (appointment) => {
-      //console.log("appointment page RECEIVE_APPOINTMENT", appointment);
-      setIsLoading(false);
-      setAppointment(appointment);
-      
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      //console.log("Database updated FROM APPOINTMENT PAGE");
+  
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && isLoading && hasRequested === false) {
+      setHasRequested(false);
       socket.emit("GET_APPOINTMENT", { id: params.appId });
-    });
-  }
+      socket.on("RECEIVE_APPOINTMENT", (appointment) => {
+        setIsLoading(false);
+        setAppointment(appointment);      
+      });
+    }
+  
+  }, [socket]);
+  
 
   return (
     <div class="container-fluid">

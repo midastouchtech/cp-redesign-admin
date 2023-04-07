@@ -1,5 +1,5 @@
 import { isNil, isEmpty, repeat, assoc } from "ramda";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { confirmAlert } from "react-confirm-alert"; // Import
@@ -36,6 +36,7 @@ const Companies = ({ socket }) => {
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [hasRequested , setHasRequested] = useState(false)
 
   const getPageClients = (p) => {
     socket.emit("GET_NEXT_PAGE_CLIENTS", { page: p, role: "client" });
@@ -45,11 +46,16 @@ const Companies = ({ socket }) => {
       setPage(p);
     });
   };
-
-  if (socket && !clients) {
-    getPageClients(0);
-  }
-
+  
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && !clients && hasRequested === false) {
+      setHasRequested(true);
+      getPageClients(0);
+    }
+  
+  }, [socket]);
+  
   const handleSearch = async () => {
     setLoading(true);
     setNotFound(false);

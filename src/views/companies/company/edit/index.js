@@ -33,20 +33,27 @@ function App({ socket, stateUser }) {
   const [originalCompany, setOriginalCompany] = useState({});
   const [hasUpdatedCompany, sethasUpdatedCompany] = useState(false);
   const [show, setShow] = useState(false);
+  const [hasRequested , setHasRequested] = useState(false)
 
-  if (socket && isLoading) {
-    socket.emit("GET_COMPANY", { id: params.companyId });
-    socket.on("RECEIVE_COMPANY", (client) => {
-      //console.log("client page RECEIVE_company", client);
-      setIsLoading(false);
-      setCompany(client);
-      setOriginalCompany(client);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      //console.log("Database updated FROM CLient PAGE");
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && isLoading && hasRequested === false) {
+      setHasRequested(true)
       socket.emit("GET_COMPANY", { id: params.companyId });
-    });
-  }
+      socket.on("RECEIVE_COMPANY", (client) => {
+        //console.log("client page RECEIVE_company", client);
+        setIsLoading(false);
+        setCompany(client);
+        setOriginalCompany(client);
+      });
+      socket.on("DATABASE_UPDATED", (u) => {
+        //console.log("Database updated FROM CLient PAGE");
+        socket.emit("GET_COMPANY", { id: params.companyId });
+      });
+    }
+  }, [socket]);
+
+  
 
   const setDetail = (key, value) => {
     setCompany(assocPath(["details", key], value, company));

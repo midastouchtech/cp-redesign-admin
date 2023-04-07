@@ -1,5 +1,5 @@
 import { isNil, isEmpty, repeat } from "ramda";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
@@ -41,10 +41,15 @@ const Companies = ({ socket }) => {
         setPage(p);
       });
   };
-
-  if (socket && !companies) {
-    getPageCompanies(0);
-  }
+  
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && !companies) {
+      getPageCompanies(0);
+    }
+  
+  }, [socket]);
+  
 
   const handleSearch = async (term) => {
     setLoading(true);

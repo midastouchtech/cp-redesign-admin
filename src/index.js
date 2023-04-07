@@ -29,6 +29,7 @@ import  Logout from "./views/logout";
 import Reset from "./views/reset";
 import Reports from "./views/reports"
 import Analytics from "./views/analytics";
+import Operations from "./views/operations";
 
 import "./style.css"
 
@@ -106,6 +107,10 @@ const Main = () => {
           <Route
             path="/analytics"
             element={<Analytics socket={socket} />}
+          />
+          <Route
+            path="/operations"
+            element={<Operations socket={socket} />}
           />
           <Route path="/companies" element={<Companies socket={socket} />} />
           <Route path="/clients" element={<Clients socket={socket} />} />

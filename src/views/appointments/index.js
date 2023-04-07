@@ -1,5 +1,5 @@
 import { isNil, isEmpty, repeat, insert } from "ramda";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { CSVLink, CSVDownload } from "react-csv";
@@ -38,6 +38,8 @@ const Appointments = ({ socket }) => {
   const [notFound, setNotFound] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [pageLimit, setPageLimit] = useState("25");
+  const [hasRequested , setHasRequested] = useState(false)
+
   const handleSearch = async () => {
     setLoading(true);
     setNotFound(false);
@@ -98,9 +100,15 @@ const Appointments = ({ socket }) => {
     });
   };
 
-  if (socket && !appointments) {
-    getAllAppointments();
-  }
+  
+
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && !appointments && hasRequested === false) {
+      setHasRequested(true)
+      getAllAppointments();
+    }
+  }, [socket]);
 
   const setAppointmentsType = (type) => {
     if (type === "all") {

@@ -56,20 +56,22 @@ function App({ socket, stateUser }) {
   const [hasUpdatedAppointmnent, setHasUpdatedAppointment] = useState(false);
   const [show, setShow] = useState(false);
   const [showNdaModal, setNdaModalOpen] = useState(false);
+  const [hasRequested , setHasRequested] = useState(false)
 
-  if (socket && isLoading) {
-    socket.emit("GET_APPOINTMENT", { id: params.appId });
-    socket.on("RECEIVE_APPOINTMENT", (appointment) => {
-      setIsLoading(false);
-      setAppointment(appointment);
-      setOriginalAppointment(appointment);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      //console.log("Database updated FROM APPOINTMENT PAGE");
+  
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && isLoading && hasRequested === false) {
+      setHasRequested(true)
       socket.emit("GET_APPOINTMENT", { id: params.appId });
-    });
-  }
-
+      socket.on("RECEIVE_APPOINTMENT", (appointment) => {
+        setIsLoading(false);
+        setAppointment(appointment);
+        setOriginalAppointment(appointment);
+      });
+    }
+  }, [socket]);
+  
   const setDetail = (key, value) => {
     //console.log("setting detail", key, value)
     setAppointment(assocPath(["details", key], value, appointment));

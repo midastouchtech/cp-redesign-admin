@@ -15,6 +15,7 @@ function App({ socket }) {
   const [originalUser, setOriginalUser] = useState({});
   const [hasUpdatedUser, setHasUpdatedUser] = useState(false);
   const [passwordType, setPasswordType] = useState("password")
+  const [hasRequested , setHasRequested] = useState(false)
 
   const togglePasswordType = () => {
     if(passwordType === "password"){
@@ -24,19 +25,25 @@ function App({ socket }) {
       setPasswordType("password")
     }
   }
-  if (socket && isLoading) {
-    socket.emit("GET_USER", { id: params.clientId });
-    socket.on("RECEIVE_USER", (client) => {
-      //console.log("client page RECEIVE_client", client);
-      setIsLoading(false);
-      setDBUser(client);
-      setOriginalUser(client);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      //console.log("Database updated FROM CLient PAGE");
-      socket.emit("GET_USER", { id: params.appId });
-    });
-  }
+  
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && isLoading && hasRequested === false) {
+      setHasRequested(true)
+      socket.emit("GET_USER", { id: params.clientId });
+      socket.on("RECEIVE_USER", (client) => {
+        //console.log("client page RECEIVE_client", client);
+        setIsLoading(false);
+        setDBUser(client);
+        setOriginalUser(client);
+      });
+      socket.on("DATABASE_UPDATED", (u) => {
+        //console.log("Database updated FROM CLient PAGE");
+        socket.emit("GET_USER", { id: params.appId });
+      });
+    }
+  }, [socket]);
+  
 
   const setDetail = (key, value) => {
     setDBUser(assocPath(["details", key], value, user));

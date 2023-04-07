@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import NavHeader from "./navHeader";
 import Header from "./header";
@@ -52,33 +52,38 @@ export const Layout = (props) => {
   const cookieUser = cookies.get("clinicplus_admin_logged_in_user");
   const navigate = useNavigate();
   const location = useLocation();
-  if (socket && !exists(user)) {
-    if (cookieUser) {
-      socket.emit("GET_USER", { id: cookieUser });
+  
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && !exists(user)) {
+      if (cookieUser) {
+        socket.emit("GET_USER", { id: cookieUser });
+      }
+      if (
+        (isNil(cookieUser) || isEmpty(cookieUser)) &&
+        location.pathname !== "/login" &&
+        !window.location.pathname.includes("reset-password")
+      ) {
+        navigate("/login");
+      }
+      socket.on("RECEIVE_USER", (u) => {
+        saveUser(u);
+        setUser(u);
+        socket.off("RECEIVE_USER");
+      });
+      socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
+            setLatestAppointments(appointments);
+            console.log("set latest appointments", appointments)
+            socket.off('RECEIVE_LATEST_APPOINTMENTS')
+          });
+      socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
+        setLatestMessages(messages);
+        console.log("set latest messages", messages)
+        socket.off("RECEIVE_LATEST_MESSAGES")
+      });
     }
-    if (
-      (isNil(cookieUser) || isEmpty(cookieUser)) &&
-      location.pathname !== "/login" &&
-      !window.location.pathname.includes("reset-password")
-    ) {
-      navigate("/login");
-    }
-    socket.on("RECEIVE_USER", (u) => {
-      saveUser(u);
-      setUser(u);
-      socket.off("RECEIVE_USER");
-    });
-    socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
-          setLatestAppointments(appointments);
-          console.log("set latest appointments", appointments)
-          socket.off('RECEIVE_LATEST_APPOINTMENTS')
-        });
-    socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
-      setLatestMessages(messages);
-      console.log("set latest messages", messages)
-      socket.off("RECEIVE_LATEST_MESSAGES")
-    });
-  }
+  
+  }, [socket]);
   const isQuoteOrLoginPage =
     window.location.pathname.includes("quote") ||
     window.location.pathname.includes("login") ||

@@ -78,24 +78,27 @@ function App({ socket, user }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [hasFetchedAvatars, setHasFetchedAvatars] = useState(false);
+  const [hasRequested , setHasRequested] = useState(false)
 
-  if (socket && isLoading) {
-    console.log("FETCHING APPointment");
-    socket.emit("GET_APPOINTMENT", { id: params.appId });
-    socket.on("RECEIVE_APPOINTMENT", (app) => {
-      console.log("RECEIVE_APPOINTMENT", app);
-      setAppointment(app);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && isLoading && hasRequested === false) {
+      setHasRequested(true)
+      console.log("FETCHING APPointment");
       socket.emit("GET_APPOINTMENT", { id: params.appId });
-    });
-
-    socket.on("RECEIVE_AVATARS", (avatars) => {
-      console.log("RECEIVE_AVATARS", avatars);
-      setAvatars(avatars);
-    });
-    setIsLoading(false);
-  }
+      socket.on("RECEIVE_APPOINTMENT", (app) => {
+        console.log("RECEIVE_APPOINTMENT", app);
+        setAppointment(app);
+      });
+      
+      socket.on("RECEIVE_AVATARS", (avatars) => {
+        console.log("RECEIVE_AVATARS", avatars);
+        setAvatars(avatars);
+      });
+      setIsLoading(false);
+    }
+  }, [socket]);
+  
 
   if (appointment?.messages?.length > 0 && !hasFetchedAvatars) {
     console.log("FETCHING AVATARS");
