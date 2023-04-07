@@ -20,24 +20,21 @@ const Wrapper = styled.div`
 const Operations = ({ socket }) => {
   const [events, setEvents] = useState([]);
 
-  const addEvent = (e) => {    
+  const addEvent = (e) => { 
+    console.log(e.name)   
     const newEvents = [
       ...events,
       e
     ]
-    console.log("current events", events)
-    console.log("saving", newEvents)
     if(!equals(events, newEvents)){
       setEvents(newEvents)
     }
   }
 
   useEffect(()=>{
-    console.log("runnign effect")
     if (socket) {
       socket.off("LOG")
-      socket.on("LOG", (data) => {
-        console.log("saving event", data.event)        
+      socket.on("LOG", (data) => {      
         addEvent({ name: data.event, time: moment().format("HH:mm:ss"), args: data.args })
       });
     }
