@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { AiOutlineLineChart } from 'react-icons/ai';
+import {BsFillGearFill} from 'react-icons/bs'
 
 const NavContainer = styled.div`
   .deznav {
@@ -112,6 +113,12 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
             <Link to="/analytics" class="has-arrow ai-icon" aria-expanded="false">
               <AiOutlineLineChart />
               Analytics
+            </Link>
+          </li>
+          <li onClick={toggleOpen}>
+            <Link to="/operations" class="has-arrow ai-icon" aria-expanded="false">
+              <BsFillGearFill />
+              System
             </Link>
           </li>
           {/* <li className="has-arrow ai-icon" onClick={toggleOpen}>
