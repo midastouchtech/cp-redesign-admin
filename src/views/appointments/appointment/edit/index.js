@@ -151,7 +151,7 @@ function App({ socket, stateUser }) {
     socket.emit("UPDATE_APPOINTMENT", appointmentWithNewPrice);
     socket.on("APPOINTMENT_UPDATED", () => {
       //console.log("appointment updated");
-      navigate("/appointment/edit/" + appointment.id);
+      navigate("/appointment/" + appointment.id)
     });
   };
 
