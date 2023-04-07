@@ -1,5 +1,5 @@
 import { isNil, isEmpty, repeat } from "ramda";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
@@ -50,9 +50,13 @@ const Admins = ({ socket }) => {
       });
   };
 
-  if (socket && !admins) {
-    getPageAdmins(0);
-  }
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && !admins) {
+      getPageAdmins(0);
+    }
+  }, [socket]);
+  
 
   return (
     <div className="container-fluid">

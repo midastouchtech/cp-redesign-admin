@@ -20,20 +20,26 @@ const Wrapper = styled.div`
 const Operations = ({ socket }) => {
   const [events, setEvents] = useState([]);
 
+  const addEvent = (e) => {    
+    const newEvents = [
+      ...events,
+      e
+    ]
+    console.log("current events", events)
+    console.log("saving", newEvents)
+    if(!equals(events, newEvents)){
+      setEvents(newEvents)
+    }
+  }
+
   useEffect(()=>{
     if (socket) {
       socket.on("LOG", (data) => {
-        console.log("saving event", data.event)
-        const newEvents = [
-          ...events,
-          { name: data.event, time: moment().format("HH:mm:ss"), args: data.args },
-        ]
-        console.log("current events", events)
-        console.log("saving", newEvents)
-        setEvents(newEvents)
+        console.log("saving event", data.event)        
+        addEvent({ name: data.event, time: moment().format("HH:mm:ss"), args: data.args })
       });
     }
-  }, [socket]);
+  }, [socket, events]);
 
   
   

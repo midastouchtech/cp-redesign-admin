@@ -48,16 +48,19 @@ function App({ socket }) {
       setPasswordType("password")
     }
   }
-
-  if (socket && isLoading) {
-    socket.emit("GET_USER", { id: params.adminId });
-    socket.on("RECEIVE_USER", (client) => {
-      //console.log("client page RECEIVE_client", client);
-      setIsLoading(false);
-      setDBUser(client);
-      setOriginalUser(client);
-    });
-  }
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && isLoading) {
+      socket.emit("GET_USER", { id: params.adminId });
+      socket.on("RECEIVE_USER", (client) => {
+        //console.log("client page RECEIVE_client", client);
+        setIsLoading(false);
+        setDBUser(client);
+        setOriginalUser(client);
+      });
+    }
+  }, [socket]);
+  
 
   const setDetail = (key, value) => {
     setDBUser(assocPath(["details", key], value, user));
