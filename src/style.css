@@ -9121,6 +9121,14 @@ a {
 .bg-green-light {
   background: #00838f !important; }
 
+a{
+  cursor:pointer;
+}
+
+.badge{
+  text-transform: capitalize;
+}
+
 .bg-green {
   background: #047f04 !important; }
 

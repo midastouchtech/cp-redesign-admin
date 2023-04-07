@@ -12,6 +12,15 @@ import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import moment from "moment";
 
+const Banner = styled.div`
+    width: 100vw;
+    height: 40px;
+    background: #d80009;
+    padding: 10px;
+    text-align: center;
+    color: white;
+    font-weight: 700;
+`
 const ChildrenContainer = styled.div`
   margin-left: 12rem;
   padding-top: 1rem;
@@ -34,6 +43,8 @@ export const Layout = (props) => {
   const [firstLoad, setFirstLoad] = useState(0);
   const [latestAppointments, setLatestAppointments] =useState([]);
   const [latestMessages, setLatestMessages] = useState([]);
+  const [systemSettings, setSystemSettings] = useState();
+
   const showLoader = () => {
     setTimeout(() => {
       //console.log("showing loader...");
@@ -55,6 +66,15 @@ export const Layout = (props) => {
   
   useEffect(()=>{
     console.log("use effect socket", socket)
+    if(socket && !exists(systemSettings)){
+      socket.emit("GET_SYSTEM_SETTINGS")
+      socket.on("RECEIVE_SYSTEM_SETTINGS", settings => {
+        setSystemSettings(settings)
+      })
+      socket.on("FETCH_SYSTEM_SETTINGS", settings => {
+        socket.emit("GET_SYSTEM_SETTINGS")
+      })
+    }
     if (socket && !exists(user)) {
       if (cookieUser) {
         socket.emit("GET_USER", { id: cookieUser });
@@ -152,7 +172,9 @@ export const Layout = (props) => {
           rel="stylesheet"
         />
       </Helmet>
+      {systemSettings?.admin.underMaintanance && <Banner>Please note the system is under maintanance</Banner>}
       <div id="main-wrapper" className="show">
+        
         <NavHeader toggleOpen={toggleOpen} />
         <Header latestNotifications={latestNotifications} />
         <SideBar isOpen={isOpen} toggleOpen={toggleOpen} />

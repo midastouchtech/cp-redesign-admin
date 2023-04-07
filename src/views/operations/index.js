@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 
-import { equals, isNil, keys, mergeAll, range, values } from "ramda";
+import { equals, isNil, keys, mergeAll, range, remove, take, values } from "ramda";
 import moment from "moment";
 import axios from "axios";
 
@@ -26,7 +26,10 @@ const Operations = ({ socket }) => {
   const [currentBill, setCurrentBill] = useState(0);
   const [dynoInfo, setDynoInfo] = useState(null);
   const [numberOfDynos, setNumberOfDynos] = useState(0);
-
+  const [restartingDynos, setRestartingDynos] = useState(false);
+  const [systemSettings, setSystemSettings] = useState();
+  const [hasRequested, setHasRequested] = useState(false);
+  console.log(invoices);
   const addEvent = (e) => {
     console.log(e.name);
     const newEvents = [...events, e];
@@ -46,22 +49,20 @@ const Operations = ({ socket }) => {
         });
       });
     }
+    if (socket && !systemSettings && hasRequested === false) {
+      setHasRequested(true);
+      socket.emit("GET_SYSTEM_SETTINGS");
+      socket.on("RECEIVE_SYSTEM_SETTINGS", (settings) => {
+        setSystemSettings(settings);
+      });
+      socket.on("FETCH_SYSTEM_SETTINGS", () => {
+        socket.emit("GET_SYSTEM_SETTINGS");
+      });
+    }
   }, [socket, events]);
 
-  const checkStatus = () => {
-    axios
-      .get(process.env.REACT_APP_IO_SERVER)
-      .then(() => {
-        setAlive(true);
-        axios
-          .get(`${process.env.REACT_APP_IO_SERVER}/db-status`)
-          .then((res) => setDBAlive(res.data.alive))
-          .catch(() => setDBAlive(false));
-      })
-      .catch(() => setAlive(false));
-  };
-
   const restartDynos = () => {
+    setRestartingDynos(true);
     axios
       .delete(`${process.env.REACT_APP_DYNO_URL}`, {
         headers: {
@@ -70,14 +71,13 @@ const Operations = ({ socket }) => {
           Authorization: `Bearer ${process.env.REACT_APP_HEROKU_TOKEN}`,
         },
       })
-      .then(() => {})
+      .then(() => {
+        setRestartingDynos(false);
+      })
       .catch((err) => console.log(err));
   };
 
   const getDynoInfo = () => {
-    console.log(
-      `${process.env.REACT_APP_DYNO_URL}/${process.env.REACT_APP_DYNO_ID}`
-    );
     axios
       .get(`${process.env.REACT_APP_DYNO_URL}`, {
         headers: {
@@ -87,7 +87,6 @@ const Operations = ({ socket }) => {
         },
       })
       .then((res) => {
-        console.log(res.data);
         setDynoInfo(res.data[0]);
         setNumberOfDynos(res.data.length);
       })
@@ -104,8 +103,6 @@ const Operations = ({ socket }) => {
         },
       })
       .then((res) => {
-        console.log("invoice info");
-        console.log(res.data);
         setInvoices(res.data);
         const price = res.data[0].total;
         setCurrentBill(price / 100);
@@ -113,11 +110,34 @@ const Operations = ({ socket }) => {
       .catch((err) => console.log(err));
   };
 
-  useEffect(() => {
-    setInterval(checkStatus, 5000);
+  const checkStatus = () => {
     getDynoInfo();
     getInvoiceInfo();
+    axios
+      .get(process.env.REACT_APP_IO_SERVER)
+      .then(() => {
+        setAlive(true);
+        axios
+          .get(`${process.env.REACT_APP_IO_SERVER}/db-status`)
+          .then((res) => setDBAlive(res.data.alive))
+          .catch(() => setDBAlive(false));
+      })
+      .catch(() => setAlive(false));
+  };
+
+  useEffect(() => {
+    setInterval(checkStatus, 8000);
   }, []);
+
+  const switchOn = (id) => () => {
+    const newSystemSettings = {
+      ...systemSettings,
+      [id]: {
+        underMaintanance: !systemSettings[id].underMaintanance,
+      },
+    };
+    socket.emit("UPDATE_SYSTEM_SETTINGS", newSystemSettings);
+  };
 
   return (
     <div className="container-fluid">
@@ -139,7 +159,7 @@ const Operations = ({ socket }) => {
         </div>
       </div>
       <div className="row">
-        <div className="col-xl-2 col-xxl-2 col-lg-2 col-sm-6">
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
           <div className={`card`}>
             <div className="card-body">
               <div className="d-flex align-items-end">
@@ -147,8 +167,24 @@ const Operations = ({ socket }) => {
                   <p className="fs-14 text-black mb-1 bold">Server State</p>
                   <span className="fs-14 text-black font-w600">
                     {severIsAlive === true ? (
-                      <span className="fs-14 font-w600 badge badge-success">
-                        Running
+                      <span>
+                        <span className="fs-14 font-w600 badge badge-success">
+                          Running
+                        </span>
+                        <br />
+                        {restartingDynos ? (
+                          <small className="text-black-50">Restarting...</small>
+                        ) : (
+                          <small>
+                            <br />
+                            <a
+                              className="text-blue mt-2"
+                              onClick={restartDynos}
+                            >
+                              Restart
+                            </a>
+                          </small>
+                        )}
                       </span>
                     ) : severIsAlive === false ? (
                       <span>
@@ -156,9 +192,18 @@ const Operations = ({ socket }) => {
                           Not Running
                         </span>
                         <br />
-                        <a className="text-blue mt-2" onClick={restartDynos}>
-                          Restart Server
-                        </a>
+                        {restartingDynos ? (
+                          <small className="text-black-50">Restarting...</small>
+                        ) : (
+                          <small>
+                            <a
+                              className="text-blue mt-2"
+                              onClick={restartDynos}
+                            >
+                              Restart
+                            </a>
+                          </small>
+                        )}
                       </span>
                     ) : (
                       <span className="fs-14 font-w600 badge badge-secondary">
@@ -171,7 +216,7 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-2 col-xxl-2 col-lg-2 col-sm-6">
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
           <div className={`card`}>
             <div className="card-body">
               <div className="d-flex align-items-end">
@@ -193,7 +238,7 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-2 col-xxl-2 col-lg-2 col-sm-6">
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
           <div className={`card`}>
             <div className="card-body">
               <div className="d-flex align-items-end">
@@ -219,7 +264,7 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-2 col-xxl-2 col-lg-2 col-sm-6">
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
           <div className={`card`}>
             <div className="card-body">
               <div className="d-flex align-items-end">
@@ -237,6 +282,12 @@ const Operations = ({ socket }) => {
                         <small className="text-black-50">
                           Running {numberOfDynos} Dynos
                         </small>
+                        <br />
+                        <small>
+                          <a className="text-blue mt-2" onClick={restartDynos}>
+                            Restart Dynos
+                          </a>
+                        </small>
                       </span>
                     ) : (
                       <span>
@@ -245,7 +296,7 @@ const Operations = ({ socket }) => {
                         </span>
                         <br />
                         <a className="text-blue mt-2" onClick={restartDynos}>
-                          Restart Server
+                          Restart Dynos
                         </a>
                       </span>
                     )}
@@ -255,7 +306,7 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-2 col-xxl-2 col-lg-2 col-sm-6">
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
           <div className={`card`}>
             <div className="card-body">
               <div className="d-flex align-items-end">
@@ -267,6 +318,87 @@ const Operations = ({ socket }) => {
                       currency: "USD",
                     }).format(currentBill)}
                   </span>
+                  <br />
+                  <span>
+                    {take(4,remove(1,2,invoices))
+                      .sort((a, b) => {
+                        return moment(a.period_end).isBefore(moment(b.period_end))
+                          ? 1
+                          : -1;
+                      })
+                      .map((i) => (
+                        <small className="text-black-50">
+                          {" - "}
+                          {moment(i.period_end, "YYYY-MM-DD").format(
+                            "MMM DD"
+                          )}:{" "}
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          }).format(i.total/100)}{" "}
+                          <br />
+                        </small>
+                      ))}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+          <div className={`card`}>
+            <div className="card-body">
+              <div className="d-flex align-items-end">
+                <div>
+                  <p className="fs-14 text-black mb-1 bold">Maintenance</p>
+                  <small>
+                    <u>Client System</u>
+                  </small>
+                  <br />
+                  <small>
+                    Maintanance mode:{" "}
+                    {systemSettings?.client?.underMaintanance ? (
+                      <span className="fs-14 font-w600 badge badge-danger">
+                        ON
+                      </span>
+                    ) : (
+                      <span className="fs-14 font-w600 badge badge-success">
+                        OFF
+                      </span>
+                    )}
+                  </small>
+                  <br />
+                  <small>
+                    <a className="text-primary" onClick={switchOn("client")}>
+                      Switch{" "}
+                      {systemSettings?.client?.underMaintanance ? "Off" : "On"}
+                    </a>
+                  </small>
+                  <br />
+                  <small>
+                    <u>Admin System</u>
+                  </small>
+                  <br />
+                  <small>
+                    Maintanance mode:{" "}
+                    {systemSettings?.admin?.underMaintanance ? (
+                      <span className="fs-14 font-w600 badge badge-danger">
+                        ON
+                      </span>
+                    ) : (
+                      <span className="fs-14 font-w600 badge badge-success">
+                        OFF
+                      </span>
+                    )}
+                  </small>
+                  <br />
+                  <small>
+                    <a className="text-primary" onClick={switchOn("admin")}>
+                      Switch{" "}
+                      {systemSettings?.admin?.underMaintanance ? "Off" : "On"}
+                    </a>
+                  </small>
+                  <br />
                 </div>
               </div>
             </div>
