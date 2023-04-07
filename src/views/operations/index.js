@@ -114,7 +114,7 @@ const Operations = ({ socket }) => {
   };
 
   useEffect(() => {
-    setInterval(checkStatus, 10000);
+    setInterval(checkStatus, 5000);
     getDynoInfo();
     getInvoiceInfo();
   }, []);
