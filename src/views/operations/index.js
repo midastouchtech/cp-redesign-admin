@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 
-import { isNil, keys, mergeAll, range, values } from "ramda";
+import { equals, isNil, keys, mergeAll, range, values } from "ramda";
 import moment from "moment";
 
 const Wrapper = styled.div`
@@ -20,12 +20,24 @@ const Wrapper = styled.div`
 const Operations = ({ socket }) => {
   const [events, setEvents] = useState([]);
 
-  if (socket) {
-    socket.on("LOG", (data) => {
-      console.log("saving event", data)
-      
-    });
-  }
+  useEffect(()=>{
+    if (socket) {
+      socket.on("LOG", (data) => {
+        console.log("saving event", data.event)
+        const newEvents = [
+          ...events,
+          { name: data.event, time: moment().format("HH:mm:ss"), args: data.args },
+        ]
+        if(!equals(events, newEvents)){
+          console.log("saving", newEvents)
+          setEvents(newEvents)
+        }
+      });
+    }
+  }, [socket]);
+
+  
+  
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">

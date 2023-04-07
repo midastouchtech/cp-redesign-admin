@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaClinicMedical, FaReply } from "react-icons/fa";
 import { BsPersonCheckFill } from "react-icons/bs";
 import { MdOutlinePendingActions } from "react-icons/md";
@@ -122,32 +122,38 @@ const Dashboard = ({ socket }) => {
   const [topServices, setTopServices] = useState({ count: [] });
   const [latestAppointments, setLatestAppointments] = useState(null);
   const [latestMessages, setLatestMessages] = useState(null);
-
-  if (socket && !stats && !latestAppointments && !latestMessages) {
-    socket.emit("GET_STATS");
-    socket.emit("GET_LATEST_APPOINTMENTS");
-    socket.emit("GET_LATEST_MESSAGES");
-    socket.on("RECEIVE_STATS", (stats) => {
-      setStats(stats);
-      setSelectedStats(
-        reject((stat) => stat.title === "Top Services", stats.today)
-      );
-      setActiveStat("today");
-      setTopServices(stats.today.find((stat) => stat.title === "Top Services"));
-    });
-    socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
-      setLatestAppointments(appointments);
-    });
-    socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
-      setLatestMessages(messages);
-    });
-    socket.on("DATABASE_UPDATED", (u) => {
-      //console.log("database updated we are now going to update the stats")
+ 
+  useEffect(()=>{
+    console.log("use effect socket", socket)
+    if (socket && !stats && !latestAppointments && !latestMessages) {
       socket.emit("GET_STATS");
       socket.emit("GET_LATEST_APPOINTMENTS");
       socket.emit("GET_LATEST_MESSAGES");
-     });
-  }
+      socket.on("RECEIVE_STATS", (stats) => {
+        setStats(stats);
+        setSelectedStats(
+          reject((stat) => stat.title === "Top Services", stats.today)
+        );
+        setActiveStat("today");
+        setTopServices(stats.today.find((stat) => stat.title === "Top Services"));
+      });
+      socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
+        setLatestAppointments(appointments);
+      });
+      socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
+        setLatestMessages(messages);
+      });
+      socket.on("DATABASE_UPDATED", (u) => {
+        //console.log("database updated we are now going to update the stats")
+        socket.emit("GET_STATS");
+        socket.emit("GET_LATEST_APPOINTMENTS");
+        socket.emit("GET_LATEST_MESSAGES");
+       });
+    }
+  
+  }, [socket]);
+
+  
   const toggleStat = (stat) => {
     setSelectedStats(
       reject((stat) => stat.title === "Top Services", stats[stat])
