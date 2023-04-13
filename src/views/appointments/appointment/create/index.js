@@ -72,6 +72,7 @@ function App({ socket }) {
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShowCompanySearch] = useState(false);
   const [searchParams] = useSearchParams();
+  const [shouldUpdateCount, setShouldUpdateCount] = useState(false)
 
   const [appointmentsForDateCount, setAppointmentsForDateCount] = useState();
   const [searchParamCompanyName, setSearchParamCompanyName] = useState(
@@ -262,13 +263,14 @@ function App({ socket }) {
 
   const exists = (i) => !isNil(i) && !isEmpty(i);
   useEffect(() => {
-    console.log("use effect appointment", appointment);
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
+    setShouldUpdateCount(true)
     if (
       socket &&
       exists(appointment?.details?.date) &&
       exists(appointment?.details?.clinic)
+      && shouldUpdateCount === true
     ) {
       socket.emit("GET_APPOINTMENTS_FOR_DATE_COUNT", {
         clinic: appointment.details.clinic,
@@ -278,6 +280,7 @@ function App({ socket }) {
         console.log("COUNT", count);
         setAppointmentsForDateCount(count);
       });
+      setShouldUpdateCount(false);
     }
   });
 
