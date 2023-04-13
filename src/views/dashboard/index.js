@@ -76,6 +76,13 @@ const HeadContainer = styled.div`
   }
 `;
 
+const LoadContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+`
+
 const getReadableTime = (date) => {
   return moment(date).format("DD/MM/YYYY");
 };
@@ -322,9 +329,10 @@ const Dashboard = ({ socket }) => {
         </div>
       </div>
       {loading && (
-        <div class="row text-center">
+        <LoadContainer>
+          <div class="row text-center">
           <div class="col-md-10 text-center">
-            <h1> Generating report data, please wait ....</h1>
+            <h3> Generating report data, please wait ....</h3>
             <Line
               percent={(counter / 60) * 100}
               strokeWidth={2}
@@ -332,6 +340,7 @@ const Dashboard = ({ socket }) => {
             />
           </div>
         </div>
+        </LoadContainer>
       )}
       {!loading && (
         <MegaCardContainer className="row">
