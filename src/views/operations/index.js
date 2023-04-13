@@ -311,45 +311,6 @@ const Operations = ({ socket }) => {
             <div className="card-body">
               <div className="d-flex align-items-end">
                 <div>
-                  <p className="fs-14 text-black mb-1 bold">Heroku Bill</p>
-                  <span className="fs-34 text-black font-w600">
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(currentBill)}
-                  </span>
-                  <br />
-                  <span>
-                    {take(4,remove(1,2,invoices))
-                      .sort((a, b) => {
-                        return moment(a.period_end).isBefore(moment(b.period_end))
-                          ? 1
-                          : -1;
-                      })
-                      .map((i) => (
-                        <small className="text-black-50">
-                          {" - "}
-                          {moment(i.period_end, "YYYY-MM-DD").format(
-                            "MMM DD"
-                          )}:{" "}
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          }).format(i.total/100)}{" "}
-                          <br />
-                        </small>
-                      ))}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
-          <div className={`card`}>
-            <div className="card-body">
-              <div className="d-flex align-items-end">
-                <div>
                   <p className="fs-14 text-black mb-1 bold">Maintenance</p>
                   <small>
                     <u>Client System</u>
