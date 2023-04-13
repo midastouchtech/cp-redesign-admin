@@ -43,7 +43,7 @@ const Main = () => {
       transports: ['websocket'],
       secure: true,
       }
-    const newSocket = io(process.env.REACT_APP_IO_SERVER);
+    const newSocket = io(process.env.REACT_APP_IO_SERVER, socketOptions);
     newSocket.onAny((event, ...args) => {
       //console.log(`** Handling:  ${event}`);
       //console.log(args);
