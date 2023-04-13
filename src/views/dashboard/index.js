@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FaClinicMedical, FaReply } from "react-icons/fa";
 import { BsPersonCheckFill } from "react-icons/bs";
 import { MdOutlinePendingActions } from "react-icons/md";
@@ -12,6 +12,8 @@ import { Doughnut } from "react-chartjs-2";
 import moment from "moment";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { Line } from "rc-progress";
+
 
 const CaratContainer = styled.div`
   ${(props) =>
@@ -122,10 +124,32 @@ const Dashboard = ({ socket }) => {
   const [topServices, setTopServices] = useState({ count: [] });
   const [latestAppointments, setLatestAppointments] = useState(null);
   const [latestMessages, setLatestMessages] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [counter, setCounter] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const myInterval = useRef();
+
+  useEffect(() => {
+    return () => clearInterval(myInterval.current);
+  }, []);
+
+  useEffect(() => {
+    if (isRunning && counter < 5) {
+      myInterval.current = setInterval(
+        () => setCounter((counter) => counter + 1),
+        1000
+      );
+    } else {
+      clearInterval(myInterval.current);
+      myInterval.current = null;
+    }
+  }, [isRunning]);
  
   useEffect(()=>{
     console.log("use effect socket", socket)
-    if (socket && !stats && !latestAppointments && !latestMessages) {
+    if (socket && !stats && !latestAppointments && !latestMessages && !isRunning) {
+      setCounter(0);
+      setIsRunning(true);
       socket.emit("GET_STATS");
       socket.emit("GET_LATEST_APPOINTMENTS");
       socket.emit("GET_LATEST_MESSAGES");
@@ -136,6 +160,9 @@ const Dashboard = ({ socket }) => {
         );
         setActiveStat("today");
         setTopServices(stats.today.find((stat) => stat.title === "Top Services"));
+        setLoading(false);
+        setCounter(0);
+        setIsRunning(false);
       });
       socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
         setLatestAppointments(appointments);
@@ -294,7 +321,20 @@ const Dashboard = ({ socket }) => {
           </div>
         </div>
       </div>
-      <MegaCardContainer className="row">
+      {loading && (
+        <div class="row text-center">
+          <div class="col-md-10 text-center">
+            <h1> Generating report data, please wait ....</h1>
+            <Line
+              percent={(counter / 60) * 100}
+              strokeWidth={2}
+              strokeColor="#fe4128"
+            />
+          </div>
+        </div>
+      )}
+      {!loading && (
+        <MegaCardContainer className="row">
         <div className="mega-card col-xl-3 col-xxl-3">
           <div class="row">
             <div class="col-xl-12 col-md-6">
@@ -398,6 +438,8 @@ const Dashboard = ({ socket }) => {
           </div>
         </div>
       </MegaCardContainer>
+      )}
+      
     </div>
   );
 };
