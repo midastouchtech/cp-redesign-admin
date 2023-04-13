@@ -265,13 +265,13 @@ function App({ socket }) {
   useEffect(() => {
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
-    setShouldUpdateCount(true)
     if (
       socket &&
       exists(appointment?.details?.date) &&
       exists(appointment?.details?.clinic)
       && shouldUpdateCount === true
     ) {
+      console.log("getting count")
       socket.emit("GET_APPOINTMENTS_FOR_DATE_COUNT", {
         clinic: appointment.details.clinic,
         date: appointment.details.date,
@@ -280,6 +280,7 @@ function App({ socket }) {
         console.log("COUNT", count);
         setAppointmentsForDateCount(count);
       });
+      
       setShouldUpdateCount(false);
     }
   });
@@ -406,7 +407,10 @@ function App({ socket }) {
                         class="form-control input-default "
                         placeholder="select date"
                         type="date"
-                        onChange={(e) => setDetail("date", e.target.value)}
+                        onChange={(e) => {
+                          setDetail("date", e.target.value)
+                          setShouldUpdateCount(true)
+                        }}
                         value={appointment?.details?.date}
                       />
                     </div>
@@ -523,7 +527,10 @@ function App({ socket }) {
                           "churchill"
                         }
                         value="Churchill"
-                        onChange={(event) => setDetail("clinic", "Churchill")}
+                        onChange={(event) => {
+                          setDetail("clinic", "Churchill")
+                          setShouldUpdateCount(true)
+                        }}
                       />
                       <label class="form-check-label" for="check1">
                         Churchill
@@ -538,7 +545,10 @@ function App({ socket }) {
                           appointment?.details?.clinic?.toLowerCase() ===
                           "hendrina"
                         }
-                        onChange={(event) => setDetail("clinic", "Hendrina")}
+                        onChange={(event) => {
+                          setDetail("clinic", "Hendrina");
+                          setShouldUpdateCount(true)
+                        }}
                       />
                       <label class="form-check-label" for="check2">
                         Hendrina
