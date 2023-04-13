@@ -77,6 +77,8 @@ const Reports = ({ socket }) => {
             company: a?.details?.company?.name,
             clinic: a?.details?.clinic,
             price: calculateEmployeeCost(e),
+            sites: e.sites.map(s => s.name).toString(),
+            dover: e?.dover?.required ? 1 : 0,
             date: a?.details?.date,
             ...mergeAll(
               values(MEDICAL_SERVICES).map((s) => ({
@@ -94,9 +96,11 @@ const Reports = ({ socket }) => {
     "name",
     "idNumber",
     "occupation",
+    "sites",
     "clinic",
     "price",
     "date",
+    "dover",
     ...values(MEDICAL_SERVICES).map((service) => service.id),
   ];
 
@@ -376,6 +380,7 @@ const Reports = ({ socket }) => {
                         <th>Location</th>
                         <th>Price</th>
                         <th>Date</th>
+                        <th>Dover Service</th>
                         {values(MEDICAL_SERVICES).map((service) => (
                           <th>{service.title}</th>
                         ))}
@@ -389,13 +394,21 @@ const Reports = ({ socket }) => {
                             <td>{employee?.purchaseOrderNumber}</td>
                             <td>{employee?.company}</td>
                             <td>{employee.name}</td>
-                            <td>{employee.idNumber}</td>
-                            <td>{employee.occupation}</td>
-                            <td>{employee.sites.map(s => <p>{s.name}</p>)}</td>
+                            <td>{employee?.idNumber}</td>
+                            <td>{employee?.occupation}</td>
+                            <td>{employee?.sites?.split(",").map(s => <p>{s}</p>)}</td>
                             <td>{employee?.clinic}</td>
                             <td>{employee?.price}</td>
                             <td>
                               {moment(employee?.date).format("DD MMMM YYYY")}
+                            </td>
+                            <td>{employee?.dover?.required  ? (
+                                  <span className="badge badge-success">
+                                    Yes
+                                  </span>
+                                ) : (
+                                  <span className="badge badge-danger">No</span>
+                                )} 
                             </td>
                             {values(MEDICAL_SERVICES).map((service) => (
                               <td>
