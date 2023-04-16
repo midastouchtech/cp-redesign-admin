@@ -98,7 +98,7 @@ const Appointments = ({ socket }) => {
     socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(Math.floor(pages)));
+      setPageCount(Math.round(count/pageLimit))
       setAppCount(count);
       setOriginalAppointments(data);
     });
@@ -132,7 +132,7 @@ const Appointments = ({ socket }) => {
     socket.on("RECEIVE_CURRENT_MONTHS_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(Math.floor(pages)));
+      setPageCount(Math.round(count/pageLimit))
       setAppCount(count);
       setOriginalAppointments(data);
       setMonthType("current");
@@ -145,7 +145,7 @@ const Appointments = ({ socket }) => {
     socket.on("RECEIVE_NEXT_MONTHS_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(Math.floor(pages)));
+      setPageCount(Math.round(count/pageLimit))
       setAppCount(count);
       setOriginalAppointments(data);
       setMonthType("next");
@@ -158,7 +158,7 @@ const Appointments = ({ socket }) => {
     socket.on("RECEIVE_PREVIOUS_MONTHS_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(Math.floor(pages)));
+      setPageCount(Math.round(count/pageLimit))
       setAppCount(count);
       setOriginalAppointments(data);
       setMonthType("prev");
@@ -188,7 +188,7 @@ const Appointments = ({ socket }) => {
       socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
         const { apps, pages, count } = data;
         setAppointments(apps);
-        setPageCount(Math.round(Math.floor(pages)));
+        setPageCount(Math.round(count/pageLimit))
         setAppCount(count);
         setOriginalAppointments(data);
         setPage(p);
