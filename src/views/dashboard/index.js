@@ -158,8 +158,6 @@ const Dashboard = ({ socket }) => {
       setCounter(0);
       setIsRunning(true);
       socket.emit("GET_STATS");
-      socket.emit("GET_LATEST_APPOINTMENTS");
-      socket.emit("GET_LATEST_MESSAGES");
       socket.on("RECEIVE_STATS", (stats) => {
         setStats(stats);
         setSelectedStats(
@@ -180,8 +178,6 @@ const Dashboard = ({ socket }) => {
       socket.on("DATABASE_UPDATED", (u) => {
         //console.log("database updated we are now going to update the stats")
         socket.emit("GET_STATS");
-        socket.emit("GET_LATEST_APPOINTMENTS");
-        socket.emit("GET_LATEST_MESSAGES");
        });
     }
   
