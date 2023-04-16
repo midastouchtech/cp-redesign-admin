@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { CSVLink, CSVDownload } from "react-csv";
 import moment from "moment";
+/* eslint-disable */
 
 const getBadgeclassName = (status) => {
   switch (status) {
@@ -27,19 +28,19 @@ const NoAppointments = styled.div`
 `;
 
 const StyledUL = styled.ul`
-      display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow-x: scroll;
-    align-items: center;
-    width: auto;
-    height:80px; ;
-    li{
-      flex-shrink: 0;
-      a{
-        padding: 0.325rem 0.7rem !important;
-      }
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: scroll;
+  align-items: center;
+  width: auto;
+  height: 80px;
+  li {
+    flex-shrink: 0;
+    a {
+      padding: 0.325rem 0.7rem !important;
     }
+  }
 `;
 
 const Appointments = ({ socket }) => {
@@ -84,39 +85,40 @@ const Appointments = ({ socket }) => {
       setAppointments(newAppointments);
     });
   };
-
-  const csvData = appointments
-    ? insert(
-        0,
-        [
-          "appointmentId",
-          "userName",
-          "purchaseOrderNumber",
-          "companyName",
-          "location",
-          "appointmentDate",
-          "status",
-        ],
-        appointments?.map((appointment) => [
-          appointment?.id,
-          appointment?.usersWhoCanManage[0].name,
-          appointment?.details?.purchaseOrderNumber,
-          appointment?.details?.company?.name,
-          appointment?.details?.clinic,
-          appointment?.details?.date,
-          appointment?.status,
-        ])
-      )
-    : [];
+  console.log(appointments);
+  const csvData =
+    !isNil(appointments) && !isEmpty(appointments)
+      ? insert(
+          0,
+          [
+            "appointmentId",
+            "userName",
+            "purchaseOrderNumber",
+            "companyName",
+            "location",
+            "appointmentDate",
+            "status",
+          ],
+          appointments?.map((appointment) => [
+            appointment?.id,
+            appointment?.usersWhoCanManage[0].name,
+            appointment?.details?.purchaseOrderNumber,
+            appointment?.details?.company?.name,
+            appointment?.details?.clinic,
+            appointment?.details?.date,
+            appointment?.status,
+          ])
+        )
+      : [];
 
   const getAllAppointments = () => {
     socket.emit("GET_ALL_APPOINTMENTS", { pageLimit });
     socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(count/pageLimit))
+      setPageCount(Math.round(count / pageLimit));
       setAppCount(count);
-      setOriginalAppointments(data);
+      setOriginalAppointments(apps);
     });
   };
 
@@ -148,9 +150,9 @@ const Appointments = ({ socket }) => {
     socket.on("RECEIVE_CURRENT_MONTHS_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(count/pageLimit))
+      setPageCount(Math.round(count / pageLimit));
       setAppCount(count);
-      setOriginalAppointments(data);
+      setOriginalAppointments(apps);
       setMonthType("current");
       setPage(page);
     });
@@ -161,9 +163,9 @@ const Appointments = ({ socket }) => {
     socket.on("RECEIVE_NEXT_MONTHS_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(count/pageLimit))
+      setPageCount(Math.round(count / pageLimit));
       setAppCount(count);
-      setOriginalAppointments(data);
+      setOriginalAppointments(apps);
       setMonthType("next");
       setPage(p);
     });
@@ -174,9 +176,9 @@ const Appointments = ({ socket }) => {
     socket.on("RECEIVE_PREVIOUS_MONTHS_APPOINTMENTS", (data) => {
       const { apps, pages, count } = data;
       setAppointments(apps);
-      setPageCount(Math.round(count/pageLimit))
+      setPageCount(Math.round(count / pageLimit));
       setAppCount(count);
-      setOriginalAppointments(data);
+      setOriginalAppointments(apps);
       setMonthType("prev");
       setPage(p);
     });
@@ -190,7 +192,7 @@ const Appointments = ({ socket }) => {
   };
 
   const getAppointmentsByMonth = (e) => {
-    //console.log("getting first set appointments for monthtype", e.target.value);
+    console.log("getting first set appointments for monthtype", e.target.value);
     const month = e.target.value;
     if (monthType !== month) {
       functionsByMonth[month](0);
@@ -204,7 +206,7 @@ const Appointments = ({ socket }) => {
       socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
         const { apps, pages, count } = data;
         setAppointments(apps);
-        setPageCount(Math.round(count/pageLimit))
+        setPageCount(Math.round(count / pageLimit));
         setAppCount(count);
         setOriginalAppointments(data);
         setPage(p);
@@ -222,51 +224,11 @@ const Appointments = ({ socket }) => {
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
         <div className="mb-3 mr-3">
-          <h6 className="fs-16 text-black font-w600 mb-0">
-            Appointments
-          </h6>
-          <span className="fs-14">
-            Viewed {pageCount < 1 ? appCount : pageCount * pageLimit} of{" "}
-            {appCount} appointments.{" "}
-          </span>
+          <h6 className="fs-16 text-black font-w600 mb-0">Appointments</h6>
+          <span className="fs-14">Querying from {appCount} appointments. </span>
           <div className="row"></div>
         </div>
-        <div className="event-tabs mb-3 mr-3">
-          <ul className="nav nav-tabs" role="tablist">
-            <li className="nav-item">
-              <a
-                className={`nav-link ${type === "all" ? "active" : ""}`}
-                onClick={() => setAppointmentsType("all")}
-              >
-                All
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className={`nav-link ${type === "approved" ? "active" : ""}`}
-                onClick={() => setAppointmentsType("approved")}
-              >
-                Approved
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className={`nav-link ${type === "pending" ? "active" : ""}`}
-                onClick={() => setAppointmentsType("pending")}
-              >
-                Pending
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className={`nav-link ${type === "declined" ? "active" : ""}`}
-                onClick={() => setAppointmentsType("declined")}
-              >
-                Declined
-              </a>
-            </li>
-          </ul>
-        </div>
+
         <div className="d-flex mb-3">
           <select
             className="form-control style-2 default-select mr-3"
@@ -294,82 +256,140 @@ const Appointments = ({ socket }) => {
             Generate Report
           </CSVLink>
         </div>
-        <div className="d-flex mb-3">
-          <select
-            className="form-control style-2 default-select mr-3"
-            onClick={(e) => {
-              setPageLimit(e.target.value);
-              getAllAppointments();
-            }}
-          >
-            <option value="25" selected={pageLimit === "25"}>
-              25
-            </option>
-            <option value="50" selected={pageLimit === "50"}>
-              50
-            </option>
-            <option value="100" selected={pageLimit === "100"}>
-              100
-            </option>
-          </select>
-        </div>
       </div>
-
-      <div className="row mb-3">
-        <div className="col-md-4 col-sm-12">
-          <input
-            type="text"
-            className="form-control input-default mb-2"
-            placeholder="Enter company name, user name or appointment id"
-            onChange={(e) => setSearchTerm(e.target.value)}
-            value={searchTerm}
-          />
-        </div>
-        <div className="col-md-1 col-sm-12">
-          <button
-            type="button"
-            class="btn btn-primary btn-block mb-2"
-            onClick={handleSearch}
-          >
-            Search
-          </button>
-        </div>
-        <div className="col-md-1 col-sm-12">
-          <button
-            type="button"
-            class="btn btn-primary btn-block mb-3"
-            onClick={clearSearch}
-          >
-            Clear
-          </button>
-        </div>
-        <div className="col-md-4 col-sm-12">
-          <div class="input-group input-daterange mb-2">
-            <input
-              type="date"
-              class="form-control"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-            />
+      <div className="row">
+        <div className="col-md-6 col-sm-12">
+          <h4>Table</h4>
+          <p>Filter table to by status</p>
+          <div className="mb-3">
+            <ul className="row" role="tablist">
+              <li className="  col-md-3 col-sm-12">
+                <a
+                  className={`btn btn-outline-primary ${
+                    type === "all" ? "btn-primary" : ""
+                  }`}
+                  onClick={() => setAppointmentsType("all")}
+                >
+                  Any Status
+                </a>
+              </li>
+              <li className="  col-md-3 col-sm-12">
+                <a
+                  className={`btn btn-outline-primary ${
+                    type === "approved" ? "btn-primary" : ""
+                  }`}
+                  onClick={() => setAppointmentsType("approved")}
+                >
+                  Approved
+                </a>
+              </li>
+              <li className=" col-md-3 col-sm-12">
+                <a
+                  className={`btn btn-outline-primary ${
+                    type === "pending" ? "btn-primary" : ""
+                  }`}
+                  onClick={() => setAppointmentsType("pending")}
+                >
+                  Pending
+                </a>
+              </li>
+              <li className="col-md-3 col-sm-12">
+                <a
+                  className={`btn btn-outline-primary ${
+                    type === "declined" ? "btn-primary" : ""
+                  }`}
+                  onClick={() => setAppointmentsType("declined")}
+                >
+                  Declined
+                </a>
+              </li>
+            </ul>
+          </div>
+          <p>Select table page size </p>
+          <div className="d-flex mb-3">
+            <select
+              className="form-control style-2 default-select mr-3"
+              onClick={(e) => {
+                setPageLimit(e.target.value);
+                getAllAppointments();
+              }}
+            >
+              <option value="25" selected={pageLimit === "25"}>
+                25
+              </option>
+              <option value="50" selected={pageLimit === "50"}>
+                50
+              </option>
+              <option value="100" selected={pageLimit === "100"}>
+                100
+              </option>
+            </select>
           </div>
         </div>
-        <div className="col-md-1 col-sm-12">
-          <button
-            type="button"
-            class="btn btn-primary btn-block mb-2"
-            onClick={handleFilter}
-          >
-            Filter
-          </button>
-        </div>
-        <div className="col-md-1 col-sm-12">
-          <button
-            type="button"
-            class="btn btn-primary btn-block mb-3"
-            onClick={clearSearch}
-          >
-            Clear
-          </button>
+
+        <div className="col-md-6 col-sm-12">
+          <h4>Database</h4>
+          <p>Search for an appointment </p>
+          <div className="row">
+            <div className="col-md-6 col-sm-12">
+              <input
+                type="text"
+                className="form-control input-default mb-2"
+                placeholder="Enter company name, user name or appointment id"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchTerm}
+              />
+            </div>
+            <div className="col-md-4 col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-block mb-2"
+                onClick={handleSearch}
+              >
+                Search
+              </button>
+            </div>
+            <div className="col-md-2 col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-block mb-3"
+                onClick={clearSearch}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+          <p>Filter database appointnments by date</p>
+          <div className="row">
+            <div className="col-md-6 col-sm-12">
+              <div class="input-group input-daterange mb-2">
+                <input
+                  type="date"
+                  class="form-control"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="col-md-4 col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-block mb-2"
+                onClick={handleFilter}
+              >
+                Filter
+              </button>
+            </div>
+            <div className="col-md-2 col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-block mb-3"
+                onClick={clearSearch}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <div className="row">
