@@ -36,9 +36,11 @@ const Appointments = ({ socket }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const [fromDate, setFromDate] = useState('');
+  const [fromDate, setFromDate] = useState("");
   const [pageLimit, setPageLimit] = useState("25");
-  const [hasRequested , setHasRequested] = useState(false)
+  const [hasRequested, setHasRequested] = useState(false);
+  const [pageCount, setPageCount] = useState(0);
+  const [appCount, setAppCount] = useState(0);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -46,7 +48,6 @@ const Appointments = ({ socket }) => {
     socket.emit("SEARCH_APPOINTMENT", { term: searchTerm });
     socket.on("RECEIVE_SEARCHED_APPOINTMENT", (data) => {
       setAppointments(data);
-      setLoading(false);
     });
     socket.on("RECEIVE_SEARCHED_APPOINTMENT_NOT_FOUND", (data) => {
       setAppointments(originalAppointments);
@@ -64,9 +65,9 @@ const Appointments = ({ socket }) => {
   const handleFilter = () => {
     socket.emit("GET_APPOINTMENTS_BY_DATE", { date: fromDate });
     socket.on("RECEIVE_APPOINTMENTS_BY_DATE", (newAppointments) => {
-      setAppointments(newAppointments)
-    })    
-  }
+      setAppointments(newAppointments);
+    });
+  };
 
   const csvData = appointments
     ? insert(
@@ -93,19 +94,20 @@ const Appointments = ({ socket }) => {
     : [];
 
   const getAllAppointments = () => {
-    socket.emit("GET_ALL_APPOINTMENTS", { pageLimit});
+    socket.emit("GET_ALL_APPOINTMENTS", { pageLimit });
     socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
-      setAppointments(data);
+      const { apps, pages, count } = data;
+      setAppointments(apps);
+      setPageCount(Math.round(Math.floor(pages)));
+      setAppCount(count);
       setOriginalAppointments(data);
     });
   };
 
-  
-
-  useEffect(()=>{
-    console.log("use effect socket", socket)
+  useEffect(() => {
+    console.log("use effect socket", socket);
     if (socket && !appointments && hasRequested === false) {
-      setHasRequested(true)
+      setHasRequested(true);
       getAllAppointments();
     }
   }, [socket]);
@@ -125,9 +127,13 @@ const Appointments = ({ socket }) => {
   const getCurrentMonthsAppointments = (page) => {
     socket.emit("GET_CURRENT_MONTHS_APPOINTMENTS", {
       page,
+      pageLimit,
     });
     socket.on("RECEIVE_CURRENT_MONTHS_APPOINTMENTS", (data) => {
-      setAppointments(data);
+      const { apps, pages, count } = data;
+      setAppointments(apps);
+      setPageCount(Math.round(Math.floor(pages)));
+      setAppCount(count);
       setOriginalAppointments(data);
       setMonthType("current");
       setPage(page);
@@ -135,11 +141,12 @@ const Appointments = ({ socket }) => {
   };
 
   const getNextMonthsAppointments = (p) => {
-    socket.emit("GET_NEXT_MONTHS_APPOINTMENTS", {
-      page: p,
-    });
+    socket.emit("GET_NEXT_MONTHS_APPOINTMENTS", { page: p, pageLimit });
     socket.on("RECEIVE_NEXT_MONTHS_APPOINTMENTS", (data) => {
-      setAppointments(data);
+      const { apps, pages, count } = data;
+      setAppointments(apps);
+      setPageCount(Math.round(Math.floor(pages)));
+      setAppCount(count);
       setOriginalAppointments(data);
       setMonthType("next");
       setPage(p);
@@ -147,11 +154,12 @@ const Appointments = ({ socket }) => {
   };
 
   const getPrevMonthsAppointments = (p) => {
-    socket.emit("GET_PREVIOUS_MONTHS_APPOINTMENTS", {
-      page: p,
-    });
+    socket.emit("GET_PREVIOUS_MONTHS_APPOINTMENTS", { page: p, pageLimit });
     socket.on("RECEIVE_PREVIOUS_MONTHS_APPOINTMENTS", (data) => {
-      setAppointments(data);
+      const { apps, pages, count } = data;
+      setAppointments(apps);
+      setPageCount(Math.round(Math.floor(pages)));
+      setAppCount(count);
       setOriginalAppointments(data);
       setMonthType("prev");
       setPage(p);
@@ -178,7 +186,10 @@ const Appointments = ({ socket }) => {
     if (monthType === "any") {
       socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, pageLimit });
       socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
-        setAppointments(data);
+        const { apps, pages, count } = data;
+        setAppointments(apps);
+        setPageCount(Math.round(Math.floor(pages)));
+        setAppCount(count);
         setOriginalAppointments(data);
         setPage(p);
       });
@@ -196,9 +207,13 @@ const Appointments = ({ socket }) => {
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
         <div className="mb-3 mr-3">
           <h6 className="fs-16 text-black font-w600 mb-0">
-            Appointment Requests
+            Appointments
           </h6>
-          <span className="fs-14">All active appointments listed here </span>
+          <span className="fs-14">
+            Viewed {pageCount < 1 ? appCount : pageCount * pageLimit} of{" "}
+            {appCount} appointments.{" "}
+          </span>
+          <div className="row"></div>
         </div>
         <div className="event-tabs mb-3 mr-3">
           <ul className="nav nav-tabs" role="tablist">
@@ -266,26 +281,24 @@ const Appointments = ({ socket }) => {
         <div className="d-flex mb-3">
           <select
             className="form-control style-2 default-select mr-3"
-            onClick={(e) => { 
+            onClick={(e) => {
               setPageLimit(e.target.value);
               getAllAppointments();
             }}
           >
-            <option value='25' selected={pageLimit === "25"}>
+            <option value="25" selected={pageLimit === "25"}>
               25
             </option>
-            <option value='50' selected={pageLimit === "50"}>
+            <option value="50" selected={pageLimit === "50"}>
               50
             </option>
-            <option value='100' selected={pageLimit === "100"}>
+            <option value="100" selected={pageLimit === "100"}>
               100
             </option>
           </select>
-      </div>
+        </div>
       </div>
 
-      
-      
       <div className="row mb-3">
         <div className="col-md-4 col-sm-12">
           <input
@@ -297,27 +310,48 @@ const Appointments = ({ socket }) => {
           />
         </div>
         <div className="col-md-1 col-sm-12">
-          <button type="button" class="btn btn-primary btn-block mb-2" onClick={handleSearch}>
+          <button
+            type="button"
+            class="btn btn-primary btn-block mb-2"
+            onClick={handleSearch}
+          >
             Search
           </button>
         </div>
         <div className="col-md-1 col-sm-12">
-          <button type="button" class="btn btn-primary btn-block mb-3" onClick={clearSearch}>
+          <button
+            type="button"
+            class="btn btn-primary btn-block mb-3"
+            onClick={clearSearch}
+          >
             Clear
           </button>
         </div>
         <div className="col-md-4 col-sm-12">
           <div class="input-group input-daterange mb-2">
-            <input type="date" class="form-control" value={fromDate} onChange={e => setFromDate(e.target.value)}/>
+            <input
+              type="date"
+              class="form-control"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+            />
           </div>
         </div>
         <div className="col-md-1 col-sm-12">
-          <button type="button" class="btn btn-primary btn-block mb-2" onClick={handleFilter}>
+          <button
+            type="button"
+            class="btn btn-primary btn-block mb-2"
+            onClick={handleFilter}
+          >
             Filter
           </button>
         </div>
         <div className="col-md-1 col-sm-12">
-          <button type="button" class="btn btn-primary btn-block mb-3" onClick={clearSearch}>
+          <button
+            type="button"
+            class="btn btn-primary btn-block mb-3"
+            onClick={clearSearch}
+          >
             Clear
           </button>
         </div>
@@ -336,6 +370,7 @@ const Appointments = ({ socket }) => {
           </div>
         )}
       </div>
+
       <br />
       <div className="row">
         <div className="col-xl-12">
@@ -420,7 +455,7 @@ const Appointments = ({ socket }) => {
               Next Page
             </a>
           </li>
-          {repeat("i", page).map((i, index) => (
+          {repeat("i", pageCount).map((i, index) => (
             <li className="nav-item">
               <a
                 className={`nav-link ${type === "pending" ? "active" : ""}`}
