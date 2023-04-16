@@ -26,6 +26,22 @@ const NoAppointments = styled.div`
   width: 100%;
 `;
 
+const StyledUL = styled.ul`
+      display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    align-items: center;
+    width: auto;
+    height:80px; ;
+    li{
+      flex-shrink: 0;
+      a{
+        padding: 0.325rem 0.7rem !important;
+      }
+    }
+`;
+
 const Appointments = ({ socket }) => {
   const [appointments, setAppointments] = useState(null);
   const [originalAppointments, setOriginalAppointments] = useState(null);
@@ -438,7 +454,7 @@ const Appointments = ({ socket }) => {
         </div>
       </div>
       <div className="event-tabs mb-3 mr-3">
-        <ul className="nav nav-tabs" role="tablist">
+        <StyledUL className="nav nav-tabs" role="tablist">
           <li className="nav-item">
             <a
               className={`nav-link ${type === "approved" ? "active" : ""}`}
@@ -458,14 +474,14 @@ const Appointments = ({ socket }) => {
           {repeat("i", pageCount).map((i, index) => (
             <li className="nav-item">
               <a
-                className={`nav-link ${type === "pending" ? "active" : ""}`}
+                className={`nav-link ${page === index ? "active" : ""}`}
                 onClick={() => getPageAppointments(index)}
               >
                 Page {index + 1}
               </a>
             </li>
           ))}
-        </ul>
+        </StyledUL>
       </div>
     </div>
   );
