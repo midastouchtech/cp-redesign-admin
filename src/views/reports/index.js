@@ -107,8 +107,8 @@ const Reports = ({ socket }) => {
   const getAllAppointments = () => {
     socket.emit("GET_ALL_APPOINTMENTS", { pageLimit: 50});
     socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
     });
   };
 
@@ -135,8 +135,8 @@ const Reports = ({ socket }) => {
       pageLimit: 50
     });
     socket.on("RECEIVE_CURRENT_MONTHS_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
       setMonthType("current");
       setPage(page);
     });
@@ -148,8 +148,8 @@ const Reports = ({ socket }) => {
       pageLimit: 50
     });
     socket.on("RECEIVE_NEXT_MONTHS_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
       setMonthType("next");
       setPage(p);
     });
@@ -161,8 +161,8 @@ const Reports = ({ socket }) => {
       pageLimit: 50
     });
     socket.on("RECEIVE_PREVIOUS_MONTHS_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
       setMonthType("prev");
       setPage(p);
     });
@@ -172,8 +172,8 @@ const Reports = ({ socket }) => {
   const getTodayAppointments = () => {
     socket.emit("GET_TODAYS_APPOINTMENTS");
     socket.on("RECEIVE_TODAY_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
       setMonthType("today");
     });
   };
@@ -181,8 +181,8 @@ const Reports = ({ socket }) => {
   const getTomorrowAppointments = () => {
     socket.emit("GET_TOMORROWS_APPOINTMENTS");
     socket.on("RECEIVE_TOMORROW_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
       setMonthType("tomorrow");
     });
   };
@@ -190,8 +190,8 @@ const Reports = ({ socket }) => {
   const getThisWeekAppointments = () => {
     socket.emit("GET_THIS_WEEKS_APPOINTMENTS");
     socket.on("RECEIVE_THIS_WEEK_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
       setMonthType("thisWeek");
     });
   };
@@ -199,8 +199,8 @@ const Reports = ({ socket }) => {
   const getThisYearAppointments = () => {
     socket.emit("GET_THIS_YEARS_APPOINTMENTS");
     socket.on("RECEIVE_THIS_YEAR_APPOINTMENTS", (data) => {
-      setAppointments(data);
-      setOriginalAppointments(data);
+      setAppointments(data.apps);
+      setOriginalAppointments(data.apps);
       setMonthType("thisYear");
     });
   };
@@ -228,7 +228,7 @@ const Reports = ({ socket }) => {
 
   const getPageAppointments = (p) => {
     if (monthType === "any") {
-      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p });
+      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, });
       socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
         setAppointments(data);
         setOriginalAppointments(data);
