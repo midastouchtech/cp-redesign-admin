@@ -307,6 +307,7 @@ function App({ socket }) {
                     <strong>{company?.details?.name}</strong>
                   </strong>
                   <p>{company?.details?.physicalAddress}</p>
+                  <p>Vat: {company?.details?.vat}</p>
                   <hr />
                   <h4>Appointment ID</h4>
                   <p>
