@@ -286,6 +286,14 @@ function App({ socket }) {
               <hr />
               <div class="row details-row">
                 <div class="col-md-6 text-left">
+                  <h4>Created On</h4>
+                  <p className="mb-3">
+                    <strong>{appointment?.tracking[0]?.date}</strong>
+                  </p>
+                  <h4>Booked for</h4>
+                  <p className="mb-3">
+                    <strong>{appointment?.details?.date}</strong>
+                  </p>
                   <h4>Purchase Order Number</h4>
                   <p className="mb-3">
                     <strong>{appointment?.details?.purchaseOrderNumber}</strong>
