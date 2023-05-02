@@ -21,19 +21,19 @@ const ChatContainer = styled.div`
   .chatbox {
     position: fixed;
     width: 340px;
-    height: 78vh;
+    height: 68vh;
     position: fixed;
     right: 40px !important;
-    top: 18vh;
+    top: 20vh;
   }
   .chatbox .msg_card_body {
-    height: 45vh;
+    height: 35vh;
     overflow-y: scroll;
   }
   ${(props) => (props.isOpen ? "display: block" : "display: none")};
   .chatbox {
     position: fixed;
-    top: 12vh;
+    top: 15vh;
     right: 0;
     width: 20vw;
   }
@@ -75,7 +75,7 @@ function App({ socket, user }) {
   const [appointment, setAppointment] = useState({});
   const [avatars, setAvatars] = useState({});
   const [message, setMessage] = useState("");
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
   const [messages, setMessages] = useState([]);
   const [hasFetchedAvatars, setHasFetchedAvatars] = useState(false);
   const [hasRequested , setHasRequested] = useState(false)
