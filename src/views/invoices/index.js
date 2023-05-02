@@ -95,7 +95,7 @@ const Invoices = ({ socket }) => {
           <input
             type="text"
             className="form-control input-default"
-            placeholder="Enter user name"
+            placeholder="Enter invoice details"
             onChange={(e) => setSearchTerm(e.target.value)}
             value={searchTerm}
           />
@@ -145,7 +145,7 @@ const Invoices = ({ socket }) => {
                     <tbody>
                       {invoices?.map((invoice, index) => (
                         <tr key={index}>
-                          <td>{take(8,invoice.id)}</td>
+                          <td>{invoice?.appointment?.id}</td>
                           <td>{invoice?.company?.name}</td>
                           <td>{invoice?.client?.name} {invoice?.client?.surname}</td>
                           <td>{invoice.client?.email}</td>

@@ -62,6 +62,7 @@ const Reports = ({ socket }) => {
   const [monthType, setMonthType] = useState("any");
   const [type, setStatusType] = useState("all");
   const [page, setPage] = useState(0);
+  const [fromDate, setFromDate] = useState("");
 
   const employeeHasServiceWithId = (employee, service) => {
     return employee?.services?.some((s) => s?.id === service);
@@ -272,6 +273,16 @@ const Reports = ({ socket }) => {
       };
     }
   );
+  const handleFilter = () => {
+    socket.emit("GET_APPOINTMENTS_BY_DATE", { date: fromDate });
+    socket.on("RECEIVE_APPOINTMENTS_BY_DATE", (newAppointments) => {
+      console.log("receive appointments by date", newAppointments)
+      setAppointments(newAppointments);
+    });
+  };
+  const clearSearch = () => {
+    setAppointments(originalAppointments);
+  };
 
   const fuse = new Fuse(originalAppointmentsWithReadableDates, options);
   console.log("all employees", allEmployees);
@@ -317,6 +328,36 @@ const Reports = ({ socket }) => {
             </li>
           </ul>
         </div>
+        <div className="row">
+            <div className="col-md-6 col-sm-12">
+              <div class="input-group input-daterange mb-2">
+                <input
+                  type="date"
+                  class="form-control"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="col-md-3 col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-block mb-2"
+                onClick={handleFilter}
+              >
+                Filter
+              </button>
+            </div>
+            <div className="col-md-3 col-sm-12">
+              <button
+                type="button"
+                class="btn btn-primary btn-block mb-3"
+                onClick={clearSearch}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
         <div className="d-flex mb-3">
           <select
             className="form-control style-2 default-select mr-3"
@@ -347,6 +388,7 @@ const Reports = ({ socket }) => {
               This Year
             </option>
           </select>
+          
           <CSVLink
             headers={csvHeaders}
             data={allEmployees}
