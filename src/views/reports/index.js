@@ -63,6 +63,8 @@ const Reports = ({ socket }) => {
   const [type, setStatusType] = useState("all");
   const [page, setPage] = useState(0);
   const [fromDate, setFromDate] = useState("");
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const [ isLoading, setIsLoading] = useState(false)
 
   const employeeHasServiceWithId = (employee, service) => {
     return employee?.services?.some((s) => s?.id === service);
@@ -131,6 +133,8 @@ const Reports = ({ socket }) => {
   };
 
   const getCurrentMonthsAppointments = (page) => {
+    setLoadingMessage("Fetching current month's appointments")
+    setIsLoading(true)
     socket.emit("GET_CURRENT_MONTHS_APPOINTMENTS", {
       page,
       pageLimit: 50
@@ -140,10 +144,13 @@ const Reports = ({ socket }) => {
       setOriginalAppointments(data.apps);
       setMonthType("current");
       setPage(page);
+      setIsLoading(false)
     });
   };
 
   const getNextMonthsAppointments = (p) => {
+    setLoadingMessage("Fetching next month's appointments")
+    setIsLoading(true)
     socket.emit("GET_NEXT_MONTHS_APPOINTMENTS", {
       page: p,
       pageLimit: 50
@@ -153,10 +160,13 @@ const Reports = ({ socket }) => {
       setOriginalAppointments(data.apps);
       setMonthType("next");
       setPage(p);
+      setIsLoading(false)
     });
   };
 
   const getPrevMonthsAppointments = (p) => {
+    setLoadingMessage("Fetching previous month's appointments")
+    setIsLoading(true)
     socket.emit("GET_PREVIOUS_MONTHS_APPOINTMENTS", {
       page: p,
       pageLimit: 50
@@ -166,43 +176,56 @@ const Reports = ({ socket }) => {
       setOriginalAppointments(data.apps);
       setMonthType("prev");
       setPage(p);
+      setIsLoading(false)
     });
   };
 
 
   const getTodayAppointments = () => {
+    setLoadingMessage("Fetching today's month's appointments")
+    setIsLoading(true)
     socket.emit("GET_TODAYS_APPOINTMENTS");
     socket.on("RECEIVE_TODAY_APPOINTMENTS", (data) => {
       setAppointments(data.apps);
       setOriginalAppointments(data.apps);
       setMonthType("today");
+      setIsLoading(false)
     });
   };
 
   const getTomorrowAppointments = () => {
+    setLoadingMessage("Fetching tomorrow's appointments")
+    setIsLoading(true)
     socket.emit("GET_TOMORROWS_APPOINTMENTS");
     socket.on("RECEIVE_TOMORROW_APPOINTMENTS", (data) => {
       setAppointments(data.apps);
       setOriginalAppointments(data.apps);
       setMonthType("tomorrow");
+      setIsLoading(false)
     });
   };
 
   const getThisWeekAppointments = () => {
+    setLoadingMessage("Fetching this week's appointments")
+    setIsLoading(true)
     socket.emit("GET_THIS_WEEKS_APPOINTMENTS");
     socket.on("RECEIVE_THIS_WEEK_APPOINTMENTS", (data) => {
       setAppointments(data.apps);
       setOriginalAppointments(data.apps);
       setMonthType("thisWeek");
+      setIsLoading(false)
     });
   };
 
   const getThisYearAppointments = () => {
+    setLoadingMessage("Fetching this year's appointments")
+    setIsLoading(true)
     socket.emit("GET_THIS_YEARS_APPOINTMENTS");
     socket.on("RECEIVE_THIS_YEAR_APPOINTMENTS", (data) => {
       setAppointments(data.apps);
       setOriginalAppointments(data.apps);
       setMonthType("thisYear");
+      setIsLoading(false)
     });
   };
 
@@ -229,11 +252,14 @@ const Reports = ({ socket }) => {
 
   const getPageAppointments = (p) => {
     if (monthType === "any") {
+      setLoadingMessage(`Fetching page ${p}'s appointments`)
+      setIsLoading(true)
       socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, });
       socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
         setAppointments(data);
         setOriginalAppointments(data);
         setPage(p);
+        setIsLoading(false)
       });
     } else {
       //console.log("getting next page appointments for", monthType, "month");
@@ -274,10 +300,13 @@ const Reports = ({ socket }) => {
     }
   );
   const handleFilter = () => {
+    setLoadingMessage("Fetching appointments for date ", fromDate)
+    setIsLoading(true)
     socket.emit("GET_APPOINTMENTS_BY_DATE", { date: fromDate });
     socket.on("RECEIVE_APPOINTMENTS_BY_DATE", (newAppointments) => {
       console.log("receive appointments by date", newAppointments)
       setAppointments(newAppointments);
+      setIsLoading(false)
     });
   };
   const clearSearch = () => {
@@ -405,7 +434,7 @@ const Reports = ({ socket }) => {
           <div className="tab-content">
             <div id="All" className="tab-pane active fade show">
               <div className="table-responsive">
-                {!isNil(appointments) && !isEmpty(appointments) && (
+                {!isNil(appointments) && !isEmpty(appointments) && !isLoading (
                   <ReportTable
                     id="example2"
                     className="table card-table display dataTablesCard"
@@ -469,10 +498,18 @@ const Reports = ({ socket }) => {
                     </tbody>
                   </ReportTable>
                 )}
-                {(isNil(appointments) || isEmpty(appointments)) && (
+                {(isNil(appointments) || isEmpty(appointments)) && !isLoading  && (
                   <NoAppointments>
                     <div className="d-flex">
                       <h1>No appointments</h1>
+                    </div>
+                  </NoAppointments>
+                )}
+                {(isNil(appointments) || isEmpty(appointments)) && isLoading && (
+                  <NoAppointments>
+                    <div className="d-flex">
+                      <h1>{loadingMessage}</h1>
+                      <p>Please wait...</p>
                     </div>
                   </NoAppointments>
                 )}
