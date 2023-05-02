@@ -182,7 +182,7 @@ const Reports = ({ socket }) => {
 
 
   const getTodayAppointments = () => {
-    setLoadingMessage("Fetching today's month's appointments")
+    setLoadingMessage("Fetching today's appointments")
     setIsLoading(true)
     socket.emit("GET_TODAYS_APPOINTMENTS");
     socket.on("RECEIVE_TODAY_APPOINTMENTS", (data) => {
@@ -505,11 +505,11 @@ const Reports = ({ socket }) => {
                     </div>
                   </NoAppointments>
                 )}
-                {(isNil(appointments) || isEmpty(appointments)) && isLoading && (
+                {isLoading && (
                   <NoAppointments>
                     <div className="d-flex">
                       <h1>{loadingMessage}</h1>
-                      <p>Please wait...</p>
+                      
                     </div>
                   </NoAppointments>
                 )}
