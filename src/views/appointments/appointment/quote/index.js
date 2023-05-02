@@ -302,7 +302,7 @@ function App({ socket }) {
                   <h4>Invoice Number</h4>
                   <p className="mb-3">
                     <strong>
-                      {appointment.invoice ? appointment.invoice.id : invoiceId}
+                      {appointment.id }
                     </strong>
                   </p>
                   <h4>Terms</h4>
