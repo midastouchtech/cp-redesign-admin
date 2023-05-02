@@ -23,8 +23,8 @@ const ChatContainer = styled.div`
     width: 340px;
     height: 68vh;
     position: fixed;
-    right: 40px !important;
-    top: 20vh;
+    right: 10px !important;
+    top: 22vh;
   }
   .chatbox .msg_card_body {
     height: 35vh;

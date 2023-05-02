@@ -300,7 +300,7 @@ const Reports = ({ socket }) => {
     }
   );
   const handleFilter = () => {
-    setLoadingMessage("Fetching appointments for date ", fromDate)
+    setLoadingMessage("Fetching appointments for date "+ fromDate)
     setIsLoading(true)
     socket.emit("GET_APPOINTMENTS_BY_DATE", { date: fromDate });
     socket.on("RECEIVE_APPOINTMENTS_BY_DATE", (newAppointments) => {
