@@ -434,7 +434,7 @@ const Reports = ({ socket }) => {
           <div className="tab-content">
             <div id="All" className="tab-pane active fade show">
               <div className="table-responsive">
-                {!isNil(appointments) && !isEmpty(appointments) && !isLoading (
+                {!isNil(appointments) && !isEmpty(appointments) && !isLoading && (
                   <ReportTable
                     id="example2"
                     className="table card-table display dataTablesCard"
