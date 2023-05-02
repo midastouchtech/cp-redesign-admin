@@ -468,7 +468,7 @@ function App({ socket, user }) {
         </div>
         <div class="col-xl-3 col-xxl-4">
           <FloatingButton
-            className="btn btn-primary d-block d-sm-block d-md-block"
+            className="btn btn-xs btn-primary d-block d-sm-block d-md-block"
             onClick={() => setChatOpen(!chatOpen)}
           >
             {chatOpen ? "Close Messages" : "Open Messages"}
@@ -493,7 +493,7 @@ function App({ socket, user }) {
                           </div>
                           <div class="col-12 d-flex flex-column align-items-center justify-content-center">
                             <button
-                              className="btn btn-primary d-block d-sm-block d-md-block"
+                              className="btn btn-xs btn-primary d-block d-sm-block d-md-block"
                               onClick={() => setChatOpen(!chatOpen)}
                             >
                               {chatOpen ? "Close" : "Open"}
