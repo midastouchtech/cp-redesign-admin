@@ -386,7 +386,7 @@ const Analytics = ({ socket }) => {
             the year {selectedYear}
           </h6>
           <div className="row">
-            <div className="col-xl-3 col-xxl-3 col-lg-3 col-sm-6">
+            {/* <div className="col-xl-3 col-xxl-3 col-lg-3 col-sm-6">
               <div className="card">
                 <div className="card-body">
                   <div className="d-flex align-items-end">
@@ -435,7 +435,7 @@ const Analytics = ({ socket }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
             <div className="col-xl-3 col-xxl-3 col-lg-3 col-sm-6">
               <div className="card">
                 <div className="card-body">

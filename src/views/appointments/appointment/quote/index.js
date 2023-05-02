@@ -8,6 +8,7 @@ import html2canvas from "html2canvas";
 import jspdf from "jspdf";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
+import moment from "moment";
 
 const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
@@ -288,7 +289,7 @@ function App({ socket }) {
                 <div class="col-md-6 text-left">
                   <h4>Created On</h4>
                   <p className="mb-3">
-                    <strong>{appointment?.tracking[0]?.date}</strong>
+                    <strong>{appointment?.tracking ? moment( appointment?.tracking[0]?.date ?  appointment?.tracking[0]?.date : new Date()).format("DD-MM-YYYY") : ""}</strong>
                   </p>
                   <h4>Booked for</h4>
                   <p className="mb-3">
