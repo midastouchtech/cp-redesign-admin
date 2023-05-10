@@ -30,6 +30,7 @@ import Sites from "./sites";
 import SearchModal from "../../../../components/Modal";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import Comments from "../edit/comments";
+import RemainingSlots from "../RemainingSlots";
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -72,9 +73,8 @@ function App({ socket }) {
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShowCompanySearch] = useState(false);
   const [searchParams] = useSearchParams();
-  const [shouldUpdateCount, setShouldUpdateCount] = useState(false)
-
-  const [appointmentsForDateCount, setAppointmentsForDateCount] = useState();
+  const [ isFullyBooked, setIsFullyBooked] = useState(false);
+  const [shouldUpdateCount, setShouldUpdateCount] = useState(false);
   const [searchParamCompanyName, setSearchParamCompanyName] = useState(
     searchParams.get("companyName") || null
   );
@@ -206,6 +206,7 @@ function App({ socket }) {
   };
 
   const createNewEmployee = () => {
+    setShouldUpdateCount(true)
     const newEmployee = {
       id: short.generate(),
       name: "",
@@ -219,13 +220,15 @@ function App({ socket }) {
     const newEmployees = [newEmployee, ...appointment?.details?.employees];
     //
     setDetail("employees", newEmployees);
+    
   };
 
   const removeEmployee = (id) => () => {
-    //
+    setShouldUpdateCount(true)
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
     setDetail("employees", newEmployees);
+    
   };
 
   const minimizeEmployee = (id) => () => {
@@ -261,29 +264,7 @@ function App({ socket }) {
     setDetail("employees", newEmployees);
   };
 
-  const exists = (i) => !isNil(i) && !isEmpty(i);
-  useEffect(() => {
-    const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
-    setHasUpdatedAppointment(hasUpdatedAppointmnent);
-    if (
-      socket &&
-      exists(appointment?.details?.date) &&
-      exists(appointment?.details?.clinic)
-      && shouldUpdateCount === true
-    ) {
-      console.log("getting count")
-      socket.emit("GET_APPOINTMENTS_FOR_DATE_COUNT", {
-        clinic: appointment.details.clinic,
-        date: appointment.details.date,
-      });
-      socket.on("RECEIVE_APPOINTMENTS_FOR_DATE_COUNT", ({ count }) => {
-        console.log("COUNT", count);
-        setAppointmentsForDateCount(count);
-      });
-      
-      setShouldUpdateCount(false);
-    }
-  });
+  
 
   if (
     !isNil(searchParamCompanyName) &&
@@ -310,6 +291,11 @@ function App({ socket }) {
     setDetail("employees", newEmployees);
   };
 
+  useEffect(() => {
+    const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
+    setHasUpdatedAppointment(hasUpdatedAppointmnent);
+    })
+
   return (
     <div class="container-fluid">
       <div class="row">
@@ -323,8 +309,7 @@ function App({ socket }) {
               >
                 Close
               </button>
-              {!(appointmentsForDateCount >= 100) && (
-                <button
+              <button
                   className={`btn mr-1 ${
                     hasUpdatedAppointmnent ? "btn-primary" : "btn-secondary"
                   }`}
@@ -332,8 +317,7 @@ function App({ socket }) {
                   disabled={!hasUpdatedAppointmnent}
                 >
                   Save
-                </button>
-              )}
+              </button>
               <button
                 className={`btn ${
                   hasUpdatedAppointmnent ? "btn-link" : "btn-secondary"
@@ -343,23 +327,17 @@ function App({ socket }) {
               >
                 Cancel
               </button>
+              <RemainingSlots
+                clinic={appointment?.details?.clinic}
+                date={appointment?.details?.date}
+                employeeCount={appointment?.details?.employees?.length }
+                socket={socket}
+                onBookingStatusUpdate={ (status) => {setIsFullyBooked(status)}}
+                shouldUpdateCount={shouldUpdateCount}
+                setShouldUpdateCount={setShouldUpdateCount}
+                />
               <br />
               <br />
-              {exists(appointmentsForDateCount) && (
-                <p>
-                  <small class="text-secondary">
-                    The number of appointments for {appointment?.details?.date}{" "}
-                    at {appointment?.details?.clinic} is{" "}
-                    {appointmentsForDateCount} the limit is 100{" "}
-                  </small>
-                  <br />
-                  <small class="text-danger">
-                    {appointmentsForDateCount >= 100
-                      ? "Please note you won't be able to save this appointment as the limit has been reached."
-                      : ""}
-                  </small>
-                </p>
-              )}
             </div>
           </div>
         </div>
@@ -725,13 +703,13 @@ function App({ socket }) {
 
         <div class="col-xl-12 col-lg-12 text-center">
           <h2>Employees</h2>
+          <br/>
+          
+          <br />
           <button
             className="btn btn-primary mb-2"
-            onClick={
-              appointment?.details?.employees?.length === 100
-                ? () => {}
-                : createNewEmployee
-            }
+            disabled = {isFullyBooked}
+            onClick={createNewEmployee}
           >
             {" "}
             Add New Employee{" "}

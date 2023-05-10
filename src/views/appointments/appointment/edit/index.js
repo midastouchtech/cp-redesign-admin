@@ -30,6 +30,7 @@ import Comments from "./comments";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { connect } from "react-redux";
 import SearchModal from "../../../../components/Modal";
+import RemainingSlots from "../RemainingSlots";
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -58,6 +59,8 @@ function App({ socket, stateUser }) {
   const [showNdaModal, setNdaModalOpen] = useState(false);
   const [hasRequested , setHasRequested] = useState(false)
 
+  const [ isFullyBooked, setIsFullyBooked] = useState(false);
+  const [shouldUpdateCount, setShouldUpdateCount] = useState(true);
   
   useEffect(()=>{
     console.log("use effect socket", socket)
@@ -156,6 +159,7 @@ function App({ socket, stateUser }) {
   };
 
   const createNewEmployee = () => {
+    setShouldUpdateCount(true)
     const newEmployee = {
       id: short.generate(),
       name: "",
@@ -172,6 +176,7 @@ function App({ socket, stateUser }) {
   };
 
   const removeEmployee = (id) => () => {
+    setShouldUpdateCount(true)
     //console.log("removing employee", id);
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
@@ -330,6 +335,15 @@ function App({ socket, stateUser }) {
               >
                 Delete
               </button>
+              <RemainingSlots
+                clinic={appointment?.details?.clinic}
+                date={appointment?.details?.date}
+                employeeCount={appointment?.details?.employees?.length }
+                socket={socket}
+                onBookingStatusUpdate={ (status) => {setIsFullyBooked(status)}}
+                shouldUpdateCount={shouldUpdateCount}
+                setShouldUpdateCount={setShouldUpdateCount}
+                />
             </div>
           </div>
         </div>
@@ -359,7 +373,7 @@ function App({ socket, stateUser }) {
                         class="form-control input-default "
                         placeholder="col-form-label-sm"
                         type="date"
-                        onChange={(e) => setDetail("date", e.target.value)}
+                        onChange={(e) => {setDetail("date", e.target.value);setShouldUpdateCount(true)}}
                         value={appointment?.details?.date}
                       />
                     </div>
@@ -590,7 +604,10 @@ function App({ socket, stateUser }) {
                           "churchill"
                         }
                         value="Churchill"
-                        onChange={(event) => setDetail("clinic", "Churchill")}
+                        onChange={(event) => {
+                          setDetail("clinic", "Churchill")
+                          setShouldUpdateCount(true)
+                        }}
                       />
                       <label class="form-check-label" for="check1">
                         Churchill
@@ -605,7 +622,10 @@ function App({ socket, stateUser }) {
                           appointment?.details?.clinic?.toLowerCase() ===
                           "hendrina"
                         }
-                        onChange={(event) => setDetail("clinic", "Hendrina")}
+                        onChange={(event) => {
+                          setDetail("clinic", "Hendrina");
+                          setShouldUpdateCount(true)
+                        }}
                       />
                       <label class="form-check-label" for="check2">
                         Hendrina
@@ -721,10 +741,7 @@ function App({ socket, stateUser }) {
         </div>
         <div class="col-xl-12 col-lg-12 text-center">
           <h2>Employees</h2>
-          <button className="btn btn-primary mb-2" onClick={
-              appointment?.details?.employees?.length === 100
-                ? () => {}
-                : createNewEmployee
+          <button className="btn btn-primary mb-2" disabled = {isFullyBooked}  onClick={createNewEmployee
             }>
             {" "}
             Add New Employee{" "}
