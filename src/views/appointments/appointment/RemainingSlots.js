@@ -3,7 +3,7 @@ import { isEmpty, isNil } from "ramda";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 const clinicLimits = {
-  Hendrina: 2,
+  Hendrina: 80,
   Churchill: 100,
 };
 
@@ -47,7 +47,7 @@ const RemainingSlots = ({
         setShouldUpdateCount(false);
         socket.off("RECEIVE_APPOINTMENTS_FOR_DATE_COUNT")
       });
-      
+
     }
   },[date, clinic, employeeCount]);
   return (
