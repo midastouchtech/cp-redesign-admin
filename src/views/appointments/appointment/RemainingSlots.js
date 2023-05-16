@@ -3,8 +3,8 @@ import { isEmpty, isNil } from "ramda";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 const clinicLimits = {
-  Hendrina: 80,
-  Churchill: 100,
+  Hendrina: 60,
+  Churchill: 80,
 };
 
 const Container = styled.div`
