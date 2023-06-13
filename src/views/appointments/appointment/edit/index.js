@@ -31,6 +31,8 @@ import UserSearch from "../../../../components/Modal/userSearch";
 import { connect } from "react-redux";
 import SearchModal from "../../../../components/Modal";
 import RemainingSlots from "../RemainingSlots";
+import "react-alert-confirm/lib/style.css";
+import AlertConfirm from "react-alert-confirm";
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -142,7 +144,17 @@ function App({ socket, stateUser }) {
     console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
-
+  const openFailed= (data) => {
+    AlertConfirm({
+      title: "Failed",
+      desc: "Your appointment could not be updated because the clinic is fully booked for the day. Please try another date.",
+      onOk: () => {
+      },
+      onCancel: () => {
+        console.log("cancel");
+      },
+    });
+  };
   const saveAppointment = () => {
     const price = calculateBookingPrice();
     const appointmentWithNewPrice = assocPath(
@@ -155,6 +167,10 @@ function App({ socket, stateUser }) {
     socket.on("APPOINTMENT_UPDATED", () => {
       //console.log("appointment updated");
       navigate("/appointment/" + appointment.id)
+    });
+    socket.on("APPOINTMENT_LIMIT_REACHED", (data) => {
+      openFailed();
+      socket.off("APPOINTMENT_LIMIT_REACHED")
     });
   };
 

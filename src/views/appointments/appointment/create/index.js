@@ -31,6 +31,8 @@ import SearchModal from "../../../../components/Modal";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import Comments from "../edit/comments";
 import RemainingSlots from "../RemainingSlots";
+import "react-alert-confirm/lib/style.css";
+import AlertConfirm from "react-alert-confirm";
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -176,7 +178,17 @@ function App({ socket }) {
 
     return bookingPrice;
   };
-
+  const openFailed= (data) => {
+    AlertConfirm({
+      title: "Failed",
+      desc: "Your appointment could not be created because the clinic is fully booked for the day. Please try another date.",
+      onOk: () => {
+      },
+      onCancel: () => {
+        console.log("cancel");
+      },
+    });
+  };
   const saveAppointment = () => {
     const price = calculateBookingPrice();
     const appointmentWithNewPrice = assocPath(
@@ -189,6 +201,10 @@ function App({ socket }) {
     socket.on("APPOINTMENT_ADDED", (data) => {
       //
       navigate("/appointment/" + data.id);
+    });
+    socket.on("APPOINTMENT_LIMIT_REACHED", (data) => {
+      openFailed();
+      socket.off("APPOINTMENT_LIMIT_REACHED")
     });
   };
 

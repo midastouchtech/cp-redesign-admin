@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import BasicDocument from "./BasicDocument";
 import { DOVER_PRICE, MEDICAL_SERVICES } from "../../../../config";
 import { keys, values } from "ramda";
 import styled from "styled-components";
