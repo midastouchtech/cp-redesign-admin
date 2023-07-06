@@ -2,10 +2,7 @@ import moment from "moment";
 import { isEmpty, isNil } from "ramda";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-const clinicLimits = {
-  Hendrina: 60,
-  Churchill: 80,
-};
+
 
 const Container = styled.div`
     width: 100%;
@@ -27,6 +24,7 @@ const RemainingSlots = ({
 }) => {
   const [appointmentsForDateCount, setAppointmentsForDateCount] = useState();
   const [isFullyBooked, setIsFullyBooked] = useState(false);
+  const [clinicLimits, setLimits] = useState({});
 
   const exists = (i) => !isNil(i) && !isEmpty(i);
 
@@ -47,7 +45,10 @@ const RemainingSlots = ({
         setShouldUpdateCount(false);
         socket.off("RECEIVE_APPOINTMENTS_FOR_DATE_COUNT")
       });
-
+      socket.emit("GET_SYSTEM_SETTINGS");
+      socket.on("RECEIVE_SYSTEM_SETTINGS", (settings) => {
+        setLimits(settings.limits);
+      });
     }
   },[date, clinic, employeeCount]);
   return (

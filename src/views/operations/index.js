@@ -29,7 +29,10 @@ const Operations = ({ socket }) => {
   const [restartingDynos, setRestartingDynos] = useState(false);
   const [systemSettings, setSystemSettings] = useState();
   const [hasRequested, setHasRequested] = useState(false);
-  console.log(invoices);
+  const [hendrinaLimit, setHendrinaLimit] = useState(0);
+  const [churchillLimit, setChurchillLimit] = useState(0);
+  const [limitsUpdated, setUpdateLimits] = useState(null);
+
   const addEvent = (e) => {
     console.log(e.name);
     const newEvents = [...events, e];
@@ -54,6 +57,8 @@ const Operations = ({ socket }) => {
       socket.emit("GET_SYSTEM_SETTINGS");
       socket.on("RECEIVE_SYSTEM_SETTINGS", (settings) => {
         setSystemSettings(settings);
+        setHendrinaLimit(settings.limits.Hendrina);
+        setChurchillLimit(settings.limits.Churchill);
       });
       socket.on("FETCH_SYSTEM_SETTINGS", () => {
         socket.emit("GET_SYSTEM_SETTINGS");
@@ -111,8 +116,8 @@ const Operations = ({ socket }) => {
   };
 
   const checkStatus = () => {
-    getDynoInfo();
-    getInvoiceInfo();
+    // getDynoInfo();
+    // getInvoiceInfo();
     axios
       .get(process.env.REACT_APP_IO_SERVER)
       .then(() => {
@@ -137,6 +142,23 @@ const Operations = ({ socket }) => {
       },
     };
     socket.emit("UPDATE_SYSTEM_SETTINGS", newSystemSettings);
+  };
+
+  const updateLimits = () => {
+    setUpdateLimits(false);
+    const newSystemSettings = {
+      ...systemSettings,
+      limits : {
+        Hendrina: hendrinaLimit,
+        Churchill: churchillLimit,
+      }
+    };
+    console.log("updating", newSystemSettings)
+    socket.emit("UPDATE_SYSTEM_SETTINGS", newSystemSettings);
+    socket.on("SYSTEM_SETTINGS_UPDATED_SUCCESFULLY", () => {
+      console.log("settings updated")
+      setUpdateLimits(true);
+    })
   };
 
   return (
@@ -360,6 +382,39 @@ const Operations = ({ socket }) => {
                     </a>
                   </small>
                   <br />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+          <div className={`card`}>
+            <div className="card-body">
+              <div className="d-flex align-items-end">
+                <div>
+                  <p className="fs-14 text-black mb-1 bold">Appoinment Limits</p>
+                  <small>
+                    Hendrina
+                  </small>
+                  <br />
+                  <small>
+                    <input value={hendrinaLimit} onChange={(e)=> setHendrinaLimit(e.target.value)} />
+                  </small>
+                  <br />
+                  <small>
+                    Churchill
+                  </small>
+                  <br />
+                  <small>
+                    <input value={churchillLimit} onChange={(e)=> setChurchillLimit(e.target.value)} />
+                  </small>
+                  <br />
+                  <br />
+                  <button className="btn btn-small btn-primary" onClick={updateLimits}>Update Limits</button>
+                  <br />
+                  <br />
+                  {limitsUpdated  === true && <span className="text-success">Limits updated.</span>}
+                  {limitsUpdated === false  && <span>Limits updating...</span>}
                 </div>
               </div>
             </div>
