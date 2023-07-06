@@ -414,6 +414,7 @@ const Operations = ({ socket }) => {
                   <br />
                   <br />
                   {limitsUpdated  === true && <span className="text-success">Limits updated.</span>}
+                  
                   {limitsUpdated === false  && <span>Limits updating...</span>}
                 </div>
               </div>
