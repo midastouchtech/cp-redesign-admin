@@ -6,47 +6,63 @@ const Container = styled.div``;
 
 function Uploader({ title, onChange }) {
   const [isUploading, setIsUploading] = useState(null);
+  const [fileName, setFileName] = useState(null);
 
   const onFileChange = (event) => {
-    //console.log("doing onchane")
     setIsUploading(true);
-    const url = "https://api.cloudinary.com/v1_1/clinic-plus/raw/upload";
+    setFileName(event.target.files[0].name);
+    const url = `${process.env.REACT_APP_IO_SERVER}/upload-file-to-cloud-storage`;
     const formData = new FormData();
     formData.append("file", event.target.files[0], event.target.files[0].name);
-    formData.append("upload_preset", "pwdsm6sz");
+    const headers = {
+      "Content-Type": "multipart/form-data",
+    };
+    console.log("Headers", headers);
     axios({
       method: "POST",
       data: formData,
-      headers: { "Content-Type": "multipart/form-data" },
+      headers,
       url,
     })
       .then((response) => {
+        console.log("response is", response);
         setIsUploading(false);
-        onChange(response.data.secure_url);
+        onChange(response.data.publicUrl);
       })
       .then((data) => {});
   };
 
   return (
     <Container>
-      <div>
-        <div className="row">
-        <div class="custom-file">
-          <input type="file" class="custom-file-input" onChange={onFileChange}/>
-          <label class="custom-file-label">Choose file</label>          
+      <div class="input-group row">
+        <div class="col-12 custom-file ml-3">
+          <input
+            type="file"
+            class="custom-file-input"
+            onChange={onFileChange}
+          />
+          <label class="custom-file-label">Choose file</label>
         </div>
-        </div>
-        <div className="row">
         <div className="col-12 mt-3">
-        {isUploading === true && (
-            <small className="login-loading">Uploading...</small>
+          {isUploading === true && (
+            <p>
+              <i>Uploading...</i>
+            </p>
           )}
           {isUploading === false && (
-            <small className="login-loading">Upload complete!</small>
+            <div>
+              <p>
+                <strong>Upload complete!</strong>
+              </p>
+              <p>
+                <small className="badge badge-warning">
+                  <b>File name:</b>
+                </small>{" "}
+                {fileName}
+              </p>
+            </div>
           )}
         </div>
-        </div>
-
       </div>
     </Container>
   );
