@@ -260,6 +260,7 @@ function App({ socket }) {
                     src="/images/cplogo-text.png"
                     alt=""
                   />
+                  <p>Date of invoice: {moment().format("DD MMM YYYY HH:mm")}</p>
                 </div>
               </div>
               <hr />
@@ -277,10 +278,12 @@ function App({ socket }) {
                   <h4>
                     <strong>Physical Address</strong>
                   </h4>
+                  <p>2 Churchill Avenue</p>
                   <p>Extension 5</p>
                   <p>Witbank 1035</p>
                   <p>Tel 013 656 2020</p>
                   <p>Fax 013 658 5036</p>
+                  <p>VAT: 4150244012</p>
                 </div>
               </div>
               <hr />
@@ -288,7 +291,15 @@ function App({ socket }) {
                 <div class="col-md-6 text-left">
                   <h4>Created On</h4>
                   <p className="mb-3">
-                    <strong>{appointment?.tracking ? moment( appointment?.tracking[0]?.date ?  appointment?.tracking[0]?.date : new Date()).format("DD-MM-YYYY") : ""}</strong>
+                    <strong>
+                      {appointment?.tracking
+                        ? moment(
+                            appointment?.tracking[0]?.date
+                              ? appointment?.tracking[0]?.date
+                              : new Date()
+                          ).format("DD-MM-YYYY")
+                        : ""}
+                    </strong>
                   </p>
                   <h4>Booked for</h4>
                   <p className="mb-3">
@@ -300,9 +311,7 @@ function App({ socket }) {
                   </p>
                   <h4>Invoice Number</h4>
                   <p className="mb-3">
-                    <strong>
-                      {appointment.id }
-                    </strong>
+                    <strong>{appointment.id}</strong>
                   </p>
                   <h4>Terms</h4>
                   <p>
@@ -422,6 +431,7 @@ function App({ socket }) {
                             <h4>
                               <strong>Total: </strong>
                             </h4>
+                            <p>Vat Incl.</p>
                           </td>
                           <td class="col-md-5 text-right">
                             <h4>
@@ -454,13 +464,14 @@ function App({ socket }) {
               <div class="row details-row">
                 <div class="col-md-6 text-left">
                   <h4>
-                    <strong>Banking Details</strong>
+                    <strong>Medical Services Banking Details</strong>
                   </h4>
                   <p>ClinicPlus (PTY)LTD</p>
                   <p>Bank: ABSA</p>
                   <p>Account Number: 4069672703</p>
                   <p>Account Type: Cheque</p>
                   <p>Branch: 632005</p>
+                  <p>VAT: 4150244012</p>
                   <p>Reference: {company?.details?.name}</p>
                 </div>
                 <div class="col-md-6 text-left">
@@ -473,6 +484,7 @@ function App({ socket }) {
                   <p>Account Type: Gold Business Account</p>
                   <p>Branch Code: 270250</p>
                   <p>Branch Name: WITBANK 430</p>
+                  <p>VAT: 4580289314</p>
                 </div>
               </div>
             </div>
