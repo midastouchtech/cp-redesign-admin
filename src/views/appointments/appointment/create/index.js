@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from 'moment';
 import {
   any,
   assoc,
@@ -16,23 +16,23 @@ import {
   pipe,
   append,
   last,
-} from "ramda";
-import short from "short-uuid";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import styled from "styled-components";
-import Uploader from "../../../../components/Upload";
-import { SegmentedControl } from "segmented-control-react";
-import { DOVER_PRICE, MEDICAL_SERVICES } from "../../../../config";
-import Services from "./services";
-import Sites from "./sites";
-import SearchModal from "../../../../components/Modal";
-import CompanySearch from "../../../../components/Modal/companySearch";
-import Comments from "../edit/comments";
-import RemainingSlots from "../RemainingSlots";
-import "react-alert-confirm/lib/style.css";
-import AlertConfirm from "react-alert-confirm";
+} from 'ramda';
+import short from 'short-uuid';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import Uploader from '../../../../components/Upload';
+import { SegmentedControl } from 'segmented-control-react';
+import { DOVER_PRICE, MEDICAL_SERVICES } from '../../../../config';
+import Services from './services';
+import Sites from './sites';
+import SearchModal from '../../../../components/Modal';
+import CompanySearch from '../../../../components/Modal/companySearch';
+import Comments from '../edit/comments';
+import RemainingSlots from '../RemainingSlots';
+import 'react-alert-confirm/lib/style.css';
+import AlertConfirm from 'react-alert-confirm';
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -47,43 +47,43 @@ const CardBody = styled.div`
 function App({ socket }) {
   const navigate = useNavigate();
 
-  const [bodyItem, setBodyItem] = useState("details");
+  const [bodyItem, setBodyItem] = useState('details');
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({
     details: {
       company: null,
       date: null,
       purchaseOrderNumber: null,
-      clinic: "Churchill",
+      clinic: 'Churchill',
       ndaAccepted: false,
       employees: [],
     },
     usersWhoCanEdit: [],
     usersWhoCanManage: [],
     payment: {
-      proofOfPayment: "",
+      proofOfPayment: '',
       amount: 0,
     },
     isVoided: false,
     isComplete: false,
     tracking: [],
     messages: [],
-    status: "pending",
+    status: 'pending',
   });
   const [originalAppointment, setOriginalAppointment] = useState({});
   const [hasUpdatedAppointmnent, setHasUpdatedAppointment] = useState(false);
   const [hasCompletedUpload, setHasCompletedUpload] = useState(false);
   const [show, setShowCompanySearch] = useState(false);
   const [searchParams] = useSearchParams();
-  const [ isFullyBooked, setIsFullyBooked] = useState(false);
+  const [isFullyBooked, setIsFullyBooked] = useState(false);
   const [shouldUpdateCount, setShouldUpdateCount] = useState(false);
   const [searchParamCompanyName, setSearchParamCompanyName] = useState(
-    searchParams.get("companyName") || null
+    searchParams.get('companyName') || null
   );
 
   const setDetail = (key, value) => {
     //
-    setAppointment(assocPath(["details", key], value, appointment));
+    setAppointment(assocPath(['details', key], value, appointment));
   };
 
   const resetAppointmentToOriginal = () => {
@@ -99,15 +99,15 @@ function App({ socket }) {
     );
     const newEmployee = assoc(key, value, employee);
     const newEmployees = insert(index, newEmployee, employeesWithoutEmployee);
-    setDetail("employees", newEmployees);
+    setDetail('employees', newEmployees);
   };
 
   function saveStatus(status) {
-    setAppointment(assoc("status", status, appointment));
+    setAppointment(assoc('status', status, appointment));
   }
 
   const getActiveClass = (status) => {
-    return status === appointment.status ? "btn-primary" : "btn-secondary";
+    return status === appointment.status ? 'btn-primary' : 'btn-secondary';
   };
 
   const calculateBookingPrice = () => {
@@ -117,7 +117,9 @@ function App({ socket }) {
       },
       []
     );
-    const allServices = allServicesWithVienna.filter(s => s.id !== "vienna-test")
+    const allServices = allServicesWithVienna.filter(
+      (s) => s.id !== 'vienna-test'
+    );
     const services = keys(MEDICAL_SERVICES).reduce((accx, service) => {
       const filteredServices = allServices.filter((s) => s.id === service);
       const reducedPriceFromFilteredServices = filteredServices.reduce(
@@ -168,43 +170,42 @@ function App({ socket }) {
       },
       0
     );
-    console.log("doverPrice", doverPrices);
-    console.log("servicesPrice", servicesPrice);
-    console.log("site price", sitesPrice);
-    console.log("accessCardPrice", accessCardPrice);
+    console.log('doverPrice', doverPrices);
+    console.log('servicesPrice', servicesPrice);
+    console.log('site price', sitesPrice);
+    console.log('accessCardPrice', accessCardPrice);
 
     const bookingPrice =
       servicesPrice + sitesPrice + accessCardPrice + doverPrices;
 
     return bookingPrice;
   };
-  const openFailed= (data) => {
+  const openFailed = (data) => {
     AlertConfirm({
-      title: "Failed",
-      desc: "Your appointment could not be created because the clinic is fully booked for the day. Please try another date.",
-      onOk: () => {
-      },
+      title: 'Failed',
+      desc: 'Your appointment could not be created because the clinic is fully booked for the day. Please try another date.',
+      onOk: () => {},
       onCancel: () => {
-        console.log("cancel");
+        console.log('cancel');
       },
     });
   };
   const saveAppointment = () => {
     const price = calculateBookingPrice();
     const appointmentWithNewPrice = assocPath(
-      ["payment", "amount"],
+      ['payment', 'amount'],
       price,
       appointment
     );
     //
-    socket.emit("SAVE_NEW_APPOINTMENT", appointmentWithNewPrice);
-    socket.on("APPOINTMENT_ADDED", (data) => {
+    socket.emit('SAVE_NEW_APPOINTMENT', appointmentWithNewPrice);
+    socket.on('APPOINTMENT_ADDED', (data) => {
       //
-      navigate("/appointment/" + data.id);
+      navigate('/appointment/' + data.id);
     });
-    socket.on("APPOINTMENT_LIMIT_REACHED", (data) => {
+    socket.on('APPOINTMENT_LIMIT_REACHED', (data) => {
       openFailed();
-      socket.off("APPOINTMENT_LIMIT_REACHED")
+      socket.off('APPOINTMENT_LIMIT_REACHED');
     });
   };
 
@@ -212,20 +213,20 @@ function App({ socket }) {
     //
 
     const newAppointment = pipe(
-      assocPath(["details", "company"], {
+      assocPath(['details', 'company'], {
         id: company?.id,
         name: company?.details?.name,
       }),
-      assocPath(["usersWhoCanManage"], company?.usersWhoCanManage)
+      assocPath(['usersWhoCanManage'], company?.usersWhoCanManage)
     )(appointment);
     setAppointment(newAppointment);
   };
 
   const createNewEmployee = () => {
-    setShouldUpdateCount(true)
+    setShouldUpdateCount(true);
     const newEmployee = {
       id: short.generate(),
-      name: "",
+      name: '',
       services: [],
       sites: [],
       dover: {
@@ -235,21 +236,19 @@ function App({ socket }) {
     //
     const newEmployees = [newEmployee, ...appointment?.details?.employees];
     //
-    setDetail("employees", newEmployees);
-    
+    setDetail('employees', newEmployees);
   };
 
   const removeEmployee = (id) => () => {
-    setShouldUpdateCount(true)
+    setShouldUpdateCount(true);
     const employee = appointment?.details.employees?.find((e) => e.id === id);
     const newEmployees = without([employee], appointment?.details?.employees);
-    setDetail("employees", newEmployees);
-    
+    setDetail('employees', newEmployees);
   };
 
   const minimizeEmployee = (id) => () => {
     const employee = appointment?.details.employees?.find((e) => e.id === id);
-    const minimizedEmployee = assoc("isMinimized", true, employee);
+    const minimizedEmployee = assoc('isMinimized', true, employee);
     const index = appointment?.details?.employees?.indexOf(employee);
     const employeesWithoutEmployee = without(
       [employee],
@@ -261,12 +260,12 @@ function App({ socket }) {
       employeesWithoutEmployee
     );
 
-    setDetail("employees", newEmployees);
+    setDetail('employees', newEmployees);
   };
 
   const maximizeEmployee = (id) => () => {
     const employee = appointment?.details.employees?.find((e) => e.id === id);
-    const maximizedEmployee = assoc("isMinimized", false, employee);
+    const maximizedEmployee = assoc('isMinimized', false, employee);
     const index = appointment?.details?.employees?.indexOf(employee);
     const employeesWithoutEmployee = without(
       [employee],
@@ -277,10 +276,8 @@ function App({ socket }) {
       maximizedEmployee,
       employeesWithoutEmployee
     );
-    setDetail("employees", newEmployees);
+    setDetail('employees', newEmployees);
   };
-
-  
 
   if (
     !isNil(searchParamCompanyName) &&
@@ -302,41 +299,41 @@ function App({ socket }) {
       appointment?.details?.employees
     );
     const isRequired = employee.dover?.required;
-    const newEmployee = assocPath(["dover", "required"], !isRequired, employee);
+    const newEmployee = assocPath(['dover', 'required'], !isRequired, employee);
     const newEmployees = insert(index, newEmployee, employeesWithoutEmployee);
-    setDetail("employees", newEmployees);
+    setDetail('employees', newEmployees);
   };
 
   useEffect(() => {
     const hasUpdatedAppointmnent = !equals(appointment, originalAppointment);
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
-    })
+  });
 
   return (
-    <div class="container-fluid">
-      <div class="row">
-        <div className="col-xl-12 col-lg-12">
-          <div className="card">
-            <div className="card-body">
+    <div class='container-fluid'>
+      <div class='row'>
+        <div className='col-xl-12 col-lg-12'>
+          <div className='card'>
+            <div className='card-body'>
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
-                onClick={() => navigate("/appointment/" + appointment.id)}
+                onClick={() => navigate('/appointment/' + appointment.id)}
                 disabled={hasUpdatedAppointmnent}
               >
                 Close
               </button>
               <button
-                  className={`btn mr-1 ${
-                    hasUpdatedAppointmnent ? "btn-primary" : "btn-secondary"
-                  }`}
-                  onClick={saveAppointment}
-                  disabled={!hasUpdatedAppointmnent}
-                >
-                  Save
+                className={`btn mr-1 ${
+                  hasUpdatedAppointmnent ? 'btn-primary' : 'btn-secondary'
+                }`}
+                onClick={saveAppointment}
+                disabled={!hasUpdatedAppointmnent}
+              >
+                Save
               </button>
               <button
                 className={`btn ${
-                  hasUpdatedAppointmnent ? "btn-link" : "btn-secondary"
+                  hasUpdatedAppointmnent ? 'btn-link' : 'btn-secondary'
                 }`}
                 onClick={resetAppointmentToOriginal}
                 disabled={!hasUpdatedAppointmnent}
@@ -346,31 +343,33 @@ function App({ socket }) {
               <RemainingSlots
                 clinic={appointment?.details?.clinic}
                 date={appointment?.details?.date}
-                employeeCount={appointment?.details?.employees?.length }
+                employeeCount={appointment?.details?.employees?.length}
                 socket={socket}
-                onBookingStatusUpdate={ (status) => {setIsFullyBooked(status)}}
+                onBookingStatusUpdate={(status) => {
+                  setIsFullyBooked(status);
+                }}
                 shouldUpdateCount={shouldUpdateCount}
                 setShouldUpdateCount={setShouldUpdateCount}
-                />
+              />
               <br />
               <br />
             </div>
           </div>
         </div>
-        <div class="col-xl-6 col-lg-12">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Details</h4>
+        <div class='col-xl-6 col-lg-12'>
+          <div class='card'>
+            <div class='card-header'>
+              <h4 class='card-title'>Details</h4>
             </div>
-            <div class="card-body">
-              <div class="basic-form">
+            <div class='card-body'>
+              <div class='basic-form'>
                 <form>
-                  <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Company</label>
-                    <div class="col-sm-8">
+                  <div class='form-group row'>
+                    <label class='col-sm-4 col-form-label'>Company</label>
+                    <div class='col-sm-8'>
                       <input
-                        class="form-control input-default "
-                        placeholder="company name"
+                        class='form-control input-default '
+                        placeholder='company name'
                         disabled
                         value={appointment?.details?.company?.name}
                       />
@@ -379,7 +378,7 @@ function App({ socket }) {
                           e.preventDefault();
                           setShowCompanySearch(true);
                         }}
-                        className="btn btn-sm btn-link"
+                        className='btn btn-sm btn-link'
                       >
                         Search
                       </button>
@@ -388,71 +387,71 @@ function App({ socket }) {
                   <CompanySearch
                     clearPrefilledSearchTerm={clearPrefilledSearchTerm}
                     prefilledSearchTerm={searchParamCompanyName || null}
-                    name="companysearch"
+                    name='companysearch'
                     socket={socket}
                     show={show}
                     onCompanySelect={selectCompany}
                     close={() => setShowCompanySearch(false)}
                   />
-                  <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Date</label>
-                    <div class="col-sm-8">
+                  <div class='form-group row'>
+                    <label class='col-sm-4 col-form-label'>Date</label>
+                    <div class='col-sm-8'>
                       <input
-                        class="form-control input-default "
-                        placeholder="select date"
-                        type="date"
+                        class='form-control input-default '
+                        placeholder='select date'
+                        type='date'
                         onChange={(e) => {
-                          setDetail("date", e.target.value)
-                          setShouldUpdateCount(true)
+                          setDetail('date', e.target.value);
+                          setShouldUpdateCount(true);
                         }}
                         value={appointment?.details?.date}
                       />
                     </div>
                   </div>
-                  <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">
+                  <div class='form-group row'>
+                    <label class='col-sm-4 col-form-label'>
                       Purchase order number
                     </label>
-                    <div class="col-sm-8">
+                    <div class='col-sm-8'>
                       <input
-                        type="email"
-                        class="form-control input-default "
-                        placeholder="Purchase order number"
+                        type='email'
+                        class='form-control input-default '
+                        placeholder='Purchase order number'
                         onChange={(event) =>
-                          setDetail("purchaseOrderNumber", event.target.value)
+                          setDetail('purchaseOrderNumber', event.target.value)
                         }
                         value={appointment?.details?.purchaseOrderNumber}
                       />
                     </div>
                   </div>
-                  <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">
+                  <div class='form-group row'>
+                    <label class='col-sm-4 col-form-label'>
                       Company name on medical
                     </label>
-                    <div class="col-sm-8">
+                    <div class='col-sm-8'>
                       <input
-                        type="email"
-                        class="form-control input-default "
-                        placeholder="Company name on medical"
+                        type='email'
+                        class='form-control input-default '
+                        placeholder='Company name on medical'
                         onChange={(event) =>
-                          setDetail("companyNameOnMedical", event.target.value)
+                          setDetail('companyNameOnMedical', event.target.value)
                         }
                         value={appointment?.details?.companyNameOnMedical}
                       />
                     </div>
                   </div>
-                  <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">
+                  <div class='form-group row'>
+                    <label class='col-sm-4 col-form-label'>
                       Company responsible for payment
                     </label>
-                    <div class="col-sm-8">
+                    <div class='col-sm-8'>
                       <input
-                        type="email"
-                        class="form-control input-default "
-                        placeholder="Company responsible for payment"
+                        type='email'
+                        class='form-control input-default '
+                        placeholder='Company responsible for payment'
                         onChange={(event) =>
                           setDetail(
-                            "companyResponsibleForPayment",
+                            'companyResponsibleForPayment',
                             event.target.value
                           )
                         }
@@ -467,35 +466,35 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        <div class="col-xl-6 col-lg-6">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Status</h4>
+        <div class='col-xl-6 col-lg-6'>
+          <div class='card'>
+            <div class='card-header'>
+              <h4 class='card-title'>Status</h4>
             </div>
-            <div class="card-body">
+            <div class='card-body'>
               <div
-                class="btn-group mb-3 col-12"
-                role="group"
-                aria-label="Basic example"
+                class='btn-group mb-3 col-12'
+                role='group'
+                aria-label='Basic example'
               >
                 <button
-                  type="button"
-                  className={`btn ${getActiveClass("pending")}`}
-                  onClick={() => saveStatus("pending")}
+                  type='button'
+                  className={`btn ${getActiveClass('pending')}`}
+                  onClick={() => saveStatus('pending')}
                 >
                   Pending
                 </button>
                 <button
-                  type="button"
-                  className={`btn ${getActiveClass("approved")}`}
-                  onClick={() => saveStatus("approved")}
+                  type='button'
+                  className={`btn ${getActiveClass('approved')}`}
+                  onClick={() => saveStatus('approved')}
                 >
                   Approved
                 </button>
                 <button
-                  type="button"
-                  className={`btn ${getActiveClass("declined")}`}
-                  onClick={() => saveStatus("declined")}
+                  type='button'
+                  className={`btn ${getActiveClass('declined')}`}
+                  onClick={() => saveStatus('declined')}
                 >
                   Declined
                 </button>
@@ -503,48 +502,48 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        <div class="col-xl-6 col-lg-12">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Clinic</h4>
+        <div class='col-xl-6 col-lg-12'>
+          <div class='card'>
+            <div class='card-header'>
+              <h4 class='card-title'>Clinic</h4>
             </div>
-            <div class="card-body">
-              <div class="basic-form">
+            <div class='card-body'>
+              <div class='basic-form'>
                 <form>
-                  <div class="form-group">
-                    <div class="form-check mb-2">
+                  <div class='form-group'>
+                    <div class='form-check mb-2'>
                       <input
-                        type="checkbox"
-                        class="form-check-input"
+                        type='checkbox'
+                        class='form-check-input'
                         checked={
                           appointment?.details?.clinic?.toLowerCase() ===
-                          "churchill"
+                          'churchill'
                         }
-                        value="Churchill"
+                        value='Churchill'
                         onChange={(event) => {
-                          setDetail("clinic", "Churchill")
-                          setShouldUpdateCount(true)
+                          setDetail('clinic', 'Churchill');
+                          setShouldUpdateCount(true);
                         }}
                       />
-                      <label class="form-check-label" for="check1">
+                      <label class='form-check-label' for='check1'>
                         Churchill
                       </label>
                     </div>
-                    <div class="form-check mb-2">
+                    <div class='form-check mb-2'>
                       <input
-                        type="checkbox"
-                        class="form-check-input"
-                        value="Hendrina"
+                        type='checkbox'
+                        class='form-check-input'
+                        value='Hendrina'
                         checked={
                           appointment?.details?.clinic?.toLowerCase() ===
-                          "hendrina"
+                          'hendrina'
                         }
                         onChange={(event) => {
-                          setDetail("clinic", "Hendrina");
-                          setShouldUpdateCount(true)
+                          setDetail('clinic', 'Hendrina');
+                          setShouldUpdateCount(true);
                         }}
                       />
-                      <label class="form-check-label" for="check2">
+                      <label class='form-check-label' for='check2'>
                         Hendrina
                       </label>
                     </div>
@@ -554,38 +553,38 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        <div class="col-xl-6 col-lg-6">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Non disclosure Agreement</h4>
+        <div class='col-xl-6 col-lg-6'>
+          <div class='card'>
+            <div class='card-header'>
+              <h4 class='card-title'>Non disclosure Agreement</h4>
             </div>
-            <div class="card-body">
+            <div class='card-body'>
               <p>
                 You can select one of the two options below to specify wether
                 the nda terms have been accepted or not.
               </p>
-              <div class="basic-form">
+              <div class='basic-form'>
                 <form>
-                  <div class="form-group">
-                    <div class="form-check mb-2">
+                  <div class='form-group'>
+                    <div class='form-check mb-2'>
                       <input
-                        type="checkbox"
-                        class="form-check-input"
+                        type='checkbox'
+                        class='form-check-input'
                         checked={appointment?.details?.ndaAccepted === true}
-                        onChange={() => setDetail("ndaAccepted", true)}
+                        onChange={() => setDetail('ndaAccepted', true)}
                       />
-                      <label class="form-check-label" for="check1">
+                      <label class='form-check-label' for='check1'>
                         NDA has been accepted.
                       </label>
                     </div>
-                    <div class="form-check mb-2">
+                    <div class='form-check mb-2'>
                       <input
-                        type="checkbox"
-                        class="form-check-input"
+                        type='checkbox'
+                        class='form-check-input'
                         checked={appointment?.details?.ndaAccepted === false}
-                        onChange={() => setDetail("ndaAccepted", false)}
+                        onChange={() => setDetail('ndaAccepted', false)}
                       />
-                      <label class="form-check-label" for="check2">
+                      <label class='form-check-label' for='check2'>
                         NDA has not been accepted.
                       </label>
                     </div>
@@ -605,72 +604,72 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        <div class="col-xl-6 col-lg-6">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Forms</h4>
+        <div class='col-xl-6 col-lg-6'>
+          <div class='card'>
+            <div class='card-header'>
+              <h4 class='card-title'>Forms</h4>
             </div>
-            <div class="card-body">
+            <div class='card-body'>
               <ul>
                 <li>
                   <a
-                    href="/forms/Annexure 3 - Medical Certificate of Fitness.pdf"
-                    target="_blank"
-                    rel="no_rel"
+                    href='/forms/Annexure 3 - Medical Certificate of Fitness.pdf'
+                    target='_blank'
+                    rel='no_rel'
                   >
                     Annexure 3 - Medical Certificate of Fitness.pdf
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/forms/Man Job Spec.pdf"
-                    target="_blank"
-                    rel="no_rel"
+                    href='/forms/Man Job Spec.pdf'
+                    target='_blank'
+                    rel='no_rel'
                   >
                     Man Job Spec.pdf
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/forms/Man Job Spec ClinicPlus.xlsx"
-                    target="_blank"
-                    rel="no_rel"
+                    href='/forms/Man Job Spec ClinicPlus.xlsx'
+                    target='_blank'
+                    rel='no_rel'
                   >
                     Man Job Spec ClinicPlus.xlsx
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/forms/Man Job Spec for Working at Heights and Confined Spaces.xlsx"
-                    target="_blank"
-                    rel="no_rel"
+                    href='/forms/Man Job Spec for Working at Heights and Confined Spaces.xlsx'
+                    target='_blank'
+                    rel='no_rel'
                   >
                     Man Job Spec for Working at Heights and Confined Spaces.xlsx
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/forms/Non-disclosure agreement 2023.doc"
-                    target="_blank"
-                    rel="no_rel"
+                    href='/forms/Non-disclosure agreement 2023.doc'
+                    target='_blank'
+                    rel='no_rel'
                   >
                     Non-disclosure agreement 2023.doc
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/forms/Record of Hazardous Work DMR.doc"
-                    target="_blank"
-                    rel="no_rel"
+                    href='/forms/Record of Hazardous Work DMR.doc'
+                    target='_blank'
+                    rel='no_rel'
                   >
                     Record of Hazardous Work DMR.doc
                   </a>
                 </li>
                 <li>
                   <a
-                    href="/forms/Training Banking Details Confirmation.pdf"
-                    target="_blank"
-                    rel="no_rel"
+                    href='/forms/Training Banking Details Confirmation.pdf'
+                    target='_blank'
+                    rel='no_rel'
                   >
                     Training Banking Details Confirmation.pdf
                   </a>
@@ -679,44 +678,44 @@ function App({ socket }) {
             </div>
           </div>
         </div>
-        <div class="col-xl-12 col-lg-12">
-          <div class="card">
-            <div class="card-header">
-              <h4 class="card-title">Completion</h4>
+        <div class='col-xl-12 col-lg-12'>
+          <div class='card'>
+            <div class='card-header'>
+              <h4 class='card-title'>Completion</h4>
             </div>
-            <div class="card-body">
+            <div class='card-body'>
               <p>
                 You can select one of the two options below to specify wether
                 this appointment has been completed or not.
               </p>
-              <div class="basic-form">
+              <div class='basic-form'>
                 <form>
-                  <div class="form-group">
-                    <div class="form-check mb-2">
+                  <div class='form-group'>
+                    <div class='form-check mb-2'>
                       <input
-                        type="checkbox"
-                        class="form-check-input"
+                        type='checkbox'
+                        class='form-check-input'
                         checked={appointment?.isComplete === true}
                         onChange={() =>
-                          setAppointment(assoc("isComplete", true, appointment))
+                          setAppointment(assoc('isComplete', true, appointment))
                         }
                       />
-                      <label class="form-check-label" for="check1">
+                      <label class='form-check-label' for='check1'>
                         Appointment has been completed.
                       </label>
                     </div>
-                    <div class="form-check mb-2">
+                    <div class='form-check mb-2'>
                       <input
-                        type="checkbox"
-                        class="form-check-input"
+                        type='checkbox'
+                        class='form-check-input'
                         checked={appointment?.isComplete === false}
                         onChange={() =>
                           setAppointment(
-                            assoc("isComplete", false, appointment)
+                            assoc('isComplete', false, appointment)
                           )
                         }
                       />
-                      <label class="form-check-label" for="check2">
+                      <label class='form-check-label' for='check2'>
                         Appointment is still in progress.
                       </label>
                     </div>
@@ -727,71 +726,71 @@ function App({ socket }) {
           </div>
         </div>
 
-        <div class="col-xl-12 col-lg-12 text-center">
+        <div class='col-xl-12 col-lg-12 text-center'>
           <h2>Employees</h2>
-          <br/>
-          
+          <br />
+
           <br />
           <button
-            className="btn btn-primary mb-2"
-            disabled = {isFullyBooked}
+            className='btn btn-primary mb-2'
+            disabled={isFullyBooked}
             onClick={createNewEmployee}
           >
-            {" "}
-            Add New Employee{" "}
+            {' '}
+            Add New Employee{' '}
           </button>
           <br />
           <p>
-            This appointment has {appointment?.details?.employees?.length}{" "}
-            employees.{" "}
+            This appointment has {appointment?.details?.employees?.length}{' '}
+            employees.{' '}
           </p>
         </div>
         {appointment?.details?.employees?.map((employee) => (
-          <div class="col-xl-6 col-lg-6 col-sm-6">
-            <div class="card">
-              <div class="card-header">
-                <div className="row">
-                  <h4 class="col-12 card-title mb-3">{employee?.name} </h4>
-                  <div className="col-12 d-flex flex-row">
+          <div class='col-xl-6 col-lg-6 col-sm-6'>
+            <div class='card'>
+              <div class='card-header'>
+                <div className='row'>
+                  <h4 class='col-12 card-title mb-3'>{employee?.name} </h4>
+                  <div className='col-12 d-flex flex-row'>
                     <button
-                      className="btn btn-danger btn-xs"
+                      className='btn btn-danger btn-xs'
                       onClick={removeEmployee(employee.id)}
                     >
-                      {" "}
-                      Delete{" "}
+                      {' '}
+                      Delete{' '}
                     </button>
                     <button
-                      className="btn btn-outline-warning btn-xs ml-2"
+                      className='btn btn-outline-warning btn-xs ml-2'
                       onClick={
                         employee?.isMinimized
                           ? maximizeEmployee(employee?.id)
                           : minimizeEmployee(employee?.id)
                       }
                     >
-                      {" "}
-                      {employee?.isMinimized ? "View" : "Hide"} Details{" "}
+                      {' '}
+                      {employee?.isMinimized ? 'View' : 'Hide'} Details{' '}
                     </button>
                   </div>
                 </div>
               </div>
               <CardBody
                 className={`card-body ${
-                  employee.isMinimized ? "minimized" : "maximized"
+                  employee.isMinimized ? 'minimized' : 'maximized'
                 }`}
               >
-                <div class="basic-form">
+                <div class='basic-form'>
                   <form>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">Name</label>
-                      <div class="col-sm-8">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>Name</label>
+                      <div class='col-sm-8'>
                         <input
-                          type="text"
-                          class="form-control"
-                          placeholder="Name"
+                          type='text'
+                          class='form-control'
+                          placeholder='Name'
                           onChange={(event) =>
                             setEmployeeDetail(
                               employee.id,
-                              "name",
+                              'name',
                               event.target.value
                             )
                           }
@@ -799,19 +798,19 @@ function App({ socket }) {
                         />
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>
                         ID/Passport Number
                       </label>
-                      <div class="col-sm-8">
+                      <div class='col-sm-8'>
                         <input
-                          type="text"
-                          class="form-control"
-                          placeholder="Identity Number"
+                          type='text'
+                          class='form-control'
+                          placeholder='Identity Number'
                           onChange={(event) =>
                             setEmployeeDetail(
                               employee.id,
-                              "idNumber",
+                              'idNumber',
                               event.target.value
                             )
                           }
@@ -819,17 +818,17 @@ function App({ socket }) {
                         />
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">Occupation</label>
-                      <div class="col-sm-8">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>Occupation</label>
+                      <div class='col-sm-8'>
                         <input
-                          type="text"
-                          class="form-control"
-                          placeholder="Occupation"
+                          type='text'
+                          class='form-control'
+                          placeholder='Occupation'
                           onChange={(event) =>
                             setEmployeeDetail(
                               employee.id,
-                              "occupation",
+                              'occupation',
                               event.target.value
                             )
                           }
@@ -837,44 +836,48 @@ function App({ socket }) {
                         />
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">Sites</label>
-                      <div class="col-sm-8">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>Sites</label>
+                      <div class='col-sm-8'>
                         <Sites
                           employeeSites={employee?.sites || []}
                           onChange={(sites) =>
-                            setEmployeeDetail(employee.id, "sites", sites)
+                            setEmployeeDetail(employee.id, 'sites', sites)
                           }
                         />
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">Services</label>
-                      <div class="col-sm-8">
+                    <div class='form-group row'>
+                      <h4 class='card-title'>Price Increase Message</h4>
+                      <p>We will have a price increase 1 March 2024.</p>
+                    </div>
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>Services</label>
+                      <div class='col-sm-8'>
                         <Services
                           selectedServices={employee?.services}
                           onChange={(services) =>
-                            setEmployeeDetail(employee.id, "services", services)
+                            setEmployeeDetail(employee.id, 'services', services)
                           }
                         />
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>
                         Dover Service
                         <br />
                         <small>Only done in Witbank</small>
                       </label>
-                      <div class="col-sm-8">
-                        <div className="row">
-                          <div className="col-12">
-                            <div className="row">
-                              <div className="col-8">
+                      <div class='col-sm-8'>
+                        <div className='row'>
+                          <div className='col-12'>
+                            <div className='row'>
+                              <div className='col-8'>
                                 <input
-                                  type="checkbox"
+                                  type='checkbox'
                                   id={`dover-checkbox}`}
-                                  className="mr-2"
-                                  name={"dover test"}
+                                  className='mr-2'
+                                  name={'dover test'}
                                   value={employee.dover?.required}
                                   checked={employee.dover?.required}
                                   onClick={() =>
@@ -885,7 +888,7 @@ function App({ socket }) {
                                   Require dover test
                                 </label>
                               </div>
-                              <div className="col-4">
+                              <div className='col-4'>
                                 {getFormattedPrice(DOVER_PRICE)}
                               </div>
                             </div>
@@ -893,22 +896,22 @@ function App({ socket }) {
                         </div>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>
                         Job Spec File
                       </label>
-                      <div class="col-sm-8">
-                        <div class="card">
-                          <div class="card-body">
-                            <div class="row">
-                              <div class="col-12">
+                      <div class='col-sm-8'>
+                        <div class='card'>
+                          <div class='card-body'>
+                            <div class='row'>
+                              <div class='col-12'>
                                 {employee?.jobSpecFile && (
                                   <p>
                                     <a
-                                      className="btn btn-primary mb-2"
+                                      className='btn btn-primary mb-2'
                                       href={employee?.jobSpecFile}
-                                      target="_blank"
-                                      rel="noreferrer"
+                                      target='_blank'
+                                      rel='noreferrer'
                                     >
                                       View Uploaded
                                     </a>
@@ -918,7 +921,7 @@ function App({ socket }) {
                                   onChange={(jobSpecFileUrl) =>
                                     setEmployeeDetail(
                                       employee?.id,
-                                      "jobSpecFile",
+                                      'jobSpecFile',
                                       jobSpecFileUrl
                                     )
                                   }
@@ -929,15 +932,15 @@ function App({ socket }) {
                         </div>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>
                         Extra Job Spec Files
                       </label>
-                      <div class="col-sm-8">
-                        <div class="card">
-                          <div class="card-body">
-                            <div class="row">
-                              <div class="col-12">
+                      <div class='col-sm-8'>
+                        <div class='card'>
+                          <div class='card-body'>
+                            <div class='row'>
+                              <div class='col-12'>
                                 <ol>
                                   {employee?.extraJobSpecFiles &&
                                     employee?.extraJobSpecFiles.map((ex) => (
@@ -945,10 +948,10 @@ function App({ socket }) {
                                         <small>
                                           <a
                                             href={ex}
-                                            target="_blank"
-                                            rel="noreferrer"
+                                            target='_blank'
+                                            rel='noreferrer'
                                           >
-                                            {last(ex.split("/"))}
+                                            {last(ex.split('/'))}
                                           </a>
                                         </small>
                                       </li>
@@ -964,7 +967,7 @@ function App({ socket }) {
                                     );
                                     setEmployeeDetail(
                                       employee?.id,
-                                      "extraJobSpecFiles",
+                                      'extraJobSpecFiles',
                                       newFiles
                                     );
                                   }}
@@ -975,13 +978,13 @@ function App({ socket }) {
                         </div>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label class="col-sm-4 col-form-label">Comments</label>
-                      <div class="col-sm-8">
+                    <div class='form-group row'>
+                      <label class='col-sm-4 col-form-label'>Comments</label>
+                      <div class='col-sm-8'>
                         <Comments
                           employeeComments={employee?.comments ?? []}
                           onChange={(comments) =>
-                            setEmployeeDetail(employee.id, "comments", comments)
+                            setEmployeeDetail(employee.id, 'comments', comments)
                           }
                         />
                       </div>
