@@ -876,10 +876,10 @@ function App({ socket, stateUser }) {
                       </div>
                     </div>
                     <div class='form-group row'>
-                      <label>Price Increase </label>
+                      <label class="col-sm-12">Price Increase </label>
                       <br />
                       <br />
-                      <p>We will have a price increase 1 March 2024.</p>
+                      <p class="col-sm-12">We will have a price increase 1 March 2024.</p>
                     </div>
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">Services</label>
