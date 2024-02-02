@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { DOVER_PRICE, MEDICAL_SERVICES } from "../../../../config";
-import { keys, values } from "ramda";
-import styled from "styled-components";
-import html2canvas from "html2canvas";
-import jspdf from "jspdf";
-import axios from "axios";
-import { v4 as uuid } from "uuid";
-import moment from "moment";
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { DOVER_PRICE, MEDICAL_SERVICES } from '../../../../config';
+import { keys, values } from 'ramda';
+import styled from 'styled-components';
+import html2canvas from 'html2canvas';
+import jspdf from 'jspdf';
+import axios from 'axios';
+import { v4 as uuid } from 'uuid';
+import moment from 'moment';
 
 const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
@@ -65,19 +65,19 @@ function App({ socket }) {
   const [sitesPrice, setSitesPrice] = useState(0);
   const [company, setCompany] = useState({});
   const [disableButton, setButtonDisabled] = useState(false);
-  const [status, setStatus] = useState("Email Invoice");
+  const [status, setStatus] = useState('Email Invoice');
   const [serviceCounts, setServiceCounts] = useState({});
   const [doverCount, setDoverCount] = useState(0);
   const [doverPrice, setDoverPrice] = useState(0);
 
   const savetopdf = () => {
     window.scrollTo(0, 0);
-    const input = document.getElementById("quote-container");
-    var doc = new jspdf("p", "px", "a4");
+    const input = document.getElementById('quote-container');
+    var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
         //
-        pdf.save("mypdf.pdf");
+        pdf.save('mypdf.pdf');
       },
       html2canvas: {
         scale: 0.36,
@@ -89,37 +89,37 @@ function App({ socket }) {
 
   const uploadToCloudinary = () => {
     setButtonDisabled(true);
-    setStatus("Generating invoice...");
+    setStatus('Generating invoice...');
     window.scrollTo(0, 0);
     window.scrollTo(0, 0);
-    const input = document.getElementById("quote-container");
-    var doc = new jspdf("p", "px", "a4");
+    const input = document.getElementById('quote-container');
+    var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
-        var blob = pdf.output("blob");
-        const url = "https://api.cloudinary.com/v1_1/clinic-plus/raw/upload";
+        var blob = pdf.output('blob');
+        const url = 'https://api.cloudinary.com/v1_1/clinic-plus/raw/upload';
         const formData = new FormData();
-        formData.append("file", blob, "quote.pdf");
-        formData.append("upload_preset", "pwdsm6sz");
-        setStatus("Uploading invoice...");
+        formData.append('file', blob, 'quote.pdf');
+        formData.append('upload_preset', 'pwdsm6sz');
+        setStatus('Uploading invoice...');
         axios({
-          method: "POST",
+          method: 'POST',
           data: formData,
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { 'Content-Type': 'multipart/form-data' },
           url,
         })
           .then((response) => {
-            socket.emit("SEND_INVOICE", {
+            socket.emit('SEND_INVOICE', {
               appointment,
               url: response.data.secure_url,
               invoiceId,
             });
-            setStatus("Sending...");
-            socket.on("RECEIVE_SAVE_INVOICE_SUCCESS", (data) => {
-              setStatus("Invoice sent!");
+            setStatus('Sending...');
+            socket.on('RECEIVE_SAVE_INVOICE_SUCCESS', (data) => {
+              setStatus('Invoice sent!');
             });
           })
-          .catch((errr) => setStatus("Error sending invoice"));
+          .catch((errr) => setStatus('Error sending invoice'));
       },
       html2canvas: {
         scale: 0.36,
@@ -130,12 +130,12 @@ function App({ socket }) {
   };
 
   if (socket && isLoading) {
-    socket.emit("GET_APPOINTMENT", { id: params.appId });
-    socket.on("RECEIVE_COMPANY", (data) => {
+    socket.emit('GET_APPOINTMENT', { id: params.appId });
+    socket.on('RECEIVE_COMPANY', (data) => {
       setCompany(data);
     });
-    socket.on("RECEIVE_APPOINTMENT", (appointment) => {
-      socket.emit("GET_COMPANY", { id: appointment?.details?.company?.id });
+    socket.on('RECEIVE_APPOINTMENT', (appointment) => {
+      socket.emit('GET_COMPANY', { id: appointment?.details?.company?.id });
       setIsLoading(false);
       setAppointment(appointment);
       const allServicesWithVienna = appointment?.details?.employees?.reduce(
@@ -144,9 +144,11 @@ function App({ socket }) {
         },
         []
       );
-      const allServices = allServicesWithVienna.filter(s => s.id !== "vienna-test")
+      const allServices = allServicesWithVienna.filter(
+        (s) => s.id !== 'vienna-test'
+      );
       //
-      console.log("all services", allServices)
+      console.log('all services', allServices);
       const servicesPrice = allServices.reduce((acc, service) => {
         return acc + service.price;
       }, 0);
@@ -189,12 +191,13 @@ function App({ socket }) {
         (employee) => employee.dover?.required
       ).length;
 
-      console.log("doverPrice", doverPrices);
-      console.log("servicesPrice", servicesPrice);
-      console.log("site price", sitesPrice);
-      console.log("accessCardPrice", accessCardPrices);
-    const bookingPrice = servicesPrice + sitesPrice + accessCardPrices + doverPrices;
-    console.log("bookingPrice", bookingPrice);
+      console.log('doverPrice', doverPrices);
+      console.log('servicesPrice', servicesPrice);
+      console.log('site price', sitesPrice);
+      console.log('accessCardPrice', accessCardPrices);
+      const bookingPrice =
+        servicesPrice + sitesPrice + accessCardPrices + doverPrices;
+      console.log('bookingPrice', bookingPrice);
 
       setDoverPrice(doverPrices);
       setDoverCount(employeesDoingDOver);
@@ -207,64 +210,64 @@ function App({ socket }) {
         setButtonDisabled(true);
       }
     });
-    socket.on("DATABASE_UPDATED", (u) => {
+    socket.on('DATABASE_UPDATED', (u) => {
       //
-      socket.emit("GET_APPOINTMENT", { id: params.appId });
+      socket.emit('GET_APPOINTMENT', { id: params.appId });
     });
   }
 
   return (
     <StyedContainer>
-      <div class="container">
-        <div class="container">
+      <div class='container'>
+        <div class='container'>
           <br />
-          <div class="row">
-            <div class="col-1"></div>
-            <div class="col-10 text-center">
+          <div class='row'>
+            <div class='col-1'></div>
+            <div class='col-10 text-center'>
               <a
-                id="printPageButton"
-                className="btn btn-primary mr-1"
-                href={"/appointment/" + appointment.id}
+                id='printPageButton'
+                className='btn btn-primary mr-1'
+                href={'/appointment/' + appointment.id}
               >
-                {" "}
+                {' '}
                 Close
               </a>
               <button
-                id="printPageButton"
-                className="btn btn-primary ml-1"
+                id='printPageButton'
+                className='btn btn-primary ml-1'
                 onClick={() => savetopdf()}
               >
-                {" "}
-                Save as PDF{" "}
+                {' '}
+                Save as PDF{' '}
               </button>
               <button
-                id="printPageButton"
+                id='printPageButton'
                 disabled={disableButton}
-                className="btn btn-primary ml-1"
+                className='btn btn-primary ml-1'
                 onClick={() => uploadToCloudinary()}
               >
-                {" "}
-                {status}{" "}
+                {' '}
+                {status}{' '}
               </button>
             </div>
           </div>
           <br />
-          <div className="row">
-            <div className="col-1"></div>
-            <div id="quote-container" className="quote-container">
+          <div className='row'>
+            <div className='col-1'></div>
+            <div id='quote-container' className='quote-container'>
               <br />
-              <div class="row details-row">
-                <div class="col-md-6">
+              <div class='row details-row'>
+                <div class='col-md-6'>
                   <img
-                    className="logo-abbr"
-                    src="/images/cplogo-text.png"
-                    alt=""
+                    className='logo-abbr'
+                    src='/images/cplogo-text.png'
+                    alt=''
                   />
                 </div>
               </div>
               <hr />
-              <div class="row details-row">
-                <div class="col-md-6 text-left">
+              <div class='row details-row'>
+                <div class='col-md-6 text-left'>
                   <h4>
                     <strong>Postal Address</strong>
                   </h4>
@@ -273,7 +276,7 @@ function App({ socket }) {
                   <p>Practice No 0286389</p>
                   <p>1035</p>
                 </div>
-                <div class="col-md-6 text-left">
+                <div class='col-md-6 text-left'>
                   <h4>
                     <strong>Physical Address</strong>
                   </h4>
@@ -284,32 +287,38 @@ function App({ socket }) {
                 </div>
               </div>
               <hr />
-              <div class="row details-row">
-                <div class="col-md-6 text-left">
+              <div class='row details-row'>
+                <div class='col-md-6 text-left'>
                   <h4>Created On</h4>
-                  <p className="mb-3">
-                    <strong>{appointment?.tracking ? moment( appointment?.tracking[0]?.date ?  appointment?.tracking[0]?.date : new Date()).format("DD-MM-YYYY") : ""}</strong>
+                  <p className='mb-3'>
+                    <strong>
+                      {appointment?.tracking
+                        ? moment(
+                            appointment?.tracking[0]?.date
+                              ? appointment?.tracking[0]?.date
+                              : new Date()
+                          ).format('DD-MM-YYYY')
+                        : ''}
+                    </strong>
                   </p>
                   <h4>Booked for</h4>
-                  <p className="mb-3">
+                  <p className='mb-3'>
                     <strong>{appointment?.details?.date}</strong>
                   </p>
                   <h4>Purchase Order Number</h4>
-                  <p className="mb-3">
+                  <p className='mb-3'>
                     <strong>{appointment?.details?.purchaseOrderNumber}</strong>
                   </p>
                   <h4>Invoice Number</h4>
-                  <p className="mb-3">
-                    <strong>
-                      {appointment.id }
-                    </strong>
+                  <p className='mb-3'>
+                    <strong>{appointment.id}</strong>
                   </p>
                   <h4>Terms</h4>
                   <p>
                     <strong>E&O E. Errors and ommisions expected</strong>
                   </p>
                 </div>
-                <div class="col-md-6 text-left">
+                <div class='col-md-6 text-left'>
                   <h4>Bill To </h4>
                   <strong>
                     <strong>{company?.details?.name}</strong>
@@ -323,12 +332,12 @@ function App({ socket }) {
                   </p>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-md-12 ">
+              <div class='row'>
+                <div class='col-md-12 '>
                   <br />
                   <hr />
                   <div>
-                    <table class="table">
+                    <table class='table'>
                       <thead>
                         <tr>
                           <th>
@@ -337,7 +346,7 @@ function App({ socket }) {
                           <th>
                             <h5>Quantity</h5>
                           </th>
-                          <th class="text-right">
+                          <th class='text-right'>
                             <h5>Amount</h5>
                           </th>
                         </tr>
@@ -347,19 +356,19 @@ function App({ socket }) {
                         {values(MEDICAL_SERVICES).map((service) =>
                           serviceCounts[service.id] ? (
                             <tr>
-                              <td class="col-md-8">{service.title}</td>
+                              <td class='col-md-8'>{service.title}</td>
                               <td
-                                class="col-md-1"
-                                style={{ textAlign: "center" }}
+                                class='col-md-1'
+                                style={{ textAlign: 'center' }}
                               >
                                 {serviceCounts[service.id]}
                               </td>
-                              <td class="col-md-5 text-right">
+                              <td class='col-md-5 text-right'>
                                 {formatPrice(service.price)}
                               </td>
                             </tr>
                           ) : (
-                            ""
+                            ''
                           )
                         )}
 
@@ -367,18 +376,18 @@ function App({ socket }) {
                         <h5>Site Prices</h5>
                         {appointment?.details?.employees?.map((employee) => (
                           <tr>
-                            <td class="col-md-8 text-capitalize">
+                            <td class='col-md-8 text-capitalize'>
                               {employee?.name}
                             </td>
                             <td
-                              class="col-md-1"
-                              style={{ textAlign: "center" }}
+                              class='col-md-1'
+                              style={{ textAlign: 'center' }}
                             >
                               {employee?.sites && employee?.sites.length > 0
                                 ? employee?.sites?.length
                                 : 0}
                             </td>
-                            <td class="col-md-5 text-right">
+                            <td class='col-md-5 text-right'>
                               {formatPrice(
                                 employee?.sites?.length > 0
                                   ? (employee?.sites?.length - 1) * 38.4
@@ -396,16 +405,16 @@ function App({ socket }) {
                           );
                           return (
                             <tr>
-                              <td class="col-md-8 text-capitalize">
+                              <td class='col-md-8 text-capitalize'>
                                 {employee?.name}
                               </td>
                               <td
-                                class="col-md-1"
-                                style={{ textAlign: "center" }}
+                                class='col-md-1'
+                                style={{ textAlign: 'center' }}
                               >
                                 {accessCardSites.length}
                               </td>
-                              <td class="col-md-5 text-right">
+                              <td class='col-md-5 text-right'>
                                 {formatPrice(
                                   accessCardSites.length > 0
                                     ? (accessCardSites.length - 1) * 51.2
@@ -417,13 +426,13 @@ function App({ socket }) {
                         })}
                         <br />
                         <tr>
-                          <td class="col-md-8"></td>
-                          <td class="col-md-1" style={{ textAlign: "center" }}>
+                          <td class='col-md-8'></td>
+                          <td class='col-md-1' style={{ textAlign: 'center' }}>
                             <h4>
                               <strong>Total: </strong>
                             </h4>
                           </td>
-                          <td class="col-md-5 text-right">
+                          <td class='col-md-5 text-right'>
                             <h4>
                               <strong>
                                 {formatPrice(
@@ -439,9 +448,9 @@ function App({ socket }) {
                         <br />
                         <h5>Dover Service</h5>
                         <tr>
-                          <td class="col-md-8 text-capitalize">Employees</td>
-                          <td class="col-md-1">{doverCount}</td>
-                          <td class="col-md-5 text-right">
+                          <td class='col-md-8 text-capitalize'>Employees</td>
+                          <td class='col-md-1'>{doverCount}</td>
+                          <td class='col-md-5 text-right'>
                             {formatPrice(doverPrice)}
                           </td>
                         </tr>
@@ -451,8 +460,8 @@ function App({ socket }) {
                   </div>
                 </div>
               </div>
-              <div class="row details-row">
-                <div class="col-md-6 text-left">
+              <div class='row details-row'>
+                <div class='col-md-6 text-left'>
                   <h4>
                     <strong>Banking Details</strong>
                   </h4>
@@ -463,16 +472,16 @@ function App({ socket }) {
                   <p>Branch: 632005</p>
                   <p>Reference: {company?.details?.name}</p>
                 </div>
-                <div class="col-md-6 text-left">
-                <h4>
+                <div class='col-md-6 text-left'>
+                  <h4>
                     <strong>Xray Service Banking Details</strong>
                   </h4>
-                <p>Maxis</p>
-                 <p>Standardbank</p>  
+                  <p>Maxis</p>
+                  <p>Standardbank</p>
                   <p>281086303</p>
                   <p>Universal branch code</p>
-                  </div>
-                <div class="col-md-6 text-left">
+                </div>
+                <div class='col-md-6 text-left'>
                   <h4>
                     <strong>Dover Service Banking Details</strong>
                   </h4>
