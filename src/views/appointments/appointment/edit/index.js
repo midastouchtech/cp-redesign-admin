@@ -447,6 +447,15 @@ function App({ socket, stateUser }) {
             </div>
           </Card>
         </div>
+        <div class='col-xl-6 col-lg-6'>
+          <div class='card'>
+            <div class='card-header'>
+              <h4 class='card-title'>Price Increase Message</h4>
+            </div>
+            <div class='card-body'>
+              <p>We will have a price increase 1 March 2024.</p>
+            </div>
+          </div>
         <div class="col-xl-6 col-lg-6">
           <div class="card">
             <div class="card-header">

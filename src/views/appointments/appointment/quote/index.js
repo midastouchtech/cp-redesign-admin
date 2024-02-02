@@ -464,6 +464,15 @@ function App({ socket }) {
                   <p>Reference: {company?.details?.name}</p>
                 </div>
                 <div class="col-md-6 text-left">
+                <h4>
+                    <strong>Xray Service Banking Details</strong>
+                  </h4>
+                <p>Maxis</p>
+                 <p>Standardbank</p>  
+                  <p>281086303</p>
+                  <p>Universal branch code</p>
+                  </div>
+                <div class="col-md-6 text-left">
                   <h4>
                     <strong>Dover Service Banking Details</strong>
                   </h4>
