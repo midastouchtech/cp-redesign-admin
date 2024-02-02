@@ -848,7 +848,8 @@ function App({ socket }) {
                       </div>
                     </div>
                     <div class='form-group row'>
-                      <h4 class='card-title'>Price Increase Message</h4>
+                      <label>Price Increase Message</label>
+                      <br />
                       <p>We will have a price increase 1 March 2024.</p>
                     </div>
                     <div class='form-group row'>
