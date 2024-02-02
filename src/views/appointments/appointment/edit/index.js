@@ -876,7 +876,6 @@ function App({ socket, stateUser }) {
                       </div>
                     </div>
                     <div class='form-group row'>
-                      <label class="col-sm-12">Price Increase </label>
                       <br />
                       <br />
                       <p class="col-sm-12">We will have a price increase 1 March 2024.</p>
