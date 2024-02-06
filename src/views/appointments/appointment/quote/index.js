@@ -97,10 +97,9 @@ function App({ socket }) {
     doc.html(input, {
       callback: function (pdf) {
         var blob = pdf.output('blob');
-        const url = 'https://api.cloudinary.com/v1_1/clinic-plus/raw/upload';
+        const url = `${process.env.REACT_APP_IO_SERVER}/upload-file-to-cloud-storage`;
         const formData = new FormData();
         formData.append('file', blob, 'quote.pdf');
-        formData.append('upload_preset', 'pwdsm6sz');
         setStatus('Uploading invoice...');
         axios({
           method: 'POST',
@@ -111,7 +110,7 @@ function App({ socket }) {
           .then((response) => {
             socket.emit('SEND_INVOICE', {
               appointment,
-              url: response.data.secure_url,
+              url: response.data.publicUrl,
               invoiceId,
             });
             setStatus('Sending...');
