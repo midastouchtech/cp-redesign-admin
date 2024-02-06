@@ -139,6 +139,22 @@ const Operations = ({ socket }) => {
     socket.emit("UPDATE_SYSTEM_SETTINGS", newSystemSettings);
   };
 
+  const changeSystemLimit = (id) => (e) => {
+    console.log("Changing limit", id, e.target.value)
+    const newSystemSettings = {
+      ...systemSettings,
+      limits: {
+        ...systemSettings.limits,
+        [id]: e.target.value,
+      },
+    };
+    setSystemSettings(newSystemSettings);
+    socket.emit("UPDATE_SYSTEM_SETTINGS", newSystemSettings);
+  };
+
+
+  console.log("System settings", systemSettings);
+
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
@@ -360,6 +376,31 @@ const Operations = ({ socket }) => {
                     </a>
                   </small>
                   <br />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+          <div className={`card`}>
+            <div className="card-body">
+              <div className="d-flex align-items-end">
+                <div>
+                  <p className="fs-14 text-black mb-1 bold">Appointment Limits</p>
+                  <strong>
+                    <u>Hendrina</u>
+                  </strong>
+                  <br />
+                  <p>
+                   <input value={systemSettings?.limits.Hendrina} onChange={changeSystemLimit("Hendrina") } />
+                  </p>
+                  <small>
+                    <u>Churchill</u>
+                  </small>
+                  <br />
+                  <p>
+                    <input value={systemSettings?.limits.Churchill} onChange={changeSystemLimit("Churchill")} />
+                  </p>
                 </div>
               </div>
             </div>
