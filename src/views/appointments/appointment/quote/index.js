@@ -97,7 +97,7 @@ function App({ socket }) {
     doc.html(input, {
       callback: function (pdf) {
         var blob = pdf.output('blob');
-        const url = `${process.env.REACT_APP_IO_SERVER}/upload-file-to-cloud-storage`;
+        const url = `${process.env.REACT_APP_IO_SERVER}upload-file-to-cloud-storage`;
         const formData = new FormData();
         formData.append('file', blob, 'quote.pdf');
         setStatus('Uploading invoice...');

@@ -10,7 +10,7 @@ function Uploader({ title, onChange }) {
   const onFileChange = (event) => {
     //console.log("doing onchane")
     setIsUploading(true);
-    const url = `${process.env.REACT_APP_IO_SERVER}/upload-file-to-cloud-storage`;
+    const url = `${process.env.REACT_APP_IO_SERVER}upload-file-to-cloud-storage`;
     const formData = new FormData();
     formData.append("file", event.target.files[0], event.target.files[0].name);
     formData.append("upload_preset", "pwdsm6sz");
