@@ -162,12 +162,13 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites && employee?.sites.length > 0
-            ? acc + (employee?.sites?.length - 1) * 38.4
+          return employee?.sites.length > 0
+            ? acc + 38.4
             : acc;
         },
         0
       );
+      console.log('sitesPrices', sitesPrices);
       const accessCardPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           const accessCardSites = employee.sites.filter(
@@ -202,6 +203,7 @@ function App({ socket }) {
       setDoverCount(employeesDoingDOver);
       setServicesPrice(servicesPrice);
       setServiceCounts(serviceCounts);
+      console.log("setting sites price", sitesPrices)
       setSitesPrice(sitesPrices);
       setAccessCardPrice(accessCardPrices);
       setServices(allServices);
@@ -389,7 +391,7 @@ function App({ socket }) {
                             <td class='col-md-5 text-right'>
                               {formatPrice(
                                 employee?.sites?.length > 0
-                                  ? (employee?.sites?.length - 1) * 38.4
+                                  ? 38.4
                                   : 0
                               )}
                             </td>
