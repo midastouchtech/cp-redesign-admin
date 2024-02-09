@@ -147,7 +147,7 @@ function App({ socket }) {
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return employee?.sites && employee?.sites.length > 0
-          ? acc + (employee?.sites?.length - 1) * 38.4
+          ? 38.4
           : acc;
       },
       0
