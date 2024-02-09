@@ -120,7 +120,7 @@ function App({ socket, stateUser }) {
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return employee?.sites && employee?.sites.length > 0
-          ? acc + (employee?.sites?.length - 1) * 38.40
+          ? 38.40
           : acc;
       },
       0
