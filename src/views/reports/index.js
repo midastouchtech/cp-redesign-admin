@@ -46,7 +46,7 @@ const calculateEmployeeCost = (employee) => {
       );
   console.log("Services cost", servicesCost);
   console.log("Sites", employee?.sites);
-  const sitesCost = employee?.sites && employee?.sites.length > 0 ? (employee?.sites?.length - 1) * 38.40 : 0;
+  const sitesCost = employee?.sites && employee?.sites.length >= 2 ? 38.40 : 0;
   const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
   const accessCardCost = accessCardSites.length > 0 ? (accessCardSites.length - 1) * 51.20 : 0;
  

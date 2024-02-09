@@ -162,7 +162,7 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites.length > 0
+          return employee?.sites.length >= 2
             ? acc + 38.4
             : acc;
         },
@@ -384,8 +384,8 @@ function App({ socket }) {
                               class='col-md-1'
                               style={{ textAlign: 'center' }}
                             >
-                              {employee?.sites && employee?.sites.length > 0
-                                ? employee?.sites?.length
+                              {employee?.sites && employee?.sites.length >= 2
+                                ? 38.40
                                 : 0}
                             </td>
                             <td class='col-md-5 text-right'>

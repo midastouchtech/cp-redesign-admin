@@ -119,7 +119,7 @@ function App({ socket, stateUser }) {
     }, 0);
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
-        return employee?.sites && employee?.sites.length > 0
+        return employee?.sites && employee?.sites.length >= 2
           ? 38.40
           : acc;
       },
