@@ -65,6 +65,7 @@ const Appointments = ({ socket }) => {
     socket.emit("SEARCH_APPOINTMENT", { term: searchTerm });
     socket.on("RECEIVE_SEARCHED_APPOINTMENT", (data) => {
       setAppointments(data);
+      setLoading(false);
     });
     socket.on("RECEIVE_SEARCHED_APPOINTMENT_NOT_FOUND", (data) => {
       setAppointments(originalAppointments);
@@ -101,7 +102,7 @@ const Appointments = ({ socket }) => {
           ],
           appointments?.map((appointment) => [
             appointment?.id,
-            appointment?.usersWhoCanManage[0].name,
+            appointment?.usersWhoCanManage[0]?.name,
             appointment?.details?.purchaseOrderNumber,
             appointment?.details?.company?.name,
             appointment?.details?.clinic,
@@ -220,6 +221,7 @@ const Appointments = ({ socket }) => {
   //console.log("prevMonthPageCount", prevMonthPageCount)
   //console.log("currentMonthPageCount", currentMonthPageCount)
   //console.log("nextMonthPageCount", nextMonthPageCount)
+  console.log("LOading", loading);
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
@@ -433,24 +435,24 @@ const Appointments = ({ socket }) => {
                     <tbody>
                       {appointments?.map((appointment, index) => (
                         <tr key={index}>
-                          <td>{appointment.id}</td>
-                          <td>{appointment.usersWhoCanManage[0].name}</td>
-                          <td>{appointment.details.purchaseOrderNumber}</td>
-                          <td>{appointment.details.company.name}</td>
-                          <td>{appointment.details.clinic}</td>
-                          <td>{appointment.details.date}</td>
+                          <td>{appointment?.id}</td>
+                          <td>{appointment?.usersWhoCanManage[0]?.name}</td>
+                          <td>{appointment?.details?.purchaseOrderNumber}</td>
+                          <td>{appointment?.details?.company.name}</td>
+                          <td>{appointment?.details?.clinic}</td>
+                          <td>{appointment?.details?.date}</td>
                           <td>
                             <span
                               className={`badge ${getBadgeclassName(
-                                appointment.status
+                                appointment?.status
                               )}`}
                             >
-                              {appointment.status}
+                              {appointment?.status}
                             </span>
                           </td>
                           <td>
                             <Link
-                              to={`/appointment/${appointment.id}`}
+                              to={`/appointment/${appointment?.id}`}
                               className="btn btn-xs btn-light  text-nowrap"
                             >
                               Open
