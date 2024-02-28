@@ -251,7 +251,7 @@ const Reports = ({ socket }) => {
       console.log(event, args);
     });
     if (monthType === "any") {
-      setLoadingMessage(`Fetching page ${p}'s appointments`)
+      setLoadingMessage(`Fetching page ${p+1}'s appointments`)
       setIsLoading(true)
       socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, type: "x-rays", pageLimit: 50});
       socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
