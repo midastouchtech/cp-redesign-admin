@@ -35,24 +35,16 @@ const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
 };
 const calculateEmployeeCost = (employee) => {
-  console.log()
-  console.log("Employee", employee.name);
-  console.log("Services rendered to employee", employee.services);
   const servicesCost = isEmpty(employee.services)
     ? 0
     : employee?.services?.reduce(
         (acc, service) => acc + service.price,
         0
       );
-  console.log("Services cost", servicesCost);
-  console.log("Sites", employee?.sites);
   const sitesCost = employee?.sites && employee?.sites.length >= 2 ? 38.40 : 0;
   const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
   const accessCardCost = accessCardSites.length > 0 ? (accessCardSites.length - 1) * 51.20 : 0;
- 
-  console.log("Sites cost", sitesCost);
   const totalCost = servicesCost + sitesCost + accessCardCost;
-  console.log("Total cost", totalCost);
   return formatPrice(totalCost);
 };
 
@@ -258,9 +250,10 @@ const Reports = ({ socket }) => {
       setLoadingMessage(`Fetching page ${p}'s appointments`)
       setIsLoading(true)
       socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, type: "x-rays"});
-      socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
-        setAppointments(data);
-        setOriginalAppointments(data);
+      socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
+        console.log("receive next page appointments", data)
+        setAppointments(data.apps);
+        setOriginalAppointments(data.apps);
         setPage(p);
         setIsLoading(false)
       });
