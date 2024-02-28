@@ -117,12 +117,6 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen, user}) => {
               Invoices
             </Link>
           </li>
-          <li onClick={toggleOpen}>
-            <Link to="/reports" class="has-arrow ai-icon" aria-expanded="false">
-              <MdHealthAndSafety />
-              Reports
-            </Link>
-          </li>
           {user?.details?.adminType === "xrayAdmin" && (
             <li onClick={toggleOpen}>
             <Link to="/x-ray-reports" class="has-arrow ai-icon" aria-expanded="false">
