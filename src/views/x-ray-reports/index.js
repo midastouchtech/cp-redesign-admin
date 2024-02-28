@@ -246,6 +246,7 @@ const Reports = ({ socket }) => {
   };
 
   const getPageAppointments = (p) => {
+    console.log("getting page appointments for", p, "monthType", monthType);
     if (monthType === "any") {
       setLoadingMessage(`Fetching page ${p}'s appointments`)
       setIsLoading(true)
