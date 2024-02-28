@@ -247,6 +247,9 @@ const Reports = ({ socket }) => {
 
   const getPageAppointments = (p) => {
     console.log("getting page appointments for", p, "monthType", monthType);
+    socket.onAny((event, ...args) => {
+      console.log(event, args);
+    });
     if (monthType === "any") {
       setLoadingMessage(`Fetching page ${p}'s appointments`)
       setIsLoading(true)
@@ -258,6 +261,7 @@ const Reports = ({ socket }) => {
         setPage(p);
         setIsLoading(false)
       });
+      
     } else {
       //console.log("getting next page appointments for", monthType, "month");
       functionsByMonth[monthType](p);
