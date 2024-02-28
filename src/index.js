@@ -24,10 +24,12 @@ import  Appointment from "./views/appointments/appointment";
 import  AppointmentEditor from "./views/appointments/appointment/edit";
 import  AppointmentCreator from "./views/appointments/appointment/create";
 import  AppointmentQuotation from "./views/appointments/appointment/quote";
+import  XAppointments from "./views/x-ray-appointments";
 import  Login from "./views/login";
 import  Logout from "./views/logout";
 import Reset from "./views/reset";
-import Reports from "./views/reports"
+import Reports from "./views/reports";
+import XReports from "./views/x-ray-reports"
 import Analytics from "./views/analytics";
 import Operations from "./views/operations";
 
@@ -89,6 +91,7 @@ const Main = () => {
             path="/appointment/quote/:appId"
             element={<AppointmentQuotation socket={socket} />}
           />
+          
           <Route
             path="/client/edit/:clientId"
             element={<ClientEditor socket={socket} />}
@@ -102,8 +105,16 @@ const Main = () => {
             element={<Appointments socket={socket} />}
           />
           <Route
+            path="/x-ray-appointments"
+            element={<XAppointments socket={socket} />}
+          />
+          <Route
             path="/reports"
             element={<Reports socket={socket} />}
+          />
+          <Route
+            path="/x-ray-reports"
+            element={<XReports socket={socket} />}
           />
           <Route
             path="/analytics"

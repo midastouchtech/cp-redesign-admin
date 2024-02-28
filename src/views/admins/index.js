@@ -116,7 +116,7 @@ const Admins = ({ socket }) => {
                         <th>Name</th>
                         <th>Email</th>
                         <th>Contact No</th>
-                        <th>Suspended </th>
+                        <th>Admin Type</th>
                         <th> </th>
                       </tr>
                     </thead>
@@ -127,7 +127,7 @@ const Admins = ({ socket }) => {
                           <td>{admin?.details.name}</td>
                           <td>{admin?.details.email}</td>
                           <td>{admin?.details.cell}</td>
-                          <td>{admin?.isSuspended ?  "Yes" : "No"}</td>
+                          <td>{admin?.details.adminType === "xrayAdmin" ?  "X-ray Admin" : "Regular Admin"}</td>
                           <td>
                             <Link to={`/admin/edit/${admin?.id}`}  className="btn btn-xs btn-primary text-nowrap">                              
                               Edit

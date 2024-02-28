@@ -6,14 +6,14 @@ import { TbFileReport } from "react-icons/tb";
 import { GoReport } from "react-icons/go";
 import { BsPeopleFill } from "react-icons/bs";
 import { HiMail } from "react-icons/hi";
-import { reject } from "ramda";
+import { isEmpty, isNil, reject } from "ramda";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import moment from "moment";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { Line } from "rc-progress";
-
+import { connect } from "react-redux";
 
 const CaratContainer = styled.div`
   ${(props) =>
@@ -123,8 +123,9 @@ const getHowManyDaysAgo = (date) => {
   const daysAgo = today.diff(dateToCompare, "days");
   return daysAgo;
 };
+const exists = i => !isEmpty(i) && !isNil(i);
 
-const Dashboard = ({ socket }) => {
+const Dashboard = ({ socket, user }) => {
   const [stats, setStats] = useState(null);
   const [selectedStats, setSelectedStats] = useState([]);
   const [activeStat, setActiveStat] = useState([]);
@@ -153,11 +154,13 @@ const Dashboard = ({ socket }) => {
   }, [isRunning]);
  
   useEffect(()=>{
-    console.log("use effect socket", socket)
-    if (socket && !stats && !latestAppointments && !latestMessages && !isRunning) {
+    const data = {type: user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all"}
+
+    if (socket && !stats && !latestAppointments && !latestMessages && !isRunning && exists(user)) {
+   
       setCounter(0);
       setIsRunning(true);
-      socket.emit("GET_STATS");
+      socket.emit("GET_STATS", data);
       socket.on("RECEIVE_STATS", (stats) => {
         setStats(stats);
         setSelectedStats(
@@ -181,7 +184,7 @@ const Dashboard = ({ socket }) => {
        });
     }
   
-  }, [socket]);
+  }, [socket, user]);
 
   
   const toggleStat = (stat) => {
@@ -449,4 +452,10 @@ const Dashboard = ({ socket }) => {
   );
 };
 
-export default Dashboard;
+const mapStateToProps = (state) => ({
+  user: state.auth.user,
+});
+
+export default connect(mapStateToProps)(Dashboard);
+
+

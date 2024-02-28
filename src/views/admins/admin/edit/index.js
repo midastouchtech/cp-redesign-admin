@@ -218,6 +218,22 @@ function App({ socket }) {
                       />
                     </div>
                   </div>
+                  <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">
+                      Admin Type
+                    </label>
+                    <div class="col-sm-8">
+                      <select
+                        class="form-control input-default"
+                        placeholder="Select Admin Type"
+                        onChange={(e) => setDetail("adminType", e.target.value)}
+                        value={user?.details?.adminType}
+                      >
+                        <option value="admin">Admin</option>
+                        <option value="xrayAdmin">X-ray Admin</option>
+                      </select>
+                    </div>
+                  </div>
                 </form>
               </div>
             </div>

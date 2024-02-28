@@ -10,7 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { isNil, keys, mergeAll, range, values } from "ramda";
+import { isEmpty, isNil, keys, mergeAll, range, values } from "ramda";
 import moment from "moment";
 import { Line } from "rc-progress";
 
@@ -18,6 +18,7 @@ import { BsPeopleFill } from "react-icons/bs";
 import { GiReceiveMoney } from "react-icons/gi";
 import { BiNotepad } from "react-icons/bi";
 import { FaSyringe } from "react-icons/fa";
+import { connect } from "react-redux";
 
 const iconsByTitle = {
   money: GiReceiveMoney,
@@ -78,7 +79,9 @@ const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
 };
 
-const Analytics = ({ socket }) => {
+const exists = i => !isEmpty(i) && !isNil(i);
+
+const Analytics = ({ socket, user }) => {
   const [analytics, setAnalytics] = useState(null);
   const [originalAnalytics, setOriginalAnalytics] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(moment().format("MMMM"));
@@ -104,13 +107,15 @@ const Analytics = ({ socket }) => {
     }
   }, [isRunning]);
 
-  if (socket && !analytics && !isRunning) {
+  if (socket && !analytics && !isRunning && exists(user)) {
     setCounter(0);
     setIsRunning(true);
 
     socket.emit("GET_FINANCE_ANALYTICS", {
       date: `01-${selectedMonth}-${selectedYear}`,
+      type: user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all"
     });
+    
     socket.on("RECEIVE_FINANCE_ANALYTICS", (data) => {
       console.log(data);
       setAnalytics(data);
@@ -611,4 +616,10 @@ const Analytics = ({ socket }) => {
   );
 };
 
-export default Analytics;
+const mapStateToProps = (state) => ({
+  user: state.auth.user,
+});
+
+export default connect(mapStateToProps)(Analytics);
+
+

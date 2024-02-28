@@ -17,7 +17,7 @@ const Header = ({ title, onBack, user, latestNotifications }) => {
         <nav className="navbar navbar-expand">
           <div className="collapse navbar-collapse justify-content-between">
             <div className="header-left">
-              <div className="dashboard_bar">Dashboard</div>
+              <div className="dashboard_bar">{user?.details?.adminType === "xrayAdmin" ? "X-Rays Dashboard" : "Dashboard"}</div>
             </div>
             <ul className="navbar-nav header-right">
               <li className="nav-item">

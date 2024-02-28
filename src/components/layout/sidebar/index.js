@@ -6,7 +6,8 @@ import styled from "styled-components";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { AiOutlineLineChart } from 'react-icons/ai';
-import {BsFillGearFill} from 'react-icons/bs'
+import {BsFillGearFill} from 'react-icons/bs';
+import { connect } from "react-redux";
 
 const NavContainer = styled.div`
   .deznav {
@@ -54,7 +55,7 @@ const NavContainer = styled.div`
   }
     .
 `;
-const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
+const SideBar = ({ title, onBack, isOpen, toggleOpen, user}) => {
   return (
     <NavContainer>
       <div class={isOpen ? "deznav open" : "deznav closed"}>
@@ -67,7 +68,19 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
               Dashboard
             </Link>
           </li>
-          <li onClick={toggleOpen}>
+          {user?.details?.adminType === "xrayAdmin" && (
+            <li onClick={toggleOpen}>
+            <Link
+              to="/x-ray-appointments"
+              class="has-arrow ai-icon"
+            >
+              <MdLibraryBooks />
+              Appointments
+            </Link>
+          </li>
+          )}
+          {user?.details?.adminType !== "xrayAdmin" && (
+            <li onClick={toggleOpen}>
             <Link
               to="/appointments"
               class="has-arrow ai-icon"
@@ -76,6 +89,7 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
               Appointments
             </Link>
           </li>
+          )}
           <li onClick={toggleOpen} >
             <Link
               to="/companies"
@@ -109,6 +123,22 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
               Reports
             </Link>
           </li>
+          {user?.details?.adminType === "xrayAdmin" && (
+            <li onClick={toggleOpen}>
+            <Link to="/x-ray-reports" class="has-arrow ai-icon" aria-expanded="false">
+              <MdHealthAndSafety />
+              Reports
+            </Link>
+          </li>
+          )}
+          {user?.details?.adminType !== "xrayAdmin" && (
+            <li onClick={toggleOpen}>
+            <Link to="/reports" class="has-arrow ai-icon" aria-expanded="false">
+              <MdHealthAndSafety />
+              Reports
+            </Link>
+          </li>
+          )}
           <li onClick={toggleOpen}>
             <Link to="/analytics" class="has-arrow ai-icon" aria-expanded="false">
               <AiOutlineLineChart />
@@ -145,4 +175,9 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen}) => {
   );
 };
 
-export default SideBar;
+const mapStateToProps = (state) => ({
+  user: state.auth.user,
+});
+
+export default connect(mapStateToProps)(SideBar);
+
