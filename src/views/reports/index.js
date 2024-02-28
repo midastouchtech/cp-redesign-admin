@@ -255,9 +255,9 @@ const Reports = ({ socket }) => {
       setLoadingMessage(`Fetching page ${p}'s appointments`)
       setIsLoading(true)
       socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, });
-      socket.on("RECEIVE_NEXT_PAGE_APPOINTMENTS", (data) => {
-        setAppointments(data);
-        setOriginalAppointments(data);
+      socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
+        setAppointments(data.apps);
+        setOriginalAppointments(data.apps);
         setPage(p);
         setIsLoading(false)
       });
