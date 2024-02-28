@@ -253,7 +253,7 @@ const Reports = ({ socket }) => {
     if (monthType === "any") {
       setLoadingMessage(`Fetching page ${p}'s appointments`)
       setIsLoading(true)
-      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, type: "x-rays"});
+      socket.emit("GET_NEXT_PAGE_APPOINTMENTS", { page: p, type: "x-rays", pageLimit: 50});
       socket.on("RECEIVE_ALL_APPOINTMENTS", (data) => {
         console.log("receive next page appointments", data)
         setAppointments(data.apps);
