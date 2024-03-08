@@ -487,11 +487,11 @@ function App({ socket, stateUser }) {
                 </li>
                 <li>
                   <a
-                    href="/forms/Man Job Spec.pdf"
+                    href="/forms/Man Job Spec - NEW.pdf"
                     target="_blank"
                     rel="no_rel"
                   >
-                    Man Job Spec.pdf
+                    Man Job Spec - NEW.pdf
                   </a>
                 </li>
                 <li>
