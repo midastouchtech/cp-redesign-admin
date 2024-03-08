@@ -114,7 +114,7 @@ const SideBar = ({ title, onBack, isOpen, toggleOpen, user}) => {
           <li onClick={toggleOpen}>
             <Link to="/invoices" class="has-arrow ai-icon" aria-expanded="false">
               <FaFileInvoiceDollar />
-              Invoices
+              Invoices Sent
             </Link>
           </li>
           {user?.details?.adminType === "xrayAdmin" && (

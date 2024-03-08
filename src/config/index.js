@@ -1,17 +1,12 @@
 export const CLINIC_LOCATIONS = ["Hendrina", "Churchill"];
 export const DOVER_PRICE = 753.34
+export const XRAYS_PRICE = 230.72
 export const MEDICAL_SERVICES = {
   "medical-examination": {
     price: 557.07,
     title: "Medical Examination",
     id: "medical-examination",
     info: `Medical assessment means a visual and physical inspection of the consumer, noting deviations from the norm, and a statement of the consumer's mental and physical condition that can be amendable to or resolved by appropriate actions of the provider.`,
-  },
-  "x-ray": {
-    price: 249.19,
-    title: "X - Rays",
-    id: "x-ray",
-    info: `An X-ray is a quick, painless test that produces images of the structures inside your body — particularly your bones. X-ray beams pass through your body, and they are absorbed in different amounts depending on the density of the material they pass through`,
   },
   "6-in-1-drug-test": {
     price: 127.13,

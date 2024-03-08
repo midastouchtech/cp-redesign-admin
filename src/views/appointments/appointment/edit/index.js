@@ -23,7 +23,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
-import { DOVER_PRICE, MEDICAL_SERVICES } from "../../../../config";
+import { DOVER_PRICE, XRAYS_PRICE ,MEDICAL_SERVICES } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
 import Comments from "./comments";
@@ -136,11 +136,19 @@ function App({ socket, stateUser }) {
         const requiresDover = employee.dover?.required;
         return requiresDover ? acc + DOVER_PRICE : acc;
       }, 0)
+
+    const xrayPrices = appointment?.details?.employees?.reduce(
+        (acc, employee) => {
+          const requiresXray = employee.xray?.required;
+          return requiresXray ? acc + XRAYS_PRICE : acc;
+        },
+        0
+      );
       console.log("doverPrice", doverPrices);
       console.log("servicesPrice", servicesPrice);
       console.log("site price", sitesPrice);
       console.log("accessCardPrice", accessCardPrice);
-    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice + doverPrices;
+    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice + doverPrices + xrayPrices;
     console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
@@ -243,6 +251,19 @@ function App({ socket, stateUser }) {
     );
     const isRequired = employee.dover?.required;
     const newEmployee = assocPath(["dover", "required"], !isRequired, employee);
+    const newEmployees = insert(index, newEmployee, employeesWithoutEmployee);
+    setDetail("employees", newEmployees);
+  };
+
+  const toggleXrayRequested = (id) => {
+    const employee = appointment?.details.employees?.find((e) => e.id === id);
+    const index = appointment?.details?.employees?.indexOf(employee);
+    const employeesWithoutEmployee = without(
+      [employee],
+      appointment?.details?.employees
+    );
+    const isRequired = employee.xray?.required;
+    const newEmployee = assocPath(["xray", "required"], !isRequired, employee);
     const newEmployees = insert(index, newEmployee, employeesWithoutEmployee);
     setDetail("employees", newEmployees);
   };
@@ -918,6 +939,36 @@ function App({ socket, stateUser }) {
                                 </label>
                               </div>
                               <div className="col-4">{getFormattedPrice(DOVER_PRICE)}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-4 col-form-label">
+                        Xray Service
+                      </label>
+                      <div class="col-sm-8">
+                        <div className="row">
+                          <div className="col-12">
+                            <div className="row">
+                              <div className="col-8">
+                                <input
+                                  type="checkbox"
+                                  id={`xray-checkbox}`}
+                                  className="mr-2"
+                                  name={"xray test"}
+                                  value={employee.xray?.required}
+                                  checked={employee.xray?.required}
+                                  onClick={() =>
+                                    toggleXrayRequested(employee.id)
+                                  }
+                                />
+                                <label htmlFor={`xray-checkbox`}>
+                                  Require Xray Scan
+                                </label>
+                              </div>
+                              <div className="col-4">{getFormattedPrice(XRAYS_PRICE)}</div>
                             </div>
                           </div>
                         </div>

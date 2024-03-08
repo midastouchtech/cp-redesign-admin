@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DOVER_PRICE, MEDICAL_SERVICES } from '../../../../config';
+import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES } from '../../../../config';
 import { keys, values } from 'ramda';
 import styled from 'styled-components';
 import html2canvas from 'html2canvas';
@@ -69,6 +69,8 @@ function App({ socket }) {
   const [serviceCounts, setServiceCounts] = useState({});
   const [doverCount, setDoverCount] = useState(0);
   const [doverPrice, setDoverPrice] = useState(0);
+  const [xrayCount, setXrayCount] = useState(0);
+  const [xrayPrice, setXrayPrice] = useState(0);
 
   const savetopdf = () => {
     window.scrollTo(0, 0);
@@ -187,8 +189,19 @@ function App({ socket }) {
         },
         0
       );
+      const xrayPrices = appointment?.details?.employees?.reduce(
+        (acc, employee) => {
+          const requiresXray = employee.xray?.required;
+          return requiresXray ? acc + XRAYS_PRICE : acc;
+        },
+        0
+      );
       const employeesDoingDOver = appointment?.details?.employees?.filter(
         (employee) => employee.dover?.required
+      ).length;
+
+      const employeesDoingXray = appointment?.details?.employees?.filter(
+        (employee) => employee.xray?.required
       ).length;
 
       console.log('doverPrice', doverPrices);
@@ -196,11 +209,13 @@ function App({ socket }) {
       console.log('site price', sitesPrice);
       console.log('accessCardPrice', accessCardPrices);
       const bookingPrice =
-        servicesPrice + sitesPrice + accessCardPrices + doverPrices;
+        servicesPrice + sitesPrice + accessCardPrices + doverPrices + xrayPrices;
       console.log('bookingPrice', bookingPrice);
 
       setDoverPrice(doverPrices);
       setDoverCount(employeesDoingDOver);
+      setXrayPrice(xrayPrices);
+      setXrayCount(employeesDoingXray);
       setServicesPrice(servicesPrice);
       setServiceCounts(serviceCounts);
       console.log("setting sites price", sitesPrices)
@@ -453,6 +468,17 @@ function App({ socket }) {
                           <td class='col-md-1'>{doverCount}</td>
                           <td class='col-md-5 text-right'>
                             {formatPrice(doverPrice)}
+                          </td>
+                        </tr>
+                        <br />
+                        <br />
+                        <br />
+                        <h5>Xray Service</h5>
+                        <tr>
+                          <td class='col-md-8 text-capitalize'>Employees</td>
+                          <td class='col-md-1'>{xrayCount}</td>
+                          <td class='col-md-5 text-right'>
+                            {formatPrice(xrayPrice)}
                           </td>
                         </tr>
                         <br />
