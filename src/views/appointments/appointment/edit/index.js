@@ -496,15 +496,6 @@ function App({ socket, stateUser }) {
                 </li>
                 <li>
                   <a
-                    href="/forms/Man Job Spec ClinicPlus.xlsx"
-                    target="_blank"
-                    rel="no_rel"
-                  >
-                    Man Job Spec ClinicPlus.xlsx
-                  </a>
-                </li>
-                <li>
-                  <a
                     href="/forms/Man Job Spec for Working at Heights and Confined Spaces.xlsx"
                     target="_blank"
                     rel="no_rel"
@@ -523,7 +514,7 @@ function App({ socket, stateUser }) {
                 </li>
                 <li>
                   <a
-                    href="/forms/Record of Hazardous Work DMR.doc"
+                    href="/forms/drm.docx"
                     target="_blank"
                     rel="no_rel"
                   >
