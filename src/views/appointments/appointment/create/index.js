@@ -878,7 +878,7 @@ function App({ socket }) {
                       <label class='col-sm-4 col-form-label'>
                         Dover Service
                         <br />
-                        <small>Only done in Witbank</small>
+                        <small>Payment for Dover Account</small>
                       </label>
                       <div class='col-sm-8'>
                         <div className='row'>
@@ -912,6 +912,8 @@ function App({ socket }) {
                       <label class='col-sm-4 col-form-label'>
                         Xray service
                       </label>
+                      <br/>
+                      <small>Payment for Maxi's Account</small>
                       <div class='col-sm-8'>
                         <div className='row'>
                           <div className='col-12'>
