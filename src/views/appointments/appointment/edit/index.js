@@ -120,7 +120,7 @@ function App({ socket, stateUser }) {
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return employee?.sites && employee?.sites.length >= 2
-          ? 40.700
+          ? 38.40
           : acc;
       },
       0
@@ -128,7 +128,7 @@ function App({ socket, stateUser }) {
     const accessCardPrice =  appointment?.details?.employees?.reduce(
       (acc, employee) => {
         const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
-        return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 55.290 : acc;
+        return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 51.20 : acc;
       }, 0)
     
     const doverPrices =  appointment?.details?.employees?.reduce(
