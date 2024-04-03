@@ -924,7 +924,7 @@ function App({ socket }) {
                                   id={`dover-checkbox}`}
                                   className='mr-2'
                                   name={'dover test'}
-                                  value={employee.xray.required}
+                                  value={employee.xray?.required}
                                   checked={employee.xray?.required}
                                   onClick={() =>
                                     toggleXrayRequested(employee.id)
