@@ -147,7 +147,7 @@ function App({ socket }) {
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return employee?.sites && employee?.sites.length >= 2
-          ? 38.4
+          ? 40.70
           : acc;
       },
       0
@@ -158,7 +158,7 @@ function App({ socket }) {
           (s) => s.hasAccessCard === true
         );
         return accessCardSites.length > 0
-          ? acc + (accessCardSites.length - 1) * 51.2
+          ? acc + (accessCardSites.length - 1) * 55.29
           : acc;
       },
       0

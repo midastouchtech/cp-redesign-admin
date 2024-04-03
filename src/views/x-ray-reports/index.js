@@ -41,9 +41,9 @@ const calculateEmployeeCost = (employee) => {
         (acc, service) => acc + service.price,
         0
       );
-  const sitesCost = employee?.sites && employee?.sites.length >= 2 ? 38.40 : 0;
+  const sitesCost = employee?.sites && employee?.sites.length >= 2 ? 40.700 : 0;
   const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
-  const accessCardCost = accessCardSites.length > 0 ? (accessCardSites.length - 1) * 51.20 : 0;
+  const accessCardCost = accessCardSites.length > 0 ? (accessCardSites.length - 1) * 55.290 : 0;
   const totalCost = servicesCost + sitesCost + accessCardCost;
   return formatPrice(totalCost);
 };

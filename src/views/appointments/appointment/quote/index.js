@@ -165,7 +165,7 @@ function App({ socket }) {
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           return employee?.sites.length >= 2
-            ? acc + 38.4
+            ? acc + 40.70
             : acc;
         },
         0
@@ -177,7 +177,7 @@ function App({ socket }) {
             (s) => s.hasAccessCard === true
           );
           return accessCardSites.length > 0
-            ? acc + (accessCardSites.length - 1) * 51.2
+            ? acc + (accessCardSites.length - 1) * 55.29
             : acc;
         },
         0
@@ -406,7 +406,7 @@ function App({ socket }) {
                             <td class='col-md-5 text-right'>
                               {formatPrice(
                                 employee?.sites?.length >= 2
-                                  ? 38.4
+                                  ? 40.70
                                   : 0
                               )}
                             </td>
@@ -433,7 +433,7 @@ function App({ socket }) {
                               <td class='col-md-5 text-right'>
                                 {formatPrice(
                                   accessCardSites.length > 0
-                                    ? (accessCardSites.length - 1) * 51.2
+                                    ? (accessCardSites.length - 1) * 55.29
                                     : 0
                                 )}
                               </td>
