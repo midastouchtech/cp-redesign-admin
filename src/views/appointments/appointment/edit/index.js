@@ -938,9 +938,10 @@ function App({ socket, stateUser }) {
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">
                         Xray Service
-                      </label>
-                      <br/>
+                        <br/>
                       <small>Payment for Maxi's Account</small>
+                      </label>
+                      
                       <div class="col-sm-8">
                         <div className="row">
                           <div className="col-12">
