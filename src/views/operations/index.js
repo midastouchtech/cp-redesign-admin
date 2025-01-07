@@ -1,9 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
+import React, { useState, useRef, useEffect } from 'react';
+import styled from 'styled-components';
 
-import { equals, isNil, keys, mergeAll, range, remove, take, values } from "ramda";
-import moment from "moment";
-import axios from "axios";
+import {
+  equals,
+  isNil,
+  keys,
+  mergeAll,
+  range,
+  remove,
+  take,
+  values,
+} from 'ramda';
+import moment from 'moment';
+import axios from 'axios';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -40,23 +49,23 @@ const Operations = ({ socket }) => {
 
   useEffect(() => {
     if (socket) {
-      socket.off("LOG");
-      socket.on("LOG", (data) => {
+      socket.on('LOG', (data) => {
+        console.log('[INFO] Server is perfoming ', data.event);
         addEvent({
           name: data.event,
-          time: moment().format("HH:mm:ss"),
+          time: moment().format('HH:mm:ss'),
           args: data.args,
         });
       });
     }
     if (socket && !systemSettings && hasRequested === false) {
       setHasRequested(true);
-      socket.emit("GET_SYSTEM_SETTINGS");
-      socket.on("RECEIVE_SYSTEM_SETTINGS", (settings) => {
+      socket.emit('GET_SYSTEM_SETTINGS');
+      socket.on('RECEIVE_SYSTEM_SETTINGS', (settings) => {
         setSystemSettings(settings);
       });
-      socket.on("FETCH_SYSTEM_SETTINGS", () => {
-        socket.emit("GET_SYSTEM_SETTINGS");
+      socket.on('FETCH_SYSTEM_SETTINGS', () => {
+        socket.emit('GET_SYSTEM_SETTINGS');
       });
     }
   }, [socket, events]);
@@ -66,8 +75,8 @@ const Operations = ({ socket }) => {
     axios
       .delete(`${process.env.REACT_APP_DYNO_URL}`, {
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/vnd.heroku+json; version=3",
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.heroku+json; version=3',
           Authorization: `Bearer ${process.env.REACT_APP_HEROKU_TOKEN}`,
         },
       })
@@ -81,8 +90,8 @@ const Operations = ({ socket }) => {
     axios
       .get(`${process.env.REACT_APP_DYNO_URL}`, {
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/vnd.heroku+json; version=3",
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.heroku+json; version=3',
           Authorization: `Bearer ${process.env.REACT_APP_HEROKU_TOKEN}`,
         },
       })
@@ -97,8 +106,8 @@ const Operations = ({ socket }) => {
     axios
       .get(`https://api.heroku.com/account/invoices`, {
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/vnd.heroku+json; version=3",
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.heroku+json; version=3',
           Authorization: `Bearer ${process.env.REACT_APP_HEROKU_TOKEN}`,
         },
       })
@@ -136,11 +145,11 @@ const Operations = ({ socket }) => {
         underMaintanance: !systemSettings[id].underMaintanance,
       },
     };
-    socket.emit("UPDATE_SYSTEM_SETTINGS", newSystemSettings);
+    socket.emit('UPDATE_SYSTEM_SETTINGS', newSystemSettings);
   };
 
   const changeSystemLimit = (id) => (e) => {
-    console.log("Changing limit", id, e.target.value)
+    console.log('Changing limit', id, e.target.value);
     const newSystemSettings = {
       ...systemSettings,
       limits: {
@@ -149,52 +158,51 @@ const Operations = ({ socket }) => {
       },
     };
     setSystemSettings(newSystemSettings);
-    socket.emit("UPDATE_SYSTEM_SETTINGS", newSystemSettings);
+    socket.emit('UPDATE_SYSTEM_SETTINGS', newSystemSettings);
   };
 
-
-  console.log("System settings", systemSettings);
+  console.log('System settings', systemSettings);
 
   return (
-    <div className="container-fluid">
-      <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
-        <div className="mb-3 mr-3">
-          <h6 className="fs-16 text-black font-w600 mb-0">System</h6>
-          <span className="fs-14 text-black">
+    <div className='container-fluid'>
+      <div className='d-flex flex-wrap mb-2 align-items-center justify-content-between'>
+        <div className='mb-3 mr-3'>
+          <h6 className='fs-16 text-black font-w600 mb-0'>System</h6>
+          <span className='fs-14 text-black'>
             Current System Health and Operation Data
           </span>
         </div>
-        <div className="d-flex mb-3">
+        <div className='d-flex mb-3'>
           <button
-            type="button"
-            class="btn btn-primary mb-3 mr-2"
+            type='button'
+            class='btn btn-primary mb-3 mr-2'
             onClick={() => {}}
           >
             Clear
           </button>
         </div>
       </div>
-      <div className="row">
-        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+      <div className='row'>
+        <div className='col-xl-4 col-xxl-4 col-lg-4 col-sm-6'>
           <div className={`card`}>
-            <div className="card-body">
-              <div className="d-flex align-items-end">
+            <div className='card-body'>
+              <div className='d-flex align-items-end'>
                 <div>
-                  <p className="fs-14 text-black mb-1 bold">Server State</p>
-                  <span className="fs-14 text-black font-w600">
+                  <p className='fs-14 text-black mb-1 bold'>Server State</p>
+                  <span className='fs-14 text-black font-w600'>
                     {severIsAlive === true ? (
                       <span>
-                        <span className="fs-14 font-w600 badge badge-success">
+                        <span className='fs-14 font-w600 badge badge-success'>
                           Running
                         </span>
                         <br />
                         {restartingDynos ? (
-                          <small className="text-black-50">Restarting...</small>
+                          <small className='text-black-50'>Restarting...</small>
                         ) : (
                           <small>
                             <br />
                             <a
-                              className="text-blue mt-2"
+                              className='text-blue mt-2'
                               onClick={restartDynos}
                             >
                               Restart
@@ -204,16 +212,16 @@ const Operations = ({ socket }) => {
                       </span>
                     ) : severIsAlive === false ? (
                       <span>
-                        <span className="fs-14 font-w600 badge badge-danger mb-2">
+                        <span className='fs-14 font-w600 badge badge-danger mb-2'>
                           Not Running
                         </span>
                         <br />
                         {restartingDynos ? (
-                          <small className="text-black-50">Restarting...</small>
+                          <small className='text-black-50'>Restarting...</small>
                         ) : (
                           <small>
                             <a
-                              className="text-blue mt-2"
+                              className='text-blue mt-2'
                               onClick={restartDynos}
                             >
                               Restart
@@ -222,7 +230,7 @@ const Operations = ({ socket }) => {
                         )}
                       </span>
                     ) : (
-                      <span className="fs-14 font-w600 badge badge-secondary">
+                      <span className='fs-14 font-w600 badge badge-secondary'>
                         Checking status...
                       </span>
                     )}
@@ -232,20 +240,20 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+        <div className='col-xl-4 col-xxl-4 col-lg-4 col-sm-6'>
           <div className={`card`}>
-            <div className="card-body">
-              <div className="d-flex align-items-end">
+            <div className='card-body'>
+              <div className='d-flex align-items-end'>
                 <div>
-                  <p className="fs-14 text-black mb-1 bold">
+                  <p className='fs-14 text-black mb-1 bold'>
                     Socket connection
                   </p>
                   {socket?.connected ? (
-                    <span className="fs-14 font-w600 badge badge-success">
+                    <span className='fs-14 font-w600 badge badge-success'>
                       Connected
                     </span>
                   ) : (
-                    <span className="fs-14 font-w600 badge badge-danger">
+                    <span className='fs-14 font-w600 badge badge-danger'>
                       Disconnected
                     </span>
                   )}
@@ -254,24 +262,24 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+        <div className='col-xl-4 col-xxl-4 col-lg-4 col-sm-6'>
           <div className={`card`}>
-            <div className="card-body">
-              <div className="d-flex align-items-end">
+            <div className='card-body'>
+              <div className='d-flex align-items-end'>
                 <div>
-                  <p className="fs-14 text-black mb-1 bold">
+                  <p className='fs-14 text-black mb-1 bold'>
                     Database connection
                   </p>
                   {dbIsAlive ? (
-                    <span className="fs-14 font-w600 badge badge-success">
+                    <span className='fs-14 font-w600 badge badge-success'>
                       Connected
                     </span>
                   ) : dbIsAlive === false ? (
-                    <span className="fs-14 font-w600 badge badge-danger">
+                    <span className='fs-14 font-w600 badge badge-danger'>
                       Disconnected
                     </span>
                   ) : (
-                    <span className="fs-14 font-w600 badge badge-secondary">
+                    <span className='fs-14 font-w600 badge badge-secondary'>
                       Checking status...
                     </span>
                   )}
@@ -280,38 +288,38 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+        <div className='col-xl-4 col-xxl-4 col-lg-4 col-sm-6'>
           <div className={`card`}>
-            <div className="card-body">
-              <div className="d-flex align-items-end">
+            <div className='card-body'>
+              <div className='d-flex align-items-end'>
                 <div>
-                  <p className="fs-14 text-black mb-1 bold">
+                  <p className='fs-14 text-black mb-1 bold'>
                     Heroku Dynos State
                   </p>
-                  <span className="fs-14 text-black font-w600">
-                    {dynoInfo?.state === "up" ? (
+                  <span className='fs-14 text-black font-w600'>
+                    {dynoInfo?.state === 'up' ? (
                       <span>
-                        <span className="fs-14 font-w600 badge badge-success">
+                        <span className='fs-14 font-w600 badge badge-success'>
                           Running
                         </span>
                         <br />
-                        <small className="text-black-50">
+                        <small className='text-black-50'>
                           Running {numberOfDynos} Dynos
                         </small>
                         <br />
                         <small>
-                          <a className="text-blue mt-2" onClick={restartDynos}>
+                          <a className='text-blue mt-2' onClick={restartDynos}>
                             Restart Dynos
                           </a>
                         </small>
                       </span>
                     ) : (
                       <span>
-                        <span className="fs-14 font-w600 badge badge-danger mb-2">
+                        <span className='fs-14 font-w600 badge badge-danger mb-2'>
                           {dynoInfo?.state}
                         </span>
                         <br />
-                        <a className="text-blue mt-2" onClick={restartDynos}>
+                        <a className='text-blue mt-2' onClick={restartDynos}>
                           Restart Dynos
                         </a>
                       </span>
@@ -322,33 +330,33 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+        <div className='col-xl-4 col-xxl-4 col-lg-4 col-sm-6'>
           <div className={`card`}>
-            <div className="card-body">
-              <div className="d-flex align-items-end">
+            <div className='card-body'>
+              <div className='d-flex align-items-end'>
                 <div>
-                  <p className="fs-14 text-black mb-1 bold">Maintenance</p>
+                  <p className='fs-14 text-black mb-1 bold'>Maintenance</p>
                   <small>
                     <u>Client System</u>
                   </small>
                   <br />
                   <small>
-                    Maintanance mode:{" "}
+                    Maintanance mode:{' '}
                     {systemSettings?.client?.underMaintanance ? (
-                      <span className="fs-14 font-w600 badge badge-danger">
+                      <span className='fs-14 font-w600 badge badge-danger'>
                         ON
                       </span>
                     ) : (
-                      <span className="fs-14 font-w600 badge badge-success">
+                      <span className='fs-14 font-w600 badge badge-success'>
                         OFF
                       </span>
                     )}
                   </small>
                   <br />
                   <small>
-                    <a className="text-primary" onClick={switchOn("client")}>
-                      Switch{" "}
-                      {systemSettings?.client?.underMaintanance ? "Off" : "On"}
+                    <a className='text-primary' onClick={switchOn('client')}>
+                      Switch{' '}
+                      {systemSettings?.client?.underMaintanance ? 'Off' : 'On'}
                     </a>
                   </small>
                   <br />
@@ -357,22 +365,22 @@ const Operations = ({ socket }) => {
                   </small>
                   <br />
                   <small>
-                    Maintanance mode:{" "}
+                    Maintanance mode:{' '}
                     {systemSettings?.admin?.underMaintanance ? (
-                      <span className="fs-14 font-w600 badge badge-danger">
+                      <span className='fs-14 font-w600 badge badge-danger'>
                         ON
                       </span>
                     ) : (
-                      <span className="fs-14 font-w600 badge badge-success">
+                      <span className='fs-14 font-w600 badge badge-success'>
                         OFF
                       </span>
                     )}
                   </small>
                   <br />
                   <small>
-                    <a className="text-primary" onClick={switchOn("admin")}>
-                      Switch{" "}
-                      {systemSettings?.admin?.underMaintanance ? "Off" : "On"}
+                    <a className='text-primary' onClick={switchOn('admin')}>
+                      Switch{' '}
+                      {systemSettings?.admin?.underMaintanance ? 'Off' : 'On'}
                     </a>
                   </small>
                   <br />
@@ -381,25 +389,33 @@ const Operations = ({ socket }) => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-xxl-4 col-lg-4 col-sm-6">
+        <div className='col-xl-4 col-xxl-4 col-lg-4 col-sm-6'>
           <div className={`card`}>
-            <div className="card-body">
-              <div className="d-flex align-items-end">
+            <div className='card-body'>
+              <div className='d-flex align-items-end'>
                 <div>
-                  <p className="fs-14 text-black mb-1 bold">Appointment Limits</p>
+                  <p className='fs-14 text-black mb-1 bold'>
+                    Appointment Limits
+                  </p>
                   <strong>
                     <u>Hendrina</u>
                   </strong>
                   <br />
                   <p>
-                   <input value={systemSettings?.limits.Hendrina} onChange={changeSystemLimit("Hendrina") } />
+                    <input
+                      value={systemSettings?.limits.Hendrina}
+                      onChange={changeSystemLimit('Hendrina')}
+                    />
                   </p>
                   <small>
                     <u>Churchill</u>
                   </small>
                   <br />
                   <p>
-                    <input value={systemSettings?.limits.Churchill} onChange={changeSystemLimit("Churchill")} />
+                    <input
+                      value={systemSettings?.limits.Churchill}
+                      onChange={changeSystemLimit('Churchill')}
+                    />
                   </p>
                 </div>
               </div>
@@ -407,13 +423,13 @@ const Operations = ({ socket }) => {
           </div>
         </div>
       </div>
-      <div className="row">
-        <table class="table">
+      <div className='row'>
+        <table class='table'>
           <thead>
             <tr>
-              <th scope="col">Event</th>
-              <th scope="col">Time</th>
-              <th scope="col"></th>
+              <th scope='col'>Event</th>
+              <th scope='col'>Time</th>
+              <th scope='col'></th>
             </tr>
           </thead>
           <tbody>
