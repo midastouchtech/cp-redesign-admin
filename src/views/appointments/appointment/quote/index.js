@@ -99,7 +99,7 @@ function App({ socket }) {
     doc.html(input, {
       callback: function (pdf) {
         var blob = pdf.output('blob');
-        const url = `${process.env.REACT_APP_IO_SERVER}upload-file-to-cloud-storage`;
+        const url = `${process.env.REACT_APP_IO_SERVER}/upload-file-to-cloud-storage`;
         const formData = new FormData();
         formData.append('file', blob, 'quote.pdf');
         setStatus('Uploading invoice...');
@@ -164,9 +164,7 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites.length >= 2
-            ? acc + 40.70
-            : acc;
+          return employee?.sites.length >= 2 ? acc + 40.7 : acc;
         },
         0
       );
@@ -209,7 +207,11 @@ function App({ socket }) {
       console.log('site price', sitesPrice);
       console.log('accessCardPrice', accessCardPrices);
       const bookingPrice =
-        servicesPrice + sitesPrice + accessCardPrices + doverPrices + xrayPrices;
+        servicesPrice +
+        sitesPrice +
+        accessCardPrices +
+        doverPrices +
+        xrayPrices;
       console.log('bookingPrice', bookingPrice);
 
       setDoverPrice(doverPrices);
@@ -218,7 +220,7 @@ function App({ socket }) {
       setXrayCount(employeesDoingXray);
       setServicesPrice(servicesPrice);
       setServiceCounts(serviceCounts);
-      console.log("setting sites price", sitesPrices)
+      console.log('setting sites price', sitesPrices);
       setSitesPrice(sitesPrices);
       setAccessCardPrice(accessCardPrices);
       setServices(allServices);
@@ -405,9 +407,7 @@ function App({ socket }) {
                             </td>
                             <td class='col-md-5 text-right'>
                               {formatPrice(
-                                employee?.sites?.length >= 2
-                                  ? 40.70
-                                  : 0
+                                employee?.sites?.length >= 2 ? 40.7 : 0
                               )}
                             </td>
                           </tr>
