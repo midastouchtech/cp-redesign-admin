@@ -103,7 +103,7 @@ function App({ socket, stateUser }) {
   }
 
   const getActiveClass = (status) => {
-    return status === appointment.status ? "btn-primary" : "btn-secondary";
+    return status === appointment?.status ? "btn-primary" : "btn-secondary";
   };
 
   const calculateBookingPrice = () => {
@@ -174,7 +174,7 @@ function App({ socket, stateUser }) {
     socket.emit("UPDATE_APPOINTMENT", appointmentWithNewPrice);
     socket.on("APPOINTMENT_UPDATED", () => {
       //console.log("appointment updated");
-      navigate("/appointment/" + appointment.id)
+      navigate("/appointment/" + appointment?.id)
     });
     socket.on("APPOINTMENT_LIMIT_REACHED", (data) => {
       openFailed();
@@ -289,7 +289,7 @@ function App({ socket, stateUser }) {
     // });
     const appointmentAlreadyHasUser = any(
       (u) => u.id === user.id,
-      appointment.usersWhoCanManage
+      appointment?.usersWhoCanManage
     );
     if (appointmentAlreadyHasUser) {
       return;
@@ -316,7 +316,7 @@ function App({ socket, stateUser }) {
     const newAppointment = pipe(
       assocPath(
         ["usersWhoCanManage"],
-        reject((u) => u.id === user.id, appointment.usersWhoCanManage)
+        reject((u) => u.id === user.id, appointment?.usersWhoCanManage)
       )
     )(appointment);
     setAppointment(newAppointment);
@@ -343,7 +343,7 @@ function App({ socket, stateUser }) {
             <div className="card-body">
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
-                onClick={() => navigate("/appointment/" + appointment.id)}
+                onClick={() => navigate("/appointment/" + appointment?.id)}
                 disabled={hasUpdatedAppointmnent}
               >
                 Close
@@ -887,11 +887,7 @@ function App({ socket, stateUser }) {
                         />
                       </div>
                     </div>
-                    <div class='form-group row'>
-                      <br />
-                      <br />
-                      <p class="col-sm-12">We will have a price increase 1 March 2024.</p>
-                    </div>
+                
                     <div class="form-group row">
                       <label class="col-sm-4 col-form-label">Services</label>
                       <div class="col-sm-8">

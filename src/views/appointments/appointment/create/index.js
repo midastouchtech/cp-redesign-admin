@@ -107,7 +107,7 @@ function App({ socket }) {
   }
 
   const getActiveClass = (status) => {
-    return status === appointment.status ? 'btn-primary' : 'btn-secondary';
+    return status === appointment?.status ? 'btn-primary' : 'btn-secondary';
   };
 
   const calculateBookingPrice = () => {
@@ -337,7 +337,7 @@ function App({ socket }) {
             <div className='card-body'>
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
-                onClick={() => navigate('/appointment/' + appointment.id)}
+                onClick={() => navigate('/appointment/' + appointment?.id)}
                 disabled={hasUpdatedAppointmnent}
               >
                 Close
@@ -617,16 +617,6 @@ function App({ socket }) {
         <div class='col-xl-6 col-lg-6'>
           <div class='card'>
             <div class='card-header'>
-              <h4 class='card-title'>Price Increase </h4>
-            </div>
-            <div class='card-body'>
-              <p>We will have a price increase 1 March 2024.</p>
-            </div>
-          </div>
-        </div>
-        <div class='col-xl-6 col-lg-6'>
-          <div class='card'>
-            <div class='card-header'>
               <h4 class='card-title'>Forms</h4>
             </div>
             <div class='card-body'>
@@ -858,11 +848,7 @@ function App({ socket }) {
                         />
                       </div>
                     </div>
-                    <div class='form-group row'>
-                      <br />
-                      <br />
-                      <p class="col-sm-12"> We will have a price increase 1 March 2024.</p>
-                    </div>
+                    
                     <div class='form-group row'>
                       <label class='col-sm-4 col-form-label'>Services</label>
                       <div class='col-sm-8'>
