@@ -21,23 +21,23 @@ export const MEDICAL_SERVICES = {
     id: 'cannabis',
     info: `Cannabis drug testing describes various drug test methodologies for the use of cannabis in medicine, sport, and law. Cannabis use is highly detectable and can be detected by urinalysis, hair analysis, as well as saliva tests for days or weeks.`,
   },
+   cannabis: {
+    price: 46.28,
+    title: 'Canbabis/Dagga Urine Test',
+    id: 'cannabis',
+    info: `Cannabis drug testing describes various drug test methodologies for the use of cannabis in medicine, sport, and law. Cannabis use is highly detectable and can be detected by urinalysis, hair analysis, as well as saliva tests for days or weeks.`,
+  },
   induction: {
     price: 302.8,
-    title: 'Induction',
+    title: 'General Mine Induction Only',
     id: 'induction',
     info: `In human resource development, induction training is a form of introduction for new employees in order to enable them to do their work in a new profession or job role within an organisation. Training can be systematic or unsystematic training. Induction training is systematic training`,
   },
   'pregnancy-test': {
     price: 48.36,
-    title: 'Pregnancy Test',
+    title: 'Pregnancy Screening Test',
     id: 'pregnancy-test',
     info: 'A pregnancy test is used to determine whether a woman is pregnant. The two primary methods are: 1 testing for human pregnancy hormone in blood or urine and 2 ultrasonography. Testing blood for hCG results in the earliest detection of pregnancy.',
-  },
-  'sugar-test': {
-    price: 47.82,
-    title: 'Sugar Test',
-    id: 'sugar-test',
-    info: 'Many types of glucose tests exist and they can be used to estimate blood sugar levels at a given time or, over a longer period of time, to obtain average levels or to see how fast body is able to normalize changed glucose levels. Eating food for example leads to elevated blood sugar levels. Wikipedia',
   },
   clearance: {
     price: 259.55,
