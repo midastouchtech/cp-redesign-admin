@@ -115,9 +115,9 @@ function Services({ onChange, selectedServices }) {
   return (
     <>
       <div className="row">
-        {services.map(({ id, title, price }, index) => {
+        {services.map(({ id, title, price, info, showInfo }, index) => {
           return (
-            <div className="col-12" key={index}>
+            <div className={`col-12 ${showInfo ? 'mb-4' : ''}`}key={index}>
               <div className="row">
                 <div className="col-8">
                   <input
@@ -132,7 +132,9 @@ function Services({ onChange, selectedServices }) {
                   <label htmlFor={`custom-checkbox-${index}`}>{title}</label>
                 </div>
                 <div className="col-4">{getFormattedPrice(price)}</div>
+               
               </div>
+              {showInfo && <small style={{margin: 0}} className="my-2 text-muted mx-0">{info}</small>}
             </div>
           );
         })}
