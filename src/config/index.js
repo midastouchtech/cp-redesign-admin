@@ -6,6 +6,7 @@ export const MEDICAL_SERVICES = {
     price: 601.64,
     title: 'Medical Examination',
     id: 'medical-examination',
+    hidden: true,
     info: `Medical assessment means a visual and physical inspection of the consumer, noting deviations from the norm, and a statement of the consumer's mental and physical condition that can be amendable to or resolved by appropriate actions of the provider.`,
   },
   '6-in-1-drug-test': {
@@ -73,5 +74,30 @@ export const MEDICAL_SERVICES = {
     title: 'Other',
     id: 'other',
     info: 'Other',
+  },
+  // Added bundled services
+  'mine-medical-with-induction': {
+    price: 1041.73,
+    title: 'Mine medicals with General Mine Induction',
+    id: 'mine-medical-with-induction',
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test & induction. X-rays compulsory – select separately (to be paid in to Maxis bank account). Compulsory mines: Mzimkhulu, Rietvlei, Mavungwani, Valley View, Mgayo, Bultfontein.',
+  },
+  'mine-medical-no-induction': {
+    price: 738.93,
+    title: 'Mine medicals with NO Induction',
+    id: 'mine-medical-no-induction',
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
+  },
+  'black-wattle-atoll-medical': {
+    price: 647.91,
+    title: 'Medical for Black Wattle & Atoll',
+    id: 'black-wattle-atoll-medical',
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine scree dipstick test, urine cannabis test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
+  },
+  'power-construction-other-medical': {
+    price: 601.63,
+    title: 'Medical examinations for Power stations, Construction and Other',
+    id: 'power-construction-other-medical',
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, Urine screening test. Drug test optional – select separately (either cannabis or 6-in-1 drug test). HGT (Sugar) test, optional – select separately. X-rays optional – select separately (to be paid in to Maxis bank account).',
   },
 };

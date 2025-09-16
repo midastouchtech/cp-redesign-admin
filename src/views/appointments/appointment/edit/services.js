@@ -80,7 +80,7 @@ const Left = styled.div`
   }
 `;
 
-const services = values(MEDICAL_SERVICES);
+const services = values(MEDICAL_SERVICES).filter((s) => s?.hidden !== true);
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
 function Services({ onChange, selectedServices }) {

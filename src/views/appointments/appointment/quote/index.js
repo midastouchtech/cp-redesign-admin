@@ -371,7 +371,8 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         <h5>Service prices</h5>
-                        {values(MEDICAL_SERVICES).map((service) =>
+                        {values(MEDICAL_SERVICES)
+                          .map((service) =>
                           serviceCounts[service.id] ? (
                             <tr>
                               <td class='col-md-8'>{service.title}</td>
