@@ -88,7 +88,7 @@ const Reports = ({ socket }) => {
             xray: e?.xray?.required ? 1 : 0,
             date: a?.details?.date,
             ...mergeAll(
-              values(MEDICAL_SERVICES).map((s) => ({
+              values(MEDICAL_SERVICES).filter(({ hidden }) => !hidden).map((s) => ({
                 [s.id]: employeeHasServiceWithId(e, s?.id) ? 1 : 0,
               }))
             ),
@@ -111,7 +111,7 @@ const Reports = ({ socket }) => {
     'date',
     'dover',
     'xray',
-    ...values(MEDICAL_SERVICES).map((service) => service.id),
+    ...values(MEDICAL_SERVICES).filter(({ hidden }) => !hidden).map((service) => service.id),
   ];
 
   const getAllAppointments = () => {
@@ -132,7 +132,7 @@ const Reports = ({ socket }) => {
       setAppointments(originalAppointments);
     } else {
       const newAppointments = originalAppointments.filter(
-        (appointment) => appointment.details?.clinic === type
+        (appointment) => appointment?.details?.clinic === type
       );
       setAppointments(newAppointments);
       setStatusType(type);
@@ -299,8 +299,8 @@ const Reports = ({ socket }) => {
       return {
         ...appointment,
         details: {
-          ...appointment.details,
-          date: moment(appointment.details.date).format('DD MMMM YYYY'),
+          ...appointment?.details,
+          date: moment(appointment?.details.date).format('DD MMMM YYYY'),
         },
       };
     }
@@ -464,7 +464,7 @@ const Reports = ({ socket }) => {
                           <th>Date</th>
                           <th>Dover Service</th>
                           <th>X-Ray Service</th>
-                          {values(MEDICAL_SERVICES).map((service) => (
+                          {values(MEDICAL_SERVICES).filter(({ hidden }) => !hidden).map((service) => (
                             <th>{service.title}</th>
                           ))}
                         </tr>
@@ -509,7 +509,7 @@ const Reports = ({ socket }) => {
                                   <span className='badge badge-danger'>No</span>
                                 )}
                               </td>
-                              {values(MEDICAL_SERVICES).map((service) => (
+                              {values(MEDICAL_SERVICES).filter(({ hidden }) => !hidden).map((service) => (
                                 <td>
                                   {employee[service.id] === 1 ? (
                                     <span className='badge badge-success'>
