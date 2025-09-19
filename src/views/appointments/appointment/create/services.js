@@ -80,7 +80,7 @@ const Left = styled.div`
   }
 `;
 
-const services = values(MEDICAL_SERVICES);
+const services = values(MEDICAL_SERVICES).filter((s) => s?.hidden !== true);
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
 function Services({ onChange, selectedServices }) {
@@ -115,7 +115,7 @@ function Services({ onChange, selectedServices }) {
   return (
     <>
       <div className="row">
-        {services.filter(({ hidden }) => !hidden).map(({ id, title, price, info, showInfo }, index) => {
+        {services.map(({ id, title, price, info, showInfo }, index) => {
           return (
             <div className={`col-12 ${showInfo ? 'mb-4' : ''}`} key={index}>
               <div className="row">
