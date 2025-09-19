@@ -115,7 +115,7 @@ function Services({ onChange, selectedServices }) {
   return (
     <>
       <div className="row">
-        {services.map(({ id, title, price, info, showInfo }, index) => {
+        {services.filter(({ hidden }) => !hidden).map(({ id, title, price, info, showInfo }, index) => {
           return (
             <div className={`col-12 ${showInfo ? 'mb-4' : ''}`}key={index}>
               <div className="row">

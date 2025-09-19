@@ -2,6 +2,34 @@ export const CLINIC_LOCATIONS = ['Hendrina', 'Churchill'];
 export const DOVER_PRICE = 828.67;
 export const XRAYS_PRICE = 248.4;
 export const MEDICAL_SERVICES = {
+  'mine-medical-with-induction': {
+    price: 1041.73,
+    title: 'Mine medicals with General Mine Induction',
+    id: 'mine-medical-with-induction',
+    showInfo: true,
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test & induction. X-rays compulsory – select separately (to be paid in to Maxis bank account). Compulsory mines: Mzimkhulu, Rietvlei, Mavungwani, Valley View, Mgayo, Bultfontein.',
+  },
+  'mine-medical-no-induction': {
+    price: 738.93,
+    title: 'Mine medicals with NO Induction',
+    id: 'mine-medical-no-induction',
+    showInfo: true,
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
+  },
+  'black-wattle-atoll-medical': {
+    price: 647.91,
+    title: 'Medical for Black Wattle & Atoll',
+    id: 'black-wattle-atoll-medical',
+    showInfo: true,
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine scree dipstick test, urine cannabis test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
+  },
+  'power-construction-other-medical': {
+    price: 601.63,
+    title: 'Medical examinations for Power stations, Construction and Other',
+    id: 'power-construction-other-medical',
+    showInfo: true,
+    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, Urine screening test. Drug test optional – select separately (either cannabis or 6-in-1 drug test). HGT (Sugar) test, optional – select separately. X-rays optional – select separately (to be paid in to Maxis bank account).',
+  },
   'medical-examination': {
     price: 601.64,
     title: 'Medical Examination',
@@ -80,32 +108,5 @@ export const MEDICAL_SERVICES = {
     info: 'Other',
   },
   // Added bundled services
-  'mine-medical-with-induction': {
-    price: 1041.73,
-    title: 'Mine medicals with General Mine Induction',
-    id: 'mine-medical-with-induction',
-    showInfo: true,
-    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test & induction. X-rays compulsory – select separately (to be paid in to Maxis bank account). Compulsory mines: Mzimkhulu, Rietvlei, Mavungwani, Valley View, Mgayo, Bultfontein.',
-  },
-  'mine-medical-no-induction': {
-    price: 738.93,
-    title: 'Mine medicals with NO Induction',
-    id: 'mine-medical-no-induction',
-    showInfo: true,
-    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
-  },
-  'black-wattle-atoll-medical': {
-    price: 647.91,
-    title: 'Medical for Black Wattle & Atoll',
-    id: 'black-wattle-atoll-medical',
-    showInfo: true,
-    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine scree dipstick test, urine cannabis test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
-  },
-  'power-construction-other-medical': {
-    price: 601.63,
-    title: 'Medical examinations for Power stations, Construction and Other',
-    id: 'power-construction-other-medical',
-    showInfo: true,
-    info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, Urine screening test. Drug test optional – select separately (either cannabis or 6-in-1 drug test). HGT (Sugar) test, optional – select separately. X-rays optional – select separately (to be paid in to Maxis bank account).',
-  },
+  
 };
