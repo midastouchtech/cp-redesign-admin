@@ -24,7 +24,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Uploader from '../../../../components/Upload';
 import { SegmentedControl } from 'segmented-control-react';
-import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES } from '../../../../config';
+import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES, SITE_SECOND_SITE_PRICE } from '../../../../config';
 import Services from './services';
 import Sites from './sites';
 import SearchModal from '../../../../components/Modal';
@@ -147,7 +147,7 @@ function App({ socket }) {
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return employee?.sites && employee?.sites.length >= 2
-          ? 40.70
+          ? acc + SITE_SECOND_SITE_PRICE
           : acc;
       },
       0

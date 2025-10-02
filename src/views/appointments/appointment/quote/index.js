@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES } from '../../../../config';
+import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES, SITE_SECOND_SITE_PRICE } from '../../../../config';
 import { keys, values } from 'ramda';
 import styled from 'styled-components';
 import html2canvas from 'html2canvas';
@@ -164,7 +164,7 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites.length >= 2 ? acc + 40.7 : acc;
+          return employee?.sites.length >= 2 ? acc + SITE_SECOND_SITE_PRICE : acc;
         },
         0
       );
@@ -408,7 +408,7 @@ function App({ socket }) {
                             </td>
                             <td class='col-md-5 text-right'>
                               {formatPrice(
-                                employee?.sites?.length >= 2 ? 40.7 : 0
+                                employee?.sites?.length >= 2 ? SITE_SECOND_SITE_PRICE : 0
                               )}
                             </td>
                           </tr>

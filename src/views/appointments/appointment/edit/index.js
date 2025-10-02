@@ -23,7 +23,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
-import { DOVER_PRICE, XRAYS_PRICE ,MEDICAL_SERVICES } from "../../../../config";
+import { DOVER_PRICE, XRAYS_PRICE ,MEDICAL_SERVICES, SITE_SECOND_SITE_PRICE } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
 import Comments from "./comments";
@@ -120,7 +120,7 @@ function App({ socket, stateUser }) {
     const sitesPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         return employee?.sites && employee?.sites.length >= 2
-          ? 40.700
+          ? acc + SITE_SECOND_SITE_PRICE
           : acc;
       },
       0

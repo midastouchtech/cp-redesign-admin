@@ -1,6 +1,7 @@
 export const CLINIC_LOCATIONS = ['Hendrina', 'Churchill'];
 export const DOVER_PRICE = 828.67;
 export const XRAYS_PRICE = 248.4;
+export const SITE_SECOND_SITE_PRICE = 43.95;
 export const MEDICAL_SERVICES = {
   'mine-medical-with-induction': {
     price: 1041.73,

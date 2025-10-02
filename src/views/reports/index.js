@@ -43,7 +43,7 @@ const calculateEmployeeCost = (employee) => {
     : employee?.services?.reduce((acc, service) => acc + service.price, 0);
   console.log('Services cost', servicesCost);
   console.log('Sites', employee?.sites);
-  const sitesCost = employee?.sites && employee?.sites.length >= 2 ? 40.7 : 0;
+  const sitesCost = employee?.sites && employee?.sites.length >= 2 ? 43.95 : 0;
   const accessCardSites = employee.sites.filter(
     (s) => s.hasAccessCard === true
   );
