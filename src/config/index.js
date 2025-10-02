@@ -31,13 +31,7 @@ export const MEDICAL_SERVICES = {
     showInfo: true,
     info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, Urine screening test. Drug test optional – select separately (either cannabis or 6-in-1 drug test). HGT (Sugar) test, optional – select separately. X-rays optional – select separately (to be paid in to Maxis bank account).',
   },
-  'medical-examination': {
-    price: 601.64,
-    title: 'Medical Examination',
-    id: 'medical-examination',
-    hidden: true,
-    info: `Medical assessment means a visual and physical inspection of the consumer, noting deviations from the norm, and a statement of the consumer's mental and physical condition that can be amendable to or resolved by appropriate actions of the provider.`,
-  },
+  
   '6-in-1-drug-test': {
     price: 137.3,
     title: '6 in 1 Drug Test includes canabis',
