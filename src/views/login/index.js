@@ -59,7 +59,7 @@ function App({ socket }) {
         fontWeight: '700',
         marginBottom: '20px'
       }}>
-        🎄 Festive season closure: 19 December 2024 - 6 January 2025 for bookings 🎄
+        🎄 Festive season closure: 19 December 2025 - 6 January 2026 for bookings 🎄
       </div>
       
       <div class="authincation h-100">
