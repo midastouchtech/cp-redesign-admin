@@ -48,6 +48,20 @@ function App({ socket }) {
 
   return (
     <div class="h-100 mt-5">
+      {/* Festive Season Closure Banner */}
+      <div style={{
+        width: '100%',
+        height: '40px',
+        background: '#ffc107',
+        padding: '10px',
+        textAlign: 'center',
+        color: '#000',
+        fontWeight: '700',
+        marginBottom: '20px'
+      }}>
+        🎄 Festive season closure: 19 December 2024 - 6 January 2025 for bookings 🎄
+      </div>
+      
       <div class="authincation h-100">
         <div class="container h-100">
           <div class="row justify-content-center h-100 align-items-center">
