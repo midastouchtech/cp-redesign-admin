@@ -30,54 +30,74 @@ const RemainingSlots = ({
   useEffect(() => {
     if (socket && exists(date) && exists(clinic) && shouldUpdateCount) {
       console.log('getting count');
-      socket.emit('GET_APPOINTMENTS_FOR_DATE_COUNT', {
-        clinic: clinic,
-        date: date,
-      });
-      socket.on('RECEIVE_APPOINTMENTS_FOR_DATE_COUNT', ({ count }) => {
-        console.log('COUNT', count);
-        setAppointmentsForDateCount(count);
-        const isFullyBooked =
-          employeeCount + count >= (clinicLimits[clinic] || 100);
-        onBookingStatusUpdate(isFullyBooked);
-        setIsFullyBooked(isFullyBooked);
-        setShouldUpdateCount(false);
-        socket.off('RECEIVE_APPOINTMENTS_FOR_DATE_COUNT');
-      });
+      
+      // Get system settings first to get limits
       socket.emit('GET_SYSTEM_SETTINGS');
-      socket.on('RECEIVE_SYSTEM_SETTINGS', (settings) => {
-        setLimits(settings.limits);
-      });
+      const settingsHandler = (settings) => {
+        setLimits(settings.limits || {});
+        const limits = settings.limits || {};
+        
+        // Then get the booking count
+        socket.emit('GET_APPOINTMENTS_FOR_DATE_COUNT', {
+          clinic: clinic,
+          date: date,
+        });
+        
+        // Set up count handler
+        const countHandler = ({ count }) => {
+          console.log('COUNT', count);
+          setAppointmentsForDateCount(count);
+          const limit = limits[clinic] || 100;
+          const isFullyBooked = (employeeCount + count) >= limit;
+          onBookingStatusUpdate(isFullyBooked);
+          setIsFullyBooked(isFullyBooked);
+          setShouldUpdateCount(false);
+          socket.off('RECEIVE_APPOINTMENTS_FOR_DATE_COUNT', countHandler);
+        };
+        
+        socket.on('RECEIVE_APPOINTMENTS_FOR_DATE_COUNT', countHandler);
+        socket.off('RECEIVE_SYSTEM_SETTINGS', settingsHandler);
+      };
+      
+      socket.on('RECEIVE_SYSTEM_SETTINGS', settingsHandler);
     }
-  }, [date, clinic, employeeCount]);
+  }, [date, clinic, employeeCount, shouldUpdateCount, socket, onBookingStatusUpdate, setShouldUpdateCount]);
+  
+  const limit = clinicLimits[clinic] || 100;
+  const currentBookings = appointmentsForDateCount || 0;
+  const remainingSpots = Math.max(0, limit - currentBookings - employeeCount);
+  const canAddMore = remainingSpots > 0;
+
   return (
     <Container>
       {exists(date) && (
-        <p>
-          <p class='text-secondary'>
-            The current number of employees booked for the{' '}
-            {moment(date).format('Do of MMM YYYY')} at {clinic} is{' '}
-            {appointmentsForDateCount}. This clinic can only take{' '}
-            {clinicLimits[clinic]} employees per day.
+        <div>
+          <p className='text-secondary'>
+            <strong>Booking Status for {moment(date).format('Do of MMM YYYY')} at {clinic}:</strong>
           </p>
-          {!isFullyBooked && (
-            <p class='text-secondary'>
-              You can add up to{' '}
-              <strong>
-                {(clinicLimits[clinic] || 100) -
-                  (appointmentsForDateCount + employeeCount)}{' '}
-                employees
-              </strong>{' '}
-              before {clinic} is fully booked.
-            </p>
-          )}
-          {isFullyBooked && (
+          <p className='text-secondary'>
+            Employees already booked: <strong>{currentBookings}</strong>
+          </p>
+          <p className='text-secondary'>
+            Employees in this appointment: <strong>{employeeCount}</strong>
+          </p>
+          <p className='text-secondary'>
+            Clinic limit: <strong>{limit} employees per day</strong>
+          </p>
+          <p className='text-secondary'>
+            Remaining spots available: <strong>{remainingSpots}</strong>
+          </p>
+          {!canAddMore && employeeCount > 0 && (
             <p className='text-danger'>
-              You cannot add any more employees. This clinic is now fully
-              booked. Feel free to submit the employees you have already added.
+              <strong>Warning:</strong> You cannot add any more employees. This clinic is now fully booked. Feel free to submit the employees you have already added.
             </p>
           )}
-        </p>
+          {canAddMore && employeeCount > 0 && (
+            <p className='text-success'>
+              You can still add up to <strong>{remainingSpots}</strong> more employees before {clinic} is fully booked.
+            </p>
+          )}
+        </div>
       )}
     </Container>
   );

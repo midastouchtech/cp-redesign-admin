@@ -77,6 +77,8 @@ function App({ socket }) {
   const [searchParams] = useSearchParams();
   const [isFullyBooked, setIsFullyBooked] = useState(false);
   const [shouldUpdateCount, setShouldUpdateCount] = useState(false);
+  const [appointmentsForDateCount, setAppointmentsForDateCount] = useState();
+  const [clinicLimits, setClinicLimits] = useState({});
   const [searchParamCompanyName, setSearchParamCompanyName] = useState(
     searchParams.get('companyName') || null
   );
@@ -188,9 +190,14 @@ function App({ socket }) {
     return bookingPrice;
   };
   const openFailed = (data) => {
+    const clinic = appointment?.details?.clinic || 'the clinic';
+    const limit = clinicLimits[clinic] || 100;
+    const currentBookings = appointmentsForDateCount || 0;
+    const employeeCount = appointment?.details?.employees?.length || 0;
+    
     AlertConfirm({
-      title: 'Failed',
-      desc: 'Your appointment could not be created because the clinic is fully booked for the day. Please try another date.',
+      title: 'Booking Limit Exceeded',
+      desc: `Cannot create appointment. The clinic limit for ${clinic} on ${appointment?.details?.date} is ${limit} employees. Currently booked: ${currentBookings}, Attempting to add: ${employeeCount}. Please reduce the number of employees or select a different date.`,
       onOk: () => {},
       onCancel: () => {
         console.log('cancel');
@@ -198,6 +205,21 @@ function App({ socket }) {
     });
   };
   const saveAppointment = () => {
+    // Validate clinic limit before saving
+    const clinic = appointment?.details?.clinic;
+    const limit = clinicLimits[clinic] || 100;
+    const currentBookings = appointmentsForDateCount || 0;
+    const employeeCount = appointment?.details?.employees?.length || 0;
+    
+    if (currentBookings + employeeCount > limit) {
+      AlertConfirm({
+        title: 'Booking Limit Exceeded',
+        desc: `Cannot create appointment. The clinic limit for ${clinic} on ${appointment?.details?.date} is ${limit} employees. Currently booked: ${currentBookings}, Attempting to add: ${employeeCount}. Please reduce the number of employees or select a different date.`,
+        onOk: () => {},
+      });
+      return;
+    }
+    
     const price = calculateBookingPrice();
     const appointmentWithNewPrice = assocPath(
       ['payment', 'amount'],
@@ -211,7 +233,7 @@ function App({ socket }) {
       navigate('/appointment/' + data.id);
     });
     socket.on('APPOINTMENT_LIMIT_REACHED', (data) => {
-      openFailed();
+      openFailed(data);
       socket.off('APPOINTMENT_LIMIT_REACHED');
     });
   };
@@ -329,6 +351,29 @@ function App({ socket }) {
     setHasUpdatedAppointment(hasUpdatedAppointmnent);
   });
 
+  useEffect(() => {
+    if (socket) {
+      // Get system settings to get clinic limits
+      socket.emit('GET_SYSTEM_SETTINGS');
+      socket.on('RECEIVE_SYSTEM_SETTINGS', (settings) => {
+        setClinicLimits(settings.limits || {});
+      });
+    }
+  }, [socket]);
+  
+  useEffect(() => {
+    if (socket && appointment?.details?.date && appointment?.details?.clinic) {
+      socket.emit('GET_APPOINTMENTS_FOR_DATE_COUNT', {
+        clinic: appointment.details.clinic,
+        date: appointment.details.date,
+      });
+      socket.on('RECEIVE_APPOINTMENTS_FOR_DATE_COUNT', ({ count }) => {
+        setAppointmentsForDateCount(count);
+        socket.off('RECEIVE_APPOINTMENTS_FOR_DATE_COUNT');
+      });
+    }
+  }, [appointment?.details?.date, appointment?.details?.clinic, socket]);
+
   return (
     <div class='container-fluid'>
       <div class='row'>
@@ -347,7 +392,17 @@ function App({ socket }) {
                   hasUpdatedAppointmnent ? 'btn-primary' : 'btn-secondary'
                 }`}
                 onClick={saveAppointment}
-                disabled={!hasUpdatedAppointmnent}
+                disabled={(() => {
+                  if (!hasUpdatedAppointmnent) return true;
+                  if (isFullyBooked) return true;
+                  const clinic = appointment?.details?.clinic;
+                  const limit = clinicLimits[clinic];
+                  if (appointmentsForDateCount !== undefined && limit) {
+                    const total = appointmentsForDateCount + (appointment?.details?.employees?.length || 0);
+                    if (total > limit) return true;
+                  }
+                  return false;
+                })()}
               >
                 Save
               </button>
