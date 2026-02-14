@@ -463,23 +463,23 @@ function App({ socket }) {
                         </tr>
                         <br />
                         <br />
-                        <h5>Dover Service</h5>
+                        <h3>Dover Service</h3>
                         <tr>
                           <td class='col-md-8 text-capitalize'>Employees</td>
                           <td class='col-md-1'>{doverCount}</td>
                           <td class='col-md-5 text-right'>
-                            {formatPrice(doverPrice)}
+                            <strong>{formatPrice(doverPrice)}</strong>
                           </td>
                         </tr>
                         <br />
                         <br />
                         <br />
-                        <h5>Xray Service</h5>
+                        <h3>Xray Service</h3>
                         <tr>
                           <td class='col-md-8 text-capitalize'>Employees</td>
                           <td class='col-md-1'>{xrayCount}</td>
                           <td class='col-md-5 text-right'>
-                            {formatPrice(xrayPrice)}
+                            <strong>{formatPrice(xrayPrice)}</strong>
                           </td>
                         </tr>
                         <br />
@@ -500,15 +500,7 @@ function App({ socket }) {
                   <p>Branch: 632005</p>
                   <p>Reference: {company?.details?.name}</p>
                 </div>
-                <div class='col-md-6 text-left'>
-                  <h4>
-                    <strong>Xray Service Banking Details</strong>
-                  </h4>
-                  <p>Maxis</p>
-                  <p>Standardbank</p>
-                  <p>281086303</p>
-                  <p>Universal branch code</p>
-                </div>
+                
                 <div class='col-md-6 text-left'>
                   <h4>
                     <strong>Dover Service Banking Details</strong>
@@ -519,6 +511,15 @@ function App({ socket }) {
                   <p>Account Type: Gold Business Account</p>
                   <p>Branch Code: 270250</p>
                   <p>Branch Name: WITBANK 430</p>
+                </div>
+                <div class='col-md-6 text-left'>
+                  <h4>
+                    <strong>Xray Service Banking Details</strong>
+                  </h4>
+                  <p>Maxis</p>
+                  <p>Standardbank</p>
+                  <p>281086303</p>
+                  <p>Universal branch code</p>
                 </div>
               </div>
             </div>
