@@ -490,7 +490,7 @@ function App({ socket }) {
                             </h4>
                           </td>
                           <td class='col-md-5 text-right'>
-                            <h4>
+                            <h3>
                               <strong>
                                 {formatPrice(
                                   servicesPrice +
@@ -498,7 +498,7 @@ function App({ socket }) {
                                     totalAccessCardPrice
                                 )}
                               </strong>
-                            </h4>
+                            </h3>
                           </td>
                         </tr>
                         <br />
@@ -508,7 +508,7 @@ function App({ socket }) {
                           <td class='col-md-8 text-capitalize'>Employees</td>
                           <td class='col-md-1'>{doverCount}</td>
                           <td class='col-md-5 text-right'>
-                            <strong>{formatPrice(doverPrice)}</strong>
+                            <h3>{formatPrice(doverPrice)}</h3>
                           </td>
                         </tr>
                         <br />
@@ -519,7 +519,7 @@ function App({ socket }) {
                           <td class='col-md-8 text-capitalize'>Employees</td>
                           <td class='col-md-1'>{xrayCount}</td>
                           <td class='col-md-5 text-right'>
-                            <strong>{formatPrice(xrayPrice)}</strong>
+                            <h3>{formatPrice(xrayPrice)}</h3>
                           </td>
                         </tr>
                         <br />
