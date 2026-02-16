@@ -49,7 +49,7 @@ function App({ socket }) {
   return (
     <div class="h-100 mt-5">
       {/* Festive Season Closure Banner */}
-      <div style={{
+      {/* <div style={{
         width: '100%',
         height: '40px',
         background: '#ffc107',
@@ -60,7 +60,7 @@ function App({ socket }) {
         marginBottom: '20px'
       }}>
         🎄 Festive season closure: 19 December 2025 - 6 January 2026 for bookings 🎄
-      </div>
+      </div> */}
       
       <div class="authincation h-100">
         <div class="container h-100">
