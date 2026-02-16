@@ -18,6 +18,9 @@ const StyedContainer = styled.div`
     #printPageButton {
       display: none;
     }
+    h1, h2, h3, h4, h5, h6 {
+      color: black !important;
+    }
   }
   .quote-container {
     border: 1px solid #lightgrey;
@@ -50,6 +53,9 @@ const StyedContainer = styled.div`
       }
     }
   }
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+  }
 `;
 
 function App({ socket }) {
@@ -75,11 +81,27 @@ function App({ socket }) {
   const savetopdf = () => {
     window.scrollTo(0, 0);
     const input = document.getElementById('quote-container');
+    
+    // Force all headings to be black by setting inline styles
+    const headings = input.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const originalStyles = [];
+    headings.forEach((heading, index) => {
+      originalStyles[index] = heading.style.color || '';
+      heading.style.color = 'black';
+    });
+    
     var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
-        //
-        pdf.save('mypdf.pdf');
+        // Restore original styles
+        headings.forEach((heading, index) => {
+          if (originalStyles[index]) {
+            heading.style.color = originalStyles[index];
+          } else {
+            heading.style.color = '';
+          }
+        });
+        pdf.save('clincplus-quote.pdf');
       },
       html2canvas: {
         scale: 0.36,
@@ -95,9 +117,26 @@ function App({ socket }) {
     window.scrollTo(0, 0);
     window.scrollTo(0, 0);
     const input = document.getElementById('quote-container');
+    
+    // Force all headings to be black by setting inline styles
+    const headings = input.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const originalStyles = [];
+    headings.forEach((heading, index) => {
+      originalStyles[index] = heading.style.color || '';
+      heading.style.color = 'black';
+    });
+    
     var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
+        // Restore original styles
+        headings.forEach((heading, index) => {
+          if (originalStyles[index]) {
+            heading.style.color = originalStyles[index];
+          } else {
+            heading.style.color = '';
+          }
+        });
         var blob = pdf.output('blob');
         const url = `${process.env.REACT_APP_IO_SERVER}/upload-file-to-cloud-storage`;
         const formData = new FormData();
@@ -442,6 +481,7 @@ function App({ socket }) {
                           );
                         })}
                         <br />
+                        <h3>Clinicplus Medicals Total</h3>
                         <tr>
                           <td class='col-md-8'></td>
                           <td class='col-md-1' style={{ textAlign: 'center' }}>
@@ -463,7 +503,7 @@ function App({ socket }) {
                         </tr>
                         <br />
                         <br />
-                        <h3>Dover Service</h3>
+                        <h3>Clinicplus Dover Total</h3>
                         <tr>
                           <td class='col-md-8 text-capitalize'>Employees</td>
                           <td class='col-md-1'>{doverCount}</td>
