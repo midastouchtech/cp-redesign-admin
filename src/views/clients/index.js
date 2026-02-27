@@ -1,9 +1,9 @@
-import { isNil, isEmpty, repeat, assoc } from "ramda";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { confirmAlert } from "react-confirm-alert"; // Import
-import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import { isNil, isEmpty, repeat, assoc } from 'ramda';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 const getMessage = (client) => (
   <p>
@@ -14,7 +14,7 @@ const getMessage = (client) => (
     </strong>
     &nbsp; and all their data?
     <br />
-    This user has {client.appointmentsManaging.length} appointments and{" "}
+    This user has {client.appointmentsManaging.length} appointments and{' '}
     {client.companiesManaging.length} companies registered on the system.
   </p>
 );
@@ -32,61 +32,58 @@ const Companies = ({ socket }) => {
   const [clients, setClients] = useState(null);
   const [originalClients, setOriginalClients] = useState(null);
   const [page, setPage] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const [hasRequested , setHasRequested] = useState(false)
+  const [hasRequested, setHasRequested] = useState(false);
 
   const getPageClients = (p) => {
-    socket.emit("GET_NEXT_PAGE_CLIENTS", { page: p, role: "client" });
-    socket.on("RECEIVE_NEXT_PAGE_CLIENTS", (data) => {
+    socket.emit('GET_NEXT_PAGE_CLIENTS', { page: p, role: 'client' });
+    socket.on('RECEIVE_NEXT_PAGE_CLIENTS', (data) => {
       setClients(data);
       setOriginalClients(data);
       setPage(p);
     });
   };
-  
-  useEffect(()=>{
-    console.log("use effect socket", socket)
+
+  useEffect(() => {
+    console.log('use effect socket', socket);
     if (socket && !clients && hasRequested === false) {
       setHasRequested(true);
       getPageClients(0);
     }
-  
   }, [socket]);
-  
+
   const handleSearch = async () => {
     setLoading(true);
     setNotFound(false);
-    socket.emit("SEARCH_USER", { term: searchTerm });
-    socket.on("RECEIVE_SEARCHED_USER", (data) => {
+    socket.emit('SEARCH_USER', { term: searchTerm });
+    socket.on('RECEIVE_SEARCHED_USER', (data) => {
       setClients(data);
-      setLoading(false);
     });
-    socket.on("RECEIVE_SEARCHED_USER_NOT_FOUND", (data) => {
+    socket.on('RECEIVE_SEARCHED_USER_NOT_FOUND', (data) => {
       setClients([]);
       setNotFound(true);
-      setLoading(false);
     });
   };
 
   const clearSearch = () => {
     setClients(originalClients);
-    setSearchTerm("");
+    setSearchTerm('');
     setNotFound(false);
   };
 
   const deleteOptions = (client) => ({
-    title: "Delete",
+    title: 'Delete',
     message: getMessage(client),
     buttons: [
       {
-        label: "Yes",
+        label: 'Yes',
         onClick: () => {},
       },
       {
-        label: "No",
+        label: 'No',
         onClick: () => {},
       },
     ],
@@ -98,67 +95,67 @@ const Companies = ({ socket }) => {
     onClickOutside: () => {},
     onKeypress: () => {},
     onKeypressEscape: () => {},
-    overlayClassName: "overlay-custom-class-name",
+    overlayClassName: 'overlay-custom-class-name',
   });
 
   return (
-    <div className="container-fluid">
-      <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
-        <div className="mb-3 mr-3">
-          <h6 className="fs-16 text-black font-w600 mb-0">Clients</h6>
-          <span className="fs-14">All active clients listed here </span>
+    <div className='container-fluid'>
+      <div className='d-flex flex-wrap mb-2 align-items-center justify-content-between'>
+        <div className='mb-3 mr-3'>
+          <h6 className='fs-16 text-black font-w600 mb-0'>Clients</h6>
+          <span className='fs-14'>All active clients listed here </span>
         </div>
       </div>
-      <div className="row mb-3">
-        <div className="col-10">
+      <div className='row mb-3'>
+        <div className='col-10'>
           <input
-            type="text"
-            className="form-control input-default"
-            placeholder="Enter user name"
+            type='text'
+            className='form-control input-default'
+            placeholder='Enter user name'
             onChange={(e) => setSearchTerm(e.target.value)}
             value={searchTerm}
           />
         </div>
-        <div className="col-1">
-          <button type="button" class="btn btn-primary" onClick={handleSearch}>
+        <div className='col-1'>
+          <button type='button' class='btn btn-primary' onClick={handleSearch}>
             Search
           </button>
         </div>
-        <div className="col-1">
-          <button type="button" class="btn btn-primary" onClick={clearSearch}>
+        <div className='col-1'>
+          <button type='button' class='btn btn-primary' onClick={clearSearch}>
             Clear
           </button>
         </div>
       </div>
-      <div className="row">
-        <div className="col-12 d-flex justify-content-center">
+      <div className='row'>
+        <div className='col-12 d-flex justify-content-center'>
           {loading && (
-            <div className="spinner-border" role="status">
-              <span className="sr-only">Searching for appointment</span>
+            <div className='spinner-border' role='status'>
+              <span className='sr-only'>Searching for appointment</span>
             </div>
           )}
           {deleteLoading && (
-            <div className="col-12 text-center" >
+            <div className='col-12 text-center'>
               <i>Deleting user data...</i>
             </div>
           )}
         </div>
         {notFound && (
-          <div className="alert alert-danger" role="alert">
+          <div className='alert alert-danger' role='alert'>
             Client could not be found.
           </div>
         )}
       </div>
       <br />
-      <div className="row">
-        <div className="col-xl-12">
-          <div className="tab-content">
-            <div id="All" className="tab-pane active fade show">
-              <div className="table-responsive">
+      <div className='row'>
+        <div className='col-xl-12'>
+          <div className='tab-content'>
+            <div id='All' className='tab-pane active fade show'>
+              <div className='table-responsive'>
                 {!isNil(clients) && !isEmpty(clients) && (
                   <table
-                    id="example2"
-                    className="table card-table display dataTablesCard"
+                    id='example2'
+                    className='table card-table display dataTablesCard'
                   >
                     <thead>
                       <tr>
@@ -176,7 +173,7 @@ const Companies = ({ socket }) => {
                       {clients?.map((client, index) => (
                         <tr
                           key={index}
-                          className={`${client.isDeleted ? "table-dark" : ""}`}
+                          className={`${client.isDeleted ? 'table-dark' : ''}`}
                         >
                           <td>{client?.id}</td>
                           <td>{client?.details.name}</td>
@@ -184,13 +181,13 @@ const Companies = ({ socket }) => {
                           <td>{client?.details.cell}</td>
                           <td>{client?.companiesManaging?.length}</td>
                           <td>{client?.appointmentsManaging?.length}</td>
-                          <td>{client?.isSuspended ? "Yes" : "No"}</td>
+                          <td>{client?.isSuspended ? 'Yes' : 'No'}</td>
                           <td>
                             {client.isDeleted && <i>Deleted</i>}
                             {!client.isDeleted && (
                               <Link
                                 to={`/client/edit/${client?.id}`}
-                                className="btn btn-xs btn-primary text-nowrap"
+                                className='btn btn-xs btn-primary text-nowrap'
                               >
                                 Edit
                               </Link>
@@ -203,7 +200,7 @@ const Companies = ({ socket }) => {
                 )}
                 {(isNil(clients) || isEmpty(clients)) && (
                   <NoAppointments>
-                    <div className="d-flex">
+                    <div className='d-flex'>
                       <h1>No Clients</h1>
                     </div>
                   </NoAppointments>
@@ -213,9 +210,9 @@ const Companies = ({ socket }) => {
           </div>
         </div>
       </div>
-      <div className="event-tabs mb-3 mr-3">
-        <ul className="nav nav-tabs" role="tablist">
-          <li className="nav-item">
+      <div className='event-tabs mb-3 mr-3'>
+        <ul className='nav nav-tabs' role='tablist'>
+          <li className='nav-item'>
             <a
               className={`nav-link`}
               onClick={() => getPageClients(page === 0 ? 0 : page - 1)}
@@ -223,13 +220,13 @@ const Companies = ({ socket }) => {
               Prev Page
             </a>
           </li>
-          <li className="nav-item">
+          <li className='nav-item'>
             <a className={`nav-link`} onClick={() => getPageClients(page + 1)}>
               Next Page
             </a>
           </li>
-          {repeat("i", page).map((i, index) => (
-            <li className="nav-item">
+          {repeat('i', page).map((i, index) => (
+            <li className='nav-item'>
               <a className={`nav-link`} onClick={() => getPageClients(index)}>
                 Page {index + 1}
               </a>

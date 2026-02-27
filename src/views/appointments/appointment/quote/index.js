@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES, SITE_SECOND_SITE_PRICE } from '../../../../config';
+import {
+  DOVER_PRICE,
+  XRAYS_PRICE,
+  MEDICAL_SERVICES,
+  SITE_SECOND_SITE_PRICE,
+} from '../../../../config';
 import { keys, values } from 'ramda';
 import styled from 'styled-components';
 import html2canvas from 'html2canvas';
@@ -18,7 +23,12 @@ const StyedContainer = styled.div`
     #printPageButton {
       display: none;
     }
-    h1, h2, h3, h4, h5, h6 {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
       color: black !important;
     }
   }
@@ -53,7 +63,12 @@ const StyedContainer = styled.div`
       }
     }
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: black !important;
   }
 `;
@@ -81,7 +96,7 @@ function App({ socket }) {
   const savetopdf = () => {
     window.scrollTo(0, 0);
     const input = document.getElementById('quote-container');
-    
+
     // Force all headings to be black by setting inline styles
     const headings = input.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const originalStyles = [];
@@ -89,7 +104,7 @@ function App({ socket }) {
       originalStyles[index] = heading.style.color || '';
       heading.style.color = 'black';
     });
-    
+
     var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
@@ -117,7 +132,7 @@ function App({ socket }) {
     window.scrollTo(0, 0);
     window.scrollTo(0, 0);
     const input = document.getElementById('quote-container');
-    
+
     // Force all headings to be black by setting inline styles
     const headings = input.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const originalStyles = [];
@@ -125,7 +140,7 @@ function App({ socket }) {
       originalStyles[index] = heading.style.color || '';
       heading.style.color = 'black';
     });
-    
+
     var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
@@ -182,10 +197,10 @@ function App({ socket }) {
         (acc, employee) => {
           return [...acc, ...employee.services];
         },
-        []
+        [],
       );
       const allServices = allServicesWithVienna.filter(
-        (s) => s.id !== 'vienna-test'
+        (s) => s.id !== 'vienna-test',
       );
       //
       console.log('all services', allServices);
@@ -203,42 +218,44 @@ function App({ socket }) {
 
       const sitesPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
-          return employee?.sites.length >= 2 ? acc + SITE_SECOND_SITE_PRICE : acc;
+          return employee?.sites.length >= 2
+            ? acc + SITE_SECOND_SITE_PRICE
+            : acc;
         },
-        0
+        0,
       );
       console.log('sitesPrices', sitesPrices);
       const accessCardPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           const accessCardSites = employee.sites.filter(
-            (s) => s.hasAccessCard === true
+            (s) => s.hasAccessCard === true,
           );
           return accessCardSites.length > 0
-            ? acc + (accessCardSites.length - 1) * 55.29
+            ? acc + (accessCardSites.length - 1) * 62.3
             : acc;
         },
-        0
+        0,
       );
       const doverPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           const requiresDover = employee.dover?.required;
           return requiresDover ? acc + DOVER_PRICE : acc;
         },
-        0
+        0,
       );
       const xrayPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           const requiresXray = employee.xray?.required;
           return requiresXray ? acc + XRAYS_PRICE : acc;
         },
-        0
+        0,
       );
       const employeesDoingDOver = appointment?.details?.employees?.filter(
-        (employee) => employee.dover?.required
+        (employee) => employee.dover?.required,
       ).length;
 
       const employeesDoingXray = appointment?.details?.employees?.filter(
-        (employee) => employee.xray?.required
+        (employee) => employee.xray?.required,
       ).length;
 
       console.log('doverPrice', doverPrices);
@@ -353,7 +370,7 @@ function App({ socket }) {
                         ? moment(
                             appointment?.tracking[0]?.date
                               ? appointment?.tracking[0]?.date
-                              : new Date()
+                              : new Date(),
                           ).format('DD-MM-YYYY')
                         : ''}
                     </strong>
@@ -410,8 +427,7 @@ function App({ socket }) {
                       </thead>
                       <tbody>
                         <h5>Service prices</h5>
-                        {values(MEDICAL_SERVICES)
-                          .map((service) =>
+                        {values(MEDICAL_SERVICES).map((service) =>
                           serviceCounts[service.id] ? (
                             <tr>
                               <td class='col-md-8'>{service.title}</td>
@@ -427,7 +443,7 @@ function App({ socket }) {
                             </tr>
                           ) : (
                             ''
-                          )
+                          ),
                         )}
 
                         <br />
@@ -447,7 +463,9 @@ function App({ socket }) {
                             </td>
                             <td class='col-md-5 text-right'>
                               {formatPrice(
-                                employee?.sites?.length >= 2 ? SITE_SECOND_SITE_PRICE : 0
+                                employee?.sites?.length >= 1
+                                  ? SITE_SECOND_SITE_PRICE
+                                  : 0,
                               )}
                             </td>
                           </tr>
@@ -457,7 +475,7 @@ function App({ socket }) {
                         <h5>Access Card Prices</h5>
                         {appointment?.details?.employees?.map((employee) => {
                           const accessCardSites = employee.sites.filter(
-                            (s) => s.hasAccessCard === true
+                            (s) => s.hasAccessCard === true,
                           );
                           return (
                             <tr>
@@ -473,8 +491,8 @@ function App({ socket }) {
                               <td class='col-md-5 text-right'>
                                 {formatPrice(
                                   accessCardSites.length > 0
-                                    ? (accessCardSites.length - 1) * 55.29
-                                    : 0
+                                    ? (accessCardSites.length - 1) * 62.3
+                                    : 0,
                                 )}
                               </td>
                             </tr>
@@ -495,7 +513,7 @@ function App({ socket }) {
                                 {formatPrice(
                                   servicesPrice +
                                     sitesPrice +
-                                    totalAccessCardPrice
+                                    totalAccessCardPrice,
                                 )}
                               </strong>
                             </h3>
@@ -540,7 +558,7 @@ function App({ socket }) {
                   <p>Branch: 632005</p>
                   <p>Reference: {company?.details?.name}</p>
                 </div>
-                
+
                 <div class='col-md-6 text-left'>
                   <h4>
                     <strong>Dover Service Banking Details</strong>
