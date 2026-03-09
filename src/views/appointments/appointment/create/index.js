@@ -24,12 +24,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Uploader from '../../../../components/Upload';
 import { SegmentedControl } from 'segmented-control-react';
-import {
-  DOVER_PRICE,
-  XRAYS_PRICE,
-  MEDICAL_SERVICES,
-  SITE_SECOND_SITE_PRICE,
-} from '../../../../config';
+import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES, SITE_SECOND_SITE_PRICE } from '../../../../config';
 import Services from './services';
 import Sites from './sites';
 import SearchModal from '../../../../components/Modal';
@@ -85,7 +80,7 @@ function App({ socket }) {
   const [appointmentsForDateCount, setAppointmentsForDateCount] = useState();
   const [clinicLimits, setClinicLimits] = useState({});
   const [searchParamCompanyName, setSearchParamCompanyName] = useState(
-    searchParams.get('companyName') || null,
+    searchParams.get('companyName') || null
   );
 
   const setDetail = (key, value) => {
@@ -102,7 +97,7 @@ function App({ socket }) {
     const index = appointment?.details?.employees?.indexOf(employee);
     const employeesWithoutEmployee = without(
       [employee],
-      appointment?.details?.employees,
+      appointment?.details?.employees
     );
     const newEmployee = assoc(key, value, employee);
     const newEmployees = insert(index, newEmployee, employeesWithoutEmployee);
@@ -122,10 +117,10 @@ function App({ socket }) {
       (acc, employee) => {
         return [...acc, ...employee.services];
       },
-      [],
+      []
     );
     const allServices = allServicesWithVienna.filter(
-      (s) => s.id !== 'vienna-test',
+      (s) => s.id !== 'vienna-test'
     );
     const services = keys(MEDICAL_SERVICES).reduce((accx, service) => {
       const filteredServices = allServices.filter((s) => s.id === service);
@@ -133,7 +128,7 @@ function App({ socket }) {
         (acc, service) => {
           return acc + service.price;
         },
-        0,
+        0
       );
 
       if (filteredServices.length > 0) {
@@ -157,32 +152,32 @@ function App({ socket }) {
           ? acc + SITE_SECOND_SITE_PRICE
           : acc;
       },
-      0,
+      0
     );
     const accessCardPrice = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         const accessCardSites = employee.sites.filter(
-          (s) => s.hasAccessCard === true,
+          (s) => s.hasAccessCard === true
         );
         return accessCardSites.length > 0
-          ? acc + (accessCardSites.length - 1) * 62.3
+          ? acc + (accessCardSites.length - 1) * 55.29
           : acc;
       },
-      0,
+      0
     );
     const doverPrices = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         const requiresDover = employee.dover?.required;
         return requiresDover ? acc + DOVER_PRICE : acc;
       },
-      0,
+      0
     );
     const xrayPrices = appointment?.details?.employees?.reduce(
       (acc, employee) => {
         const requiresXray = employee.xray?.required;
         return requiresXray ? acc + XRAYS_PRICE : acc;
       },
-      0,
+      0
     );
     console.log('doverPrice', doverPrices);
     console.log('servicesPrice', servicesPrice);
@@ -199,7 +194,7 @@ function App({ socket }) {
     const limit = clinicLimits[clinic] || 100;
     const currentBookings = appointmentsForDateCount || 0;
     const employeeCount = appointment?.details?.employees?.length || 0;
-
+    
     AlertConfirm({
       title: 'Booking Limit Exceeded',
       desc: `Cannot create appointment. The clinic limit for ${clinic} on ${appointment?.details?.date} is ${limit} employees. Currently booked: ${currentBookings}, Attempting to add: ${employeeCount}. Please reduce the number of employees or select a different date.`,
@@ -215,7 +210,7 @@ function App({ socket }) {
     const limit = clinicLimits[clinic] || 100;
     const currentBookings = appointmentsForDateCount || 0;
     const employeeCount = appointment?.details?.employees?.length || 0;
-
+    
     if (currentBookings + employeeCount > limit) {
       AlertConfirm({
         title: 'Booking Limit Exceeded',
@@ -224,12 +219,12 @@ function App({ socket }) {
       });
       return;
     }
-
+    
     const price = calculateBookingPrice();
     const appointmentWithNewPrice = assocPath(
       ['payment', 'amount'],
       price,
-      appointment,
+      appointment
     );
     //
     socket.emit('SAVE_NEW_APPOINTMENT', appointmentWithNewPrice);
@@ -251,7 +246,7 @@ function App({ socket }) {
         id: company?.id,
         name: company?.details?.name,
       }),
-      assocPath(['usersWhoCanManage'], company?.usersWhoCanManage),
+      assocPath(['usersWhoCanManage'], company?.usersWhoCanManage)
     )(appointment);
     setAppointment(newAppointment);
   };
@@ -286,12 +281,12 @@ function App({ socket }) {
     const index = appointment?.details?.employees?.indexOf(employee);
     const employeesWithoutEmployee = without(
       [employee],
-      appointment?.details?.employees,
+      appointment?.details?.employees
     );
     const newEmployees = insert(
       index,
       minimizedEmployee,
-      employeesWithoutEmployee,
+      employeesWithoutEmployee
     );
 
     setDetail('employees', newEmployees);
@@ -303,12 +298,12 @@ function App({ socket }) {
     const index = appointment?.details?.employees?.indexOf(employee);
     const employeesWithoutEmployee = without(
       [employee],
-      appointment?.details?.employees,
+      appointment?.details?.employees
     );
     const newEmployees = insert(
       index,
       maximizedEmployee,
-      employeesWithoutEmployee,
+      employeesWithoutEmployee
     );
     setDetail('employees', newEmployees);
   };
@@ -330,7 +325,7 @@ function App({ socket }) {
     const index = appointment?.details?.employees?.indexOf(employee);
     const employeesWithoutEmployee = without(
       [employee],
-      appointment?.details?.employees,
+      appointment?.details?.employees
     );
     const isRequired = employee.dover?.required;
     const newEmployee = assocPath(['dover', 'required'], !isRequired, employee);
@@ -343,7 +338,7 @@ function App({ socket }) {
     const index = appointment?.details?.employees?.indexOf(employee);
     const employeesWithoutEmployee = without(
       [employee],
-      appointment?.details?.employees,
+      appointment?.details?.employees
     );
     const isRequired = employee.xray?.required;
     const newEmployee = assocPath(['xray', 'required'], !isRequired, employee);
@@ -365,7 +360,7 @@ function App({ socket }) {
       });
     }
   }, [socket]);
-
+  
   useEffect(() => {
     if (socket && appointment?.details?.date && appointment?.details?.clinic) {
       socket.emit('GET_APPOINTMENTS_FOR_DATE_COUNT', {
@@ -403,9 +398,7 @@ function App({ socket }) {
                   const clinic = appointment?.details?.clinic;
                   const limit = clinicLimits[clinic];
                   if (appointmentsForDateCount !== undefined && limit) {
-                    const total =
-                      appointmentsForDateCount +
-                      (appointment?.details?.employees?.length || 0);
+                    const total = appointmentsForDateCount + (appointment?.details?.employees?.length || 0);
                     if (total > limit) return true;
                   }
                   return false;
@@ -534,7 +527,7 @@ function App({ socket }) {
                         onChange={(event) =>
                           setDetail(
                             'companyResponsibleForPayment',
-                            event.target.value,
+                            event.target.value
                           )
                         }
                         value={
@@ -720,7 +713,11 @@ function App({ socket }) {
                   </a>
                 </li>
                 <li>
-                  <a href='/forms/drm.docx' target='_blank' rel='no_rel'>
+                  <a
+                    href='/forms/drm.docx'
+                    target='_blank'
+                    rel='no_rel'
+                  >
                     Record of Hazardous Work DMR.doc
                   </a>
                 </li>
@@ -770,7 +767,7 @@ function App({ socket }) {
                         checked={appointment?.isComplete === false}
                         onChange={() =>
                           setAppointment(
-                            assoc('isComplete', false, appointment),
+                            assoc('isComplete', false, appointment)
                           )
                         }
                       />
@@ -850,7 +847,7 @@ function App({ socket }) {
                             setEmployeeDetail(
                               employee.id,
                               'name',
-                              event.target.value,
+                              event.target.value
                             )
                           }
                           value={employee?.name}
@@ -870,7 +867,7 @@ function App({ socket }) {
                             setEmployeeDetail(
                               employee.id,
                               'idNumber',
-                              event.target.value,
+                              event.target.value
                             )
                           }
                           value={employee?.idNumber}
@@ -888,7 +885,7 @@ function App({ socket }) {
                             setEmployeeDetail(
                               employee.id,
                               'occupation',
-                              event.target.value,
+                              event.target.value
                             )
                           }
                           value={employee?.occupation}
@@ -906,7 +903,7 @@ function App({ socket }) {
                         />
                       </div>
                     </div>
-
+                    
                     <div class='form-group row'>
                       <label class='col-sm-4 col-form-label'>Services</label>
                       <div class='col-sm-8'>
@@ -945,7 +942,7 @@ function App({ socket }) {
                                 </label>
                               </div>
                               <div className='col-4'>
-                                {getFormattedPrice(DOVER_PRICE)}
+                                {getFormattedPrice(DOVER_PRICE,)}
                               </div>
                             </div>
                           </div>
@@ -955,10 +952,10 @@ function App({ socket }) {
                     <div class='form-group row'>
                       <label class='col-sm-4 col-form-label'>
                         Xray service
-                        <br />
-                        <small>Payment for Maxi's Account</small>
+                        <br/>
+                      <small>Payment for Maxi's Account</small>
                       </label>
-
+                      
                       <div class='col-sm-8'>
                         <div className='row'>
                           <div className='col-12'>
@@ -980,7 +977,7 @@ function App({ socket }) {
                                 </label>
                               </div>
                               <div className='col-4'>
-                                {getFormattedPrice(XRAYS_PRICE)}
+                                {getFormattedPrice(XRAYS_PRICE,)}
                               </div>
                             </div>
                           </div>
@@ -1013,7 +1010,7 @@ function App({ socket }) {
                                     setEmployeeDetail(
                                       employee?.id,
                                       'jobSpecFile',
-                                      jobSpecFileUrl,
+                                      jobSpecFileUrl
                                     )
                                   }
                                 />
@@ -1054,12 +1051,12 @@ function App({ socket }) {
                                       employee.extraJobSpecFiles;
                                     const newFiles = append(
                                       jobSpecFileUrl,
-                                      extraJobSpecFiles,
+                                      extraJobSpecFiles
                                     );
                                     setEmployeeDetail(
                                       employee?.id,
                                       'extraJobSpecFiles',
-                                      newFiles,
+                                      newFiles
                                     );
                                   }}
                                 />
