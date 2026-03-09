@@ -42,16 +42,10 @@ const calculateEmployeeCost = (employee) => {
     ? 0
     : employee?.services?.reduce((acc, service) => acc + service.price, 0);
   console.log('Services cost', servicesCost);
-  console.log('Sites', employee?.sites);
-  const sitesCost = employee?.sites && employee?.sites.length >= 2 ? 43.95 : 0;
-  const accessCardSites = employee.sites.filter(
-    (s) => s.hasAccessCard === true
-  );
-  const accessCardCost =
-    accessCardSites.length > 0 ? (accessCardSites.length - 1) * 55.29 : 0;
-
-  console.log('Sites cost', sitesCost);
-  const totalCost = servicesCost + sitesCost + accessCardCost;
+  // Sites and access cards no longer charged (pricing removed from invoicing)
+  const sitesCost = 0;
+  const accessCardCost = 0;
+  const totalCost = servicesCost;
   console.log('Total cost', totalCost);
   return formatPrice(totalCost);
 };

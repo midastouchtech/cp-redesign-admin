@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES, SITE_SECOND_SITE_PRICE } from '../../../../config';
+import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES } from '../../../../config';
 import { keys, values } from 'ramda';
 import styled from 'styled-components';
 import html2canvas from 'html2canvas';
@@ -201,24 +201,9 @@ function App({ socket }) {
         return acc;
       }, {});
 
-      const sitesPrices = appointment?.details?.employees?.reduce(
-        (acc, employee) => {
-          return employee?.sites.length >= 2 ? acc + SITE_SECOND_SITE_PRICE : acc;
-        },
-        0
-      );
-      console.log('sitesPrices', sitesPrices);
-      const accessCardPrices = appointment?.details?.employees?.reduce(
-        (acc, employee) => {
-          const accessCardSites = employee.sites.filter(
-            (s) => s.hasAccessCard === true
-          );
-          return accessCardSites.length > 0
-            ? acc + (accessCardSites.length - 1) * 55.29
-            : acc;
-        },
-        0
-      );
+      // Sites and access cards no longer charged (pricing removed from invoicing)
+      const sitesPrices = 0;
+      const accessCardPrices = 0;
       const doverPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           const requiresDover = employee.dover?.required;
@@ -243,14 +228,8 @@ function App({ socket }) {
 
       console.log('doverPrice', doverPrices);
       console.log('servicesPrice', servicesPrice);
-      console.log('site price', sitesPrice);
-      console.log('accessCardPrice', accessCardPrices);
       const bookingPrice =
-        servicesPrice +
-        sitesPrice +
-        accessCardPrices +
-        doverPrices +
-        xrayPrices;
+        servicesPrice + doverPrices + xrayPrices;
       console.log('bookingPrice', bookingPrice);
 
       setDoverPrice(doverPrices);
@@ -259,7 +238,6 @@ function App({ socket }) {
       setXrayCount(employeesDoingXray);
       setServicesPrice(servicesPrice);
       setServiceCounts(serviceCounts);
-      console.log('setting sites price', sitesPrices);
       setSitesPrice(sitesPrices);
       setAccessCardPrice(accessCardPrices);
       setServices(allServices);
@@ -446,40 +424,18 @@ function App({ socket }) {
                                 : 0}
                             </td>
                             <td class='col-md-5 text-right'>
-                              {formatPrice(
-                                employee?.sites?.length >= 2 ? SITE_SECOND_SITE_PRICE : 0
-                              )}
+                              {formatPrice(0)}
                             </td>
                           </tr>
                         ))}
 
                         <br />
-                        <h5>Access Card Prices</h5>
-                        {appointment?.details?.employees?.map((employee) => {
-                          const accessCardSites = employee.sites.filter(
-                            (s) => s.hasAccessCard === true
-                          );
-                          return (
-                            <tr>
-                              <td class='col-md-8 text-capitalize'>
-                                {employee?.name}
-                              </td>
-                              <td
-                                class='col-md-1'
-                                style={{ textAlign: 'center' }}
-                              >
-                                {accessCardSites.length}
-                              </td>
-                              <td class='col-md-5 text-right'>
-                                {formatPrice(
-                                  accessCardSites.length > 0
-                                    ? (accessCardSites.length - 1) * 55.29
-                                    : 0
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        <h5>Access cards</h5>
+                        <tr>
+                          <td class='col-md-8'>Access cards</td>
+                          <td class='col-md-1' style={{ textAlign: 'center' }}>—</td>
+                          <td class='col-md-5 text-right'>No charge</td>
+                        </tr>
                         <br />
                         <h3>Clinicplus Medicals Total</h3>
                         <tr>
@@ -492,11 +448,7 @@ function App({ socket }) {
                           <td class='col-md-5 text-right'>
                             <h3>
                               <strong>
-                                {formatPrice(
-                                  servicesPrice +
-                                    sitesPrice +
-                                    totalAccessCardPrice
-                                )}
+                                {formatPrice(servicesPrice)}
                               </strong>
                             </h3>
                           </td>

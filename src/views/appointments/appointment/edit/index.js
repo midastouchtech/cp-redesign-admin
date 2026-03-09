@@ -23,7 +23,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
-import { DOVER_PRICE, XRAYS_PRICE ,MEDICAL_SERVICES, SITE_SECOND_SITE_PRICE } from "../../../../config";
+import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES } from "../../../../config";
 import Services from "./services";
 import Sites from "./sites";
 import Comments from "./comments";
@@ -117,20 +117,9 @@ function App({ socket, stateUser }) {
     const servicesPrice = allServices.reduce((acc, service) => {
       return acc + service.price;
     }, 0);
-    const sitesPrice = appointment?.details?.employees?.reduce(
-      (acc, employee) => {
-        return employee?.sites && employee?.sites.length >= 2
-          ? acc + SITE_SECOND_SITE_PRICE
-          : acc;
-      },
-      0
-    );
-    const accessCardPrice =  appointment?.details?.employees?.reduce(
-      (acc, employee) => {
-        const accessCardSites = employee.sites.filter(s => s.hasAccessCard === true)
-        return accessCardSites.length > 0 ? acc + (accessCardSites.length - 1) * 55.290 : acc;
-      }, 0)
-    
+    // Sites and access cards no longer charged (pricing removed from invoicing)
+    const sitesPrice = 0;
+    const accessCardPrice = 0;
     const doverPrices =  appointment?.details?.employees?.reduce(
       (acc, employee) => {
         const requiresDover = employee.dover?.required;
@@ -146,9 +135,7 @@ function App({ socket, stateUser }) {
       );
       console.log("doverPrice", doverPrices);
       console.log("servicesPrice", servicesPrice);
-      console.log("site price", sitesPrice);
-      console.log("accessCardPrice", accessCardPrice);
-    const bookingPrice = servicesPrice + sitesPrice + accessCardPrice + doverPrices + xrayPrices;
+    const bookingPrice = servicesPrice + doverPrices + xrayPrices;
     console.log("bookingPrice", bookingPrice);
     return bookingPrice;
   };
