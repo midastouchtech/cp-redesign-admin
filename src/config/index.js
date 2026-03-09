@@ -1,31 +1,31 @@
 export const CLINIC_LOCATIONS = ['Hendrina', 'Churchill'];
-export const DOVER_PRICE = 828.67;
-export const XRAYS_PRICE = 248.4;
+export const DOVER_PRICE = 878.39;
+export const XRAYS_PRICE = 262.00;
 export const SITE_SECOND_SITE_PRICE = 43.95;
 export const MEDICAL_SERVICES = {
   'mine-medical-with-induction': {
-    price: 1041.73,
+    price: 1104.23,
     title: 'Mine medicals with General Mine Induction',
     id: 'mine-medical-with-induction',
     showInfo: true,
     info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test & induction. X-rays compulsory – select separately (to be paid in to Maxis bank account). Compulsory mines: Mzimkhulu, Rietvlei, Mavungwani, Valley View, Mgayo, Bultfontein.',
   },
   'mine-medical-no-induction': {
-    price: 738.93,
+    price: 783.27,
     title: 'Mine medicals with NO Induction',
     id: 'mine-medical-no-induction',
     showInfo: true,
     info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine dipstick test, 6-in-1 urine drug test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
   },
   'black-wattle-atoll-medical': {
-    price: 647.91,
+    price: 686.78,
     title: 'Medical for Black Wattle & Atoll',
     id: 'black-wattle-atoll-medical',
     showInfo: true,
     info: 'Includes physical examination, BP, Height, Weight, Audio, Spiro, Vision, urine scree dipstick test, urine cannabis test. X-rays compulsory – select separately (to be paid in to Maxis bank account).',
   },
   'power-construction-other-medical': {
-    price: 601.63,
+    price: 637.73,
     title: 'Medical examinations for Power stations, Construction and Other',
     id: 'power-construction-other-medical',
     showInfo: true,
@@ -33,71 +33,71 @@ export const MEDICAL_SERVICES = {
   },
   
   '6-in-1-drug-test': {
-    price: 137.3,
-    title: '6 in 1 Drug Test includes canabis',
+    price: 145.54,
+    title: '6 in 1 Drug Test (includes cannabis)',
     id: '6-in-1-drug-test',
     info: `Our 6-test panel drug test uses urine to check for the presence of drug abuse. In comparison to our 10-panel drug test, this test covers the most popular illicit drugs, also known as “street drugs” which are rarely prescribed.`,
   },
    cannabis: {
-    price: 46.28,
-    title: 'Canbabis Urine Test',
+    price: 49.06,
+    title: 'Cannabis Urine Test',
     id: 'cannabis',
     info: `Cannabis drug testing describes various drug test methodologies for the use of cannabis in medicine, sport, and law. Cannabis use is highly detectable and can be detected by urinalysis, hair analysis, as well as saliva tests for days or weeks.`,
   },
   induction: {
-    price: 302.8,
+    price: 320.97,
     title: 'General Mine Induction Only',
     id: 'induction',
     showInfo: true,
     info: `Not compulsory for all companies`,
   },
   'pregnancy-test': {
-    price: 48.36,
+    price: 51.26,
     title: 'Pregnancy Screening Test',
     id: 'pregnancy-test',
     info: 'A pregnancy test is used to determine whether a woman is pregnant. The two primary methods are: 1 testing for human pregnancy hormone in blood or urine and 2 ultrasonography. Testing blood for hCG results in the earliest detection of pregnancy.',
   },
   'sugar-test': {
-    price: 47.82,
+    price: 50.69,
     title: 'Sugar Test',
     id: 'sugar-test',
     showInfo: true,
     info: '(Compulsory for on road truck drivers) - Please select separately',
   },
   clearance: {
-    price: 259.55,
+    price: 275.12,
     title: 'Clearance',
     id: 'clearance',
     info: 'What is the creatinine clearance test? The creatinine clearance test is an older test used to check your kidney function. This test allows your healthcare provider to look at samples of your urine and blood to see how much of the waste product — creatinine — is filtered out by your kidneys',
   },
   hiv: {
-    price: 145.1,
-    title: 'HIV screening test',
+    price: 153.81,
+    title: 'HIV',
     id: 'hiv',
     info: 'HIV tests are used to detect the presence of the human immunodeficiency virus, the virus that causes acquired immunodeficiency syndrome, in serum, saliva, or urine. Such tests may detect antibodies, antigens, or RNA. ',
   },
   'full-exit-medical': {
-    price: 601.64,
-    title: 'Full Exit Medical - medical older than 6 months',
+    price: 637.74,
+    title: 'Full Exit Medical (medical older than 6 months)',
     id: 'full-exit-medical',
     showInfo: true,
     info: 'Medicals older than 6 months. Xrays compulsory – select separately.',
   },
   'short-exit-medical': {
-    price: 327.54,
-    title: 'Short Exit Medical - medical less than 6 months',
+    price: 347.19,
+    title: 'Short Exit Medical (medical less than 6 months)',
     id: 'short-exit-medical',
     showInfo: true,
     info: 'Medicals less than 6 months. Xrays optional .',
   },
   'covid-19-screen-questionnaire': {
-    price: 110.47,
+    price: 117.10,
     title: 'Covid-19 Questionnaire',
     id: 'covid-19-screen-questionnaire',
     info: 'This is the first COVID-19 antibody test that has been approved for use in South Africa. The specificity of this test is 100% and it has a sensitivity of 95.8% for samples collected 10 days or more after the onset of symptoms or a positive PCR (nasal test) result (McAdam, 2020).',
   },
   other: {
-    price: 100,
+    price: 106.00,
     title: 'Other',
     id: 'other',
     info: 'Other',
