@@ -165,7 +165,7 @@ function App({ socket, user }) {
                         href={`/appointment/quote/${appointment.id}`}
                         class="btn btn-outline-primary mr-3"
                       >
-                        View Quote
+                        Pro-forma invoice
                       </a>
                       <a
                         href="#"
