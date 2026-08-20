@@ -32,6 +32,10 @@ import Reports from './views/reports';
 import XReports from './views/x-ray-reports';
 import Analytics from './views/analytics';
 import Operations from './views/operations';
+import Employees from './views/employees';
+import EmployeeDetail from './views/employees/detail';
+import Availability from './views/availability';
+import Messaging from './views/messaging';
 
 import './style.css';
 
@@ -111,6 +115,10 @@ const Main = () => {
           <Route path='/x-ray-reports' element={<XReports socket={socket} />} />
           <Route path='/analytics' element={<Analytics socket={socket} />} />
           <Route path='/operations' element={<Operations socket={socket} />} />
+          <Route path='/employees' element={<Employees socket={socket} />} />
+          <Route path='/employees/:employeeId' element={<EmployeeDetail socket={socket} />} />
+          <Route path='/availability' element={<Availability socket={socket} />} />
+          <Route path='/messaging' element={<Messaging socket={socket} />} />
           <Route path='/companies' element={<Companies socket={socket} />} />
           <Route path='/clients' element={<Clients socket={socket} />} />
           <Route path='/invoices' element={<Invoices socket={socket} />} />
