@@ -81,12 +81,16 @@ const formatPrice = (price) => {
 
 const exists = i => !isEmpty(i) && !isNil(i);
 
+const COMPANION_API_URL = process.env.REACT_APP_COMPANION_API_URL;
+const COMPANION_STATS_SECRET = process.env.REACT_APP_COMPANION_STATS_SECRET;
+
 const Analytics = ({ socket, user }) => {
   const [analytics, setAnalytics] = useState(null);
   const [originalAnalytics, setOriginalAnalytics] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(moment().format("MMMM"));
   const [selectedYear, setSelectedYear] = useState(moment().format("YYYY"));
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [counter, setCounter] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const myInterval = useRef();
@@ -107,43 +111,43 @@ const Analytics = ({ socket, user }) => {
     }
   }, [isRunning]);
 
-  if (socket && !analytics && !isRunning && exists(user)) {
-    setCounter(0);
-    setIsRunning(true);
-
-    socket.emit("GET_FINANCE_ANALYTICS", {
-      date: `01-${selectedMonth}-${selectedYear}`,
-      type: user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all"
-    });
-    
-    socket.on("RECEIVE_FINANCE_ANALYTICS", (data) => {
-      console.log(data);
-      setAnalytics(data);
-      setOriginalAnalytics(data);
-      setLoading(false);
-      setCounter(0);
-      setIsRunning(false);
-    });
-  }
-
-  const clear = () => {
-    setAnalytics(originalAnalytics);
-  };
-
-  const getAnalytics = () => {
+  const getAnalytics = async () => {
     setCounter(0);
     setIsRunning(true);
     setLoading(true);
-    socket.emit("GET_FINANCE_ANALYTICS", {
-      date: `01-${selectedMonth}-${selectedYear}`,
-    });
-    socket.on("RECEIVE_FINANCE_ANALYTICS", (data) => {
-      console.log(data);
+    setError(null);
+    const type = user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all";
+    const date = `01-${selectedMonth}-${selectedYear}`;
+    try {
+      const res = await fetch(
+        `${COMPANION_API_URL}/api/admin/finance-analytics?date=${date}&type=${type}`,
+        { headers: { "x-admin-stats-secret": COMPANION_STATS_SECRET } }
+      );
+      if (!res.ok) {
+        throw new Error(`Failed to load finance analytics (${res.status})`);
+      }
+      const data = await res.json();
       setAnalytics(data);
+      setOriginalAnalytics(data);
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    } finally {
       setLoading(false);
       setCounter(0);
       setIsRunning(false);
-    });
+    }
+  };
+
+  useEffect(() => {
+    if (!analytics && !isRunning && exists(user)) {
+      getAnalytics();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const clear = () => {
+    setAnalytics(originalAnalytics);
   };
 
   const amountOptions = {
@@ -559,6 +563,13 @@ const Analytics = ({ socket, user }) => {
       </div>
       <h3 class="card-title">Breakdown</h3>
 
+      {error && (
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <h4 class="text-danger">Failed to load analytics: {error}</h4>
+          </div>
+        </div>
+      )}
       {loading && (
         <div class="row">
           <div class="col-md-12 text-center">

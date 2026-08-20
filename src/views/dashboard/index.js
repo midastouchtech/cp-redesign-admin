@@ -125,6 +125,9 @@ const getHowManyDaysAgo = (date) => {
 };
 const exists = i => !isEmpty(i) && !isNil(i);
 
+const COMPANION_API_URL = process.env.REACT_APP_COMPANION_API_URL;
+const COMPANION_STATS_SECRET = process.env.REACT_APP_COMPANION_STATS_SECRET;
+
 const Dashboard = ({ socket, user }) => {
   const [stats, setStats] = useState(null);
   const [selectedStats, setSelectedStats] = useState([]);
@@ -133,6 +136,7 @@ const Dashboard = ({ socket, user }) => {
   const [latestAppointments, setLatestAppointments] = useState(null);
   const [latestMessages, setLatestMessages] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [counter, setCounter] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const myInterval = useRef();
@@ -152,39 +156,47 @@ const Dashboard = ({ socket, user }) => {
       myInterval.current = null;
     }
   }, [isRunning]);
- 
-  useEffect(()=>{
-    const data = {type: user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all"}
 
-    if (socket && !stats && !latestAppointments && !latestMessages && !isRunning && exists(user)) {
-   
+  const fetchStats = async () => {
+    setCounter(0);
+    setIsRunning(true);
+    setError(null);
+    const type = user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all";
+    try {
+      const res = await fetch(
+        `${COMPANION_API_URL}/api/admin/dashboard-stats?type=${type}`,
+        { headers: { "x-admin-stats-secret": COMPANION_STATS_SECRET } }
+      );
+      if (!res.ok) {
+        throw new Error(`Failed to load dashboard stats (${res.status})`);
+      }
+      const data = await res.json();
+      setStats(data.stats);
+      setSelectedStats(
+        reject((stat) => stat.title === "Top Services", data.stats.today)
+      );
+      setActiveStat("today");
+      setTopServices(
+        data.stats.today.find((stat) => stat.title === "Top Services")
+      );
+      setLatestAppointments(data.latestAppointments);
+      setLatestMessages(data.latestMessages);
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
       setCounter(0);
-      setIsRunning(true);
-      socket.emit("GET_STATS", data);
-      socket.on("RECEIVE_STATS", (stats) => {
-        setStats(stats);
-        setSelectedStats(
-          reject((stat) => stat.title === "Top Services", stats.today)
-        );
-        setActiveStat("today");
-        setTopServices(stats.today.find((stat) => stat.title === "Top Services"));
-        setLoading(false);
-        setCounter(0);
-        setIsRunning(false);
-      });
-      socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
-        setLatestAppointments(appointments);
-      });
-      socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
-        setLatestMessages(messages);
-      });
-      socket.on("DATABASE_UPDATED", (u) => {
-        //console.log("database updated we are now going to update the stats")
-        socket.emit("GET_STATS");
-       });
+      setIsRunning(false);
     }
-  
-  }, [socket, user]);
+  };
+
+  useEffect(() => {
+    if (!stats && !isRunning && exists(user)) {
+      fetchStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   
   const toggleStat = (stat) => {
@@ -327,6 +339,13 @@ const Dashboard = ({ socket, user }) => {
           </div>
         </div>
       </div>
+      {error && (
+        <div class="row text-center">
+          <div class="col-md-12 text-center">
+            <h4 class="text-danger">Failed to load dashboard stats: {error}</h4>
+          </div>
+        </div>
+      )}
       {loading && (
         <LoadContainer>
           <div class="row text-center">
