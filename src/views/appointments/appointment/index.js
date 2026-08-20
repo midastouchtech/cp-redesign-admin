@@ -150,6 +150,13 @@ function App({ socket, user }) {
     }
   };
 
+  const getLifecycleBadgeType = (lifecycleStatus) => {
+    if (lifecycleStatus === "completed" || lifecycleStatus === "approved") {
+      return "badge-success";
+    }
+    return "badge-secondary";
+  };
+
   return (
     <div class="container-fluid">
       <div class="row">
@@ -216,6 +223,16 @@ function App({ socket, user }) {
                       >
                         {appointment.status}
                       </a>
+                      {appointment?.lifecycleStatus && (
+                        <a
+                          href="#"
+                          class={`btn badge badge-rounded ${getLifecycleBadgeType(
+                            appointment?.lifecycleStatus
+                          )} mr-3`}
+                        >
+                          {appointment.lifecycleStatus}
+                        </a>
+                      )}
                     </div>
                   </div>
                   <div class="row">

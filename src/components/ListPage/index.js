@@ -297,7 +297,7 @@ export const RowActionLink = styled.a`
 
 const badgeTone = (status) => {
   const s = (status || "").toLowerCase();
-  if (s === "approved" || s === "no") return { bg: token.successSoft, fg: token.success };
+  if (s === "approved" || s === "no" || s === "completed") return { bg: token.successSoft, fg: token.success };
   if (s === "pending") return { bg: token.warningSoft, fg: token.warning };
   if (s === "declined" || s === "yes") return { bg: token.dangerSoft, fg: token.danger };
   return { bg: token.canvas, fg: token.ink700 };

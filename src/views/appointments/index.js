@@ -297,6 +297,9 @@ const Appointments = ({ socket }) => {
                     <td>{appointment?.details?.date}</td>
                     <td>
                       <StatusBadge status={appointment?.status} />
+                      {appointment?.lifecycleStatus && (
+                        <StatusBadge status={appointment.lifecycleStatus} />
+                      )}
                     </td>
                     <td>
                       <RowActionLink as={Link} to={`/appointment/${appointment?.id}`}>
