@@ -33,6 +33,7 @@ import Comments from '../edit/comments';
 import RemainingSlots from '../RemainingSlots';
 import 'react-alert-confirm/lib/style.css';
 import AlertConfirm from 'react-alert-confirm';
+import { trackEvent } from '../../../../lib/trackEvent';
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -212,6 +213,11 @@ function App({ socket }) {
     socket.emit('SAVE_NEW_APPOINTMENT', appointmentWithNewPrice);
     socket.on('APPOINTMENT_ADDED', (data) => {
       //
+      trackEvent({
+        entityType: 'appointment',
+        entityId: data?.id,
+        action: 'created',
+      });
       navigate('/appointment/' + data.id);
     });
     socket.on('APPOINTMENT_LIMIT_REACHED', (data) => {

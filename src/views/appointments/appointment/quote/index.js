@@ -8,6 +8,7 @@ import jspdf from 'jspdf';
 import axios from 'axios';
 import { v4 as uuid } from 'uuid';
 import moment from 'moment';
+import { trackEvent } from '../../../../lib/trackEvent';
 
 const formatPrice = (price) => {
   return `R ${price.toFixed(2)}`;
@@ -157,6 +158,16 @@ function App({ socket }) {
             setStatus('Sending...');
             socket.on('RECEIVE_SAVE_INVOICE_SUCCESS', (data) => {
               setStatus('Invoice sent!');
+              // Note: 'invoice_sent' is a free-form action string, not one of the
+              // contract's enumerated actions ('message_sent' etc) — kept distinct
+              // deliberately since an invoice send is a more specific/meaningful
+              // event than a generic chat message for timeline readers.
+              trackEvent({
+                entityType: 'appointment',
+                entityId: appointment?.id,
+                action: 'invoice_sent',
+                metadata: { invoiceId, url: response.data.publicUrl },
+              });
             });
           })
           .catch((errr) => setStatus('Error sending invoice'));

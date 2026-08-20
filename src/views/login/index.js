@@ -2,6 +2,7 @@ import { isEmpty, isNil } from "ramda";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import cookies from "js-cookie";
+import { trackEvent } from "../../lib/trackEvent";
 
 function App({ socket }) {
   let navigate = useNavigate();
@@ -27,6 +28,14 @@ function App({ socket }) {
       cookies.set("clinicplus_admin_logged_in_user", user.id, { expires: 3 });
       setError("");
       setLoading(false);
+      trackEvent({
+        entityType: "user",
+        entityId: user?.id,
+        action: "login",
+        actorType: "admin",
+        actorId: user?.id,
+        actorName: `${user?.details?.name} ${user?.details?.surname}`.trim(),
+      });
       window.location.replace("/");
     });
   };

@@ -21,6 +21,7 @@ import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import UserSearch from "../../../../components/Modal/userSearch";
+import { trackEvent } from "../../../../lib/trackEvent";
 
 function App({ socket }) {
   let params = useParams();
@@ -52,6 +53,11 @@ function App({ socket }) {
     socket.emit("SAVE_NEW_COMPANY", company);
     socket.on("COMPANY_ADDED", (c) => {
       //console.log("company updated");
+      trackEvent({
+        entityType: "company",
+        entityId: c?.id,
+        action: "created",
+      });
       navigate("/company/edit/" + c.id);
     });
   };

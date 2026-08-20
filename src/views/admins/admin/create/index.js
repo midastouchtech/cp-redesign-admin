@@ -22,6 +22,7 @@ import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import AppointmentSearch from "../../../../components/Modal/appointmentSearch";
+import { trackEvent } from "../../../../lib/trackEvent";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -62,6 +63,12 @@ function App({ socket }) {
     //console.log("saving appza");
     socket.emit("SAVE_NEW_USER", user);
     socket.on("RECEIVE_SAVE_USER_SUCCESS", (data) => {
+      trackEvent({
+        entityType: "user",
+        entityId: data?.id,
+        action: "created",
+        metadata: { role: "admin" },
+      });
       navigate("/admin/edit/" + data.id);
     });
   };

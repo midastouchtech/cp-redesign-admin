@@ -33,6 +33,7 @@ import SearchModal from "../../../../components/Modal";
 import RemainingSlots from "../RemainingSlots";
 import "react-alert-confirm/lib/style.css";
 import AlertConfirm from "react-alert-confirm";
+import { trackEvent } from "../../../../lib/trackEvent";
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -161,6 +162,24 @@ function App({ socket, stateUser }) {
     socket.emit("UPDATE_APPOINTMENT", appointmentWithNewPrice);
     socket.on("APPOINTMENT_UPDATED", () => {
       //console.log("appointment updated");
+      const statusChanged = originalAppointment?.status !== appointmentWithNewPrice?.status;
+      trackEvent({
+        entityType: "appointment",
+        entityId: appointmentWithNewPrice?.id,
+        action: statusChanged
+          ? appointmentWithNewPrice?.status === "approved"
+            ? "approved"
+            : appointmentWithNewPrice?.status === "declined"
+            ? "declined"
+            : "status_changed"
+          : "updated",
+        actorType: "admin",
+        actorId: stateUser?.id,
+        actorName: `${stateUser?.details?.name} ${stateUser?.details?.surname}`.trim(),
+        changes: statusChanged
+          ? [{ field: "status", before: originalAppointment?.status, after: appointmentWithNewPrice?.status }]
+          : undefined,
+      });
       navigate("/appointment/" + appointment?.id)
     });
     socket.on("APPOINTMENT_LIMIT_REACHED", (data) => {
@@ -299,6 +318,15 @@ function App({ socket, stateUser }) {
       userResponsible: { id: stateUser?.id, name: stateUser?.details?.name },
       userToRemove: user,
       appointment: appointment,
+    });
+    trackEvent({
+      entityType: "appointment",
+      entityId: appointment?.id,
+      action: "manager_removed",
+      actorType: "admin",
+      actorId: stateUser?.id,
+      actorName: `${stateUser?.details?.name} ${stateUser?.details?.surname}`.trim(),
+      metadata: { removedUserId: user?.id, removedUserName: user?.name },
     });
     const newAppointment = pipe(
       assocPath(

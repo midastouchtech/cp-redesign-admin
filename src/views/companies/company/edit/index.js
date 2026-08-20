@@ -22,6 +22,8 @@ import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { connect } from "react-redux";
+import { trackEvent } from "../../../../lib/trackEvent";
+import AuditTimeline from "../../../../components/AuditTimeline";
 
 
 function App({ socket, stateUser }) {
@@ -34,6 +36,7 @@ function App({ socket, stateUser }) {
   const [hasUpdatedCompany, sethasUpdatedCompany] = useState(false);
   const [show, setShow] = useState(false);
   const [hasRequested , setHasRequested] = useState(false)
+  const [bodyItem, setBodyItem] = useState("details");
 
   useEffect(()=>{
     console.log("use effect socket", socket)
@@ -70,6 +73,14 @@ function App({ socket, stateUser }) {
     socket.emit("UPDATE_COMPANY", company);
     socket.on("COMPANY_UPDATED", () => {
       //console.log("company updated");
+      trackEvent({
+        entityType: "company",
+        entityId: company?.id,
+        action: "updated",
+        actorType: "admin",
+        actorId: stateUser?.id,
+        actorName: `${stateUser?.details?.name} ${stateUser?.details?.surname}`.trim(),
+      });
       navigate("/company/edit/" + company.id);
     });
   };
@@ -101,6 +112,14 @@ function App({ socket, stateUser }) {
     socket.emit("DELETE_COMPANY", company);
 
     socket.on("COMPANY_DELETE_SUCCESS", () => {
+      trackEvent({
+        entityType: "company",
+        entityId: company?.id,
+        action: "deleted",
+        actorType: "admin",
+        actorId: stateUser?.id,
+        actorName: `${stateUser?.details?.name} ${stateUser?.details?.surname}`.trim(),
+      });
       navigate("/companies");
     });
   };
@@ -109,7 +128,16 @@ function App({ socket, stateUser }) {
   const removeUser = (user) => {
     //console.log("removing user", user);
     socket.emit("REMOVE_COMPANY_FROM_MANAGER", { userResponsible: stateUser, user: user, company: company})
-    
+    trackEvent({
+      entityType: "company",
+      entityId: company?.id,
+      action: "manager_removed",
+      actorType: "admin",
+      actorId: stateUser?.id,
+      actorName: `${stateUser?.details?.name} ${stateUser?.details?.surname}`.trim(),
+      metadata: { removedUserId: user?.id, removedUserName: user?.name },
+    });
+
     const newCompany = pipe(
       assocPath(
         ["usersWhoCanManage"],
@@ -168,10 +196,45 @@ function App({ socket, stateUser }) {
               >
                 Create Appointment For Company
               </button>
-              
+
             </div>
           </div>
         </div>
+        <div class="col-xl-12">
+          <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+              <a
+                href="#"
+                class={`nav-link ${bodyItem === "details" ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setBodyItem("details");
+                }}
+              >
+                Details
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class={`nav-link ${bodyItem === "history" ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setBodyItem("history");
+                }}
+              >
+                History
+              </a>
+            </li>
+          </ul>
+        </div>
+        {bodyItem === "history" && (
+          <div class="col-xl-12">
+            <AuditTimeline entityType="company" entityId={company?.id} />
+          </div>
+        )}
+        {bodyItem === "details" && (
+        <>
         <div class="col-xl-6 col-lg-12">
           <div class="card">
             <div class="card-header">
@@ -348,6 +411,8 @@ function App({ socket, stateUser }) {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

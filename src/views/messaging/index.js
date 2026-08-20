@@ -18,6 +18,7 @@ import {
   token,
 } from "../../components/ListPage";
 import { useCachedFetch } from "../../hooks/useCachedFetch";
+import { trackEvent } from "../../lib/trackEvent";
 
 const COMPANION_API_URL = process.env.REACT_APP_COMPANION_API_URL;
 const COMPANION_STATS_SECRET = process.env.REACT_APP_COMPANION_STATS_SECRET;
@@ -266,6 +267,15 @@ const Messaging = ({ user }) => {
       );
       if (!res.ok) throw new Error(`Failed to send reply (${res.status})`);
       setReplyText("");
+      trackEvent({
+        entityType: "appointment",
+        entityId: selectedAppointmentId,
+        action: "message_sent",
+        actorType: "admin",
+        actorId: adminId,
+        actorName: adminName,
+        metadata: { preview: replyText.trim().slice(0, 140) },
+      });
       refetchThread();
       refetchList();
     } catch (err) {
@@ -306,6 +316,15 @@ const Messaging = ({ user }) => {
         }
       );
       if (!res.ok) throw new Error(`Failed to update status (${res.status})`);
+      trackEvent({
+        entityType: "appointment",
+        entityId: selectedAppointmentId,
+        action: "status_changed",
+        actorType: "admin",
+        actorId: adminId,
+        actorName: adminName,
+        changes: [{ field: "threadStatus", before: thread?.threadStatus, after: status }],
+      });
       refetchThread();
       refetchList();
     } catch (err) {

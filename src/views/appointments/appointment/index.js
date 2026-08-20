@@ -15,6 +15,8 @@ import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { connect } from "react-redux";
+import { trackEvent } from "../../../lib/trackEvent";
+import AuditTimeline from "../../../components/AuditTimeline";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -126,6 +128,15 @@ function App({ socket, user }) {
     setMessage("");
     socket.emit("UPDATE_APPOINTMENT", newApp);
     socket.on("APPOINTMENT_UPDATED", () => {});
+    trackEvent({
+      entityType: "appointment",
+      entityId: appointment?.id,
+      action: "message_sent",
+      actorType: "admin",
+      actorId: user?.id,
+      actorName: `${user?.details?.name} ${user?.details?.surname}`.trim(),
+      metadata: { preview: message?.slice(0, 140) },
+    });
   };
 
   const getBadgeType = (title) => {
@@ -143,6 +154,36 @@ function App({ socket, user }) {
     <div class="container-fluid">
       <div class="row">
         <div class="col-xl-9 col-xxl-8">
+          <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+              <a
+                href="#"
+                class={`nav-link ${bodyItem === "details" ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setBodyItem("details");
+                }}
+              >
+                Details
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class={`nav-link ${bodyItem === "history" ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setBodyItem("history");
+                }}
+              >
+                History
+              </a>
+            </li>
+          </ul>
+          {bodyItem === "history" && (
+            <AuditTimeline entityType="appointment" entityId={appointment?.id} />
+          )}
+          {bodyItem === "details" && (
           <div class="row">
             <div class="col-xl-12">
               <div class="card event-detail-bx overflow-hidden">
@@ -465,6 +506,7 @@ function App({ socket, user }) {
               </div>
             </div>
           </div>
+          )}
         </div>
         <div class="col-xl-3 col-xxl-4">
           <FloatingButton

@@ -22,6 +22,7 @@ import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import AppointmentSearch from "../../../../components/Modal/appointmentSearch";
+import { trackEvent } from "../../../../lib/trackEvent";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -65,6 +66,11 @@ function App({ socket }) {
     socket.on("RECEIVE_SAVE_USER_SUCCESS", (data) => {
       //console.log("user added");
       //console.log("navigating to", " /client/edit/" + data.id);
+      trackEvent({
+        entityType: "user",
+        entityId: data?.id,
+        action: "created",
+      });
       navigate("/client/edit/" + data.id);
     });
   };

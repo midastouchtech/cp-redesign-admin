@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import Uploader from "../../../../components/Upload";
+import { trackEvent } from "../../../../lib/trackEvent";
+import AuditTimeline from "../../../../components/AuditTimeline";
 
 function App({ socket }) {
   let params = useParams();
@@ -65,6 +67,11 @@ function App({ socket }) {
     socket.on("USER_UPDATED", () => {
       //console.log("user updated");
       //console.log("navigating to", " /client/edit/" + user.id);
+      trackEvent({
+        entityType: "user",
+        entityId: user?.id,
+        action: "updated",
+      });
       navigate("/clients");
     });
   };
@@ -77,6 +84,11 @@ function App({ socket }) {
   const perfomDelete = () => {
     socket.emit("DELETE_USER", user);
     socket.on("USER_DELETE_SUCCESS", () => {
+      trackEvent({
+        entityType: "user",
+        entityId: user?.id,
+        action: "deleted",
+      });
       navigate("/clients");
     });
   };
@@ -121,6 +133,41 @@ function App({ socket }) {
             </div>
           </div>
         </div>
+        <div class="col-xl-12">
+          <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+              <a
+                href="#"
+                class={`nav-link ${bodyItem === "details" ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setBodyItem("details");
+                }}
+              >
+                Details
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                href="#"
+                class={`nav-link ${bodyItem === "history" ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setBodyItem("history");
+                }}
+              >
+                History
+              </a>
+            </li>
+          </ul>
+        </div>
+        {bodyItem === "history" && (
+          <div class="col-xl-12">
+            <AuditTimeline entityType="user" entityId={user?.id} />
+          </div>
+        )}
+        {bodyItem === "details" && (
+        <>
         <div class="col-xl-6 col-lg-12">
           <div class="card">
             <div class="card-header">
@@ -319,6 +366,8 @@ function App({ socket }) {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

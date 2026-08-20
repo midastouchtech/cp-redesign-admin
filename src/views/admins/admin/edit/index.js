@@ -19,6 +19,7 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
+import { trackEvent } from "../../../../lib/trackEvent";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -77,6 +78,11 @@ function App({ socket }) {
   const perfomDelete = () => {
     socket.emit("DELETE_ADMIN", user);
     socket.on("ADMIN_DELETE_SUCCESS", () => {
+      trackEvent({
+        entityType: "user",
+        entityId: user?.id,
+        action: "deleted",
+      });
       navigate("/admins");
     });
   };
