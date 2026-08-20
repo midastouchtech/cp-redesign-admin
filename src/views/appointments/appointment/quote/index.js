@@ -104,7 +104,7 @@ function App({ socket }) {
   const [xrayCount, setXrayCount] = useState(0);
   const [xrayPrice, setXrayPrice] = useState(0);
 
-  // Authoritative amount/invoice-number/subtotals, fetched from cp-companion's
+  // Authoritative amount/invoice-number/subtotals, fetched from the backend's
   // GET /api/admin/invoices/compute — replaces the client-side recomputation from
   // appointment.details.employees that used to feed formatPrice/the totals row. The socket-fetched
   // appointment is still used for everything non-price (dates, PO number, company/employee names).
@@ -134,7 +134,7 @@ function App({ socket }) {
   const html2canvasScale = getHtml2CanvasScale(employeeCount);
 
   // Grand total shown on the totals row: prefer the authoritative computed value from
-  // cp-companion; fall back to the (legacy, client-recomputed) servicesPrice+doverPrice+xrayPrice
+  // the backend; fall back to the (legacy, client-recomputed) servicesPrice+doverPrice+xrayPrice
   // only while the compute call hasn't returned yet, so the page still renders something
   // reasonable during the brief loading window rather than blank.
   const grandTotal = computedBreakdown
@@ -219,10 +219,10 @@ function App({ socket }) {
             // (saveNewInvoice in the legacy server) already emails the client itself
             // (sendNewInvoiceEmail), confirmed by reading that repo's code read-only. Emitting it
             // alongside POST /api/admin/invoices (which also emails the client via Mailjet) meant
-            // every invoice send double-emailed the client. cp-companion's endpoint below is now
-            // the sole source of both the durable invoice record and the client email; the legacy
-            // server's own invoices collection simply stops receiving new rows going forward
-            // (confirmed nothing else in this repo or cp-companion reads from it).
+            // every invoice send double-emailed the client. The endpoint below is now the sole
+            // source of both the durable invoice record and the client email; the legacy server's
+            // own invoices collection simply stops receiving new rows going forward (confirmed
+            // nothing else in this repo reads from it).
             setStatus('Sending...');
 
             if (!COMPANION_API_URL) {
@@ -243,7 +243,7 @@ function App({ socket }) {
               }),
             })
               .then((res) => {
-                if (!res.ok) throw new Error(`cp-companion invoice record failed: ${res.status}`);
+                if (!res.ok) throw new Error(`invoice record failed: ${res.status}`);
                 setStatus('Invoice sent!');
                 // Note: 'invoice_sent' is a free-form action string, not one of the
                 // contract's enumerated actions ('message_sent' etc) — kept distinct
@@ -257,7 +257,7 @@ function App({ socket }) {
                 });
               })
               .catch((err) => {
-                console.warn('[quote] failed to record invoice in cp-companion', err);
+                console.warn('[quote] failed to record invoice', err);
                 setStatus('Error sending invoice');
               });
           })

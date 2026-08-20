@@ -5,7 +5,7 @@ const COMPANION_API_URL = process.env.REACT_APP_COMPANION_API_URL;
 /**
  * Fire-and-forget audit event tracker.
  *
- * POSTs a JSON audit event to cp-companion's `/api/audit/events` endpoint.
+ * POSTs a JSON audit event to the backend's `/api/audit/events` endpoint.
  * This function intentionally does NOT return the underlying fetch promise —
  * callers should NOT (and don't need to) `await` it. Any network/parse error
  * is caught internally and only logged via console.warn. This function never

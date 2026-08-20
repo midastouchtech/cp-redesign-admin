@@ -24,7 +24,7 @@ const authedFetch = async (path) => {
 };
 
 /**
- * Prefetches the "default view" of every cp-companion-backed admin page (Dashboard, Analytics,
+ * Prefetches the "default view" of every backend-backed admin page (Dashboard, Analytics,
  * Employees, Availability, Messaging) as soon as the admin is known, and keeps refetching on a
  * 5-minute interval regardless of which page is currently open — writes straight into the same
  * localStorage keys useCachedFetch reads (cp_admin_cache:<key>), so no page needs to change how

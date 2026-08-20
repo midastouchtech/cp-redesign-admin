@@ -8,8 +8,8 @@ const COMPANION_STATS_SECRET = process.env.REACT_APP_COMPANION_STATS_SECRET;
 
 // Null-safe — the pre-fix version crashed the whole list render whenever invoice.payment.amount
 // (legacy socket shape) was undefined, since price.toFixed(2) throws on undefined. Now backed by
-// cp_companion.invoices, whose `amount` field is documented/enforced to always be a real number
-// (see Invoice in cp-companion's types.ts), but this stays defensive regardless.
+// a collection whose `amount` field is documented/enforced to always be a real number, but this
+// stays defensive regardless.
 const formatPrice = (price) => {
   return `R ${(price ?? 0).toFixed(2)}`;
 };
@@ -24,9 +24,9 @@ const NoAppointments = styled.div`
 
 // Data source swapped from the legacy GET_ALL_INVOICES / GET_NEXT_PAGE_INVOICES / SEARCH_INVOICE
 // socket calls (against clinicplus-server-latest-stable-version, left untouched/out of scope) to
-// cp-companion's GET /api/admin/invoices, which reads the new cp_companion.invoices collection —
-// populated going forward by POST /api/admin/invoices from both quote pages. Visual
-// structure/columns are kept as close to the original as reasonable; only the data layer changed.
+// the backend's GET /api/admin/invoices, which reads the new invoices collection — populated
+// going forward by POST /api/admin/invoices from both quote pages. Visual structure/columns are
+// kept as close to the original as reasonable; only the data layer changed.
 const Invoices = ({ socket }) => {
   const [invoices, setInvoices] = useState(null);
   const [page, setPage] = useState(0);

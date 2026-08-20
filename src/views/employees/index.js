@@ -168,7 +168,7 @@ const Employees = () => {
               subtitle={
                 data
                   ? "Try a different search term."
-                  : "Run the employee directory backfill script (scripts/backfill-employee-directory.mjs) in cp-companion first."
+                  : "Run the employee directory backfill script first."
               }
             />
           )}
