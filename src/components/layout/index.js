@@ -11,6 +11,7 @@ import cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import moment from "moment";
+import { useAdminDataPrefetch } from "../../hooks/useAdminDataPrefetch";
 
 const Banner = styled.div`
     width: 100vw;
@@ -74,7 +75,9 @@ export const Layout = (props) => {
   const cookieUser = cookies.get("clinicplus_admin_logged_in_user");
   const navigate = useNavigate();
   const location = useLocation();
-  
+
+  useAdminDataPrefetch(user);
+
   useEffect(()=>{
     console.log("use effect socket", socket)
     if(socket && !exists(systemSettings)){
