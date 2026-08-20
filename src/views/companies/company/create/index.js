@@ -22,6 +22,7 @@ import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { trackEvent } from "../../../../lib/trackEvent";
+import { adminApi } from "../../../../lib/adminApi";
 
 function App({ socket }) {
   let params = useParams();
@@ -48,7 +49,13 @@ function App({ socket }) {
     setCompany(assocPath(["details", key], value, company));
   };
 
-  const saveCompany = () => {
+  const saveCompany = async () => {
+    const data = await adminApi("/api/admin/platform-controls").catch(() => ({ controls: [] }));
+    const control = (data.controls || []).find((item) => item.key === "block_new_companies");
+    if (control?.enabled) {
+      alert(control.publicMessage || control.reason || "Company creation is temporarily disabled.");
+      return;
+    }
     //console.log("saving appza");
     socket.emit("SAVE_NEW_COMPANY", company);
     socket.on("COMPANY_ADDED", (c) => {

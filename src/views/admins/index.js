@@ -18,6 +18,7 @@ import {
   EmptyState,
   Pagination,
 } from "../../components/ListPage";
+import { adminApi } from "../../lib/adminApi";
 
 const Admins = ({ socket }) => {
   const [admins, setAdmins] = useState(null);
@@ -26,6 +27,7 @@ const Admins = ({ socket }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [ticketCounts, setTicketCounts] = useState({});
 
   const handleSearch = async () => {
     setLoading(true);
@@ -64,6 +66,18 @@ const Admins = ({ socket }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
+  useEffect(() => {
+    adminApi("/api/admin/support-tickets")
+      .then((data) => {
+        const counts = {};
+        (data.tickets || []).forEach((ticket) => {
+          if (ticket.submittedByUserId) counts[ticket.submittedByUserId] = (counts[ticket.submittedByUserId] || 0) + 1;
+        });
+        setTicketCounts(counts);
+      })
+      .catch(() => setTicketCounts({}));
+  }, []);
+
   return (
     <Page>
       <FontImport />
@@ -101,6 +115,7 @@ const Admins = ({ socket }) => {
                   <th>Email</th>
                   <th>Contact No.</th>
                   <th>Admin Type</th>
+                  <th>Tickets</th>
                   <th></th>
                 </tr>
               </thead>
@@ -112,6 +127,7 @@ const Admins = ({ socket }) => {
                     <td>{admin?.details.email}</td>
                     <td>{admin?.details.cell}</td>
                     <td>{admin?.details.adminType === "xrayAdmin" ? "X-ray Admin" : "Regular Admin"}</td>
+                    <td>{ticketCounts[admin?.id] || 0}</td>
                     <td>
                       <RowActionLink as={Link} to={`/admin/edit/${admin?.id}`}>
                         Edit

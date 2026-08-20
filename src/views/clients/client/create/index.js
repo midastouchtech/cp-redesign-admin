@@ -23,6 +23,7 @@ import { SegmentedControl } from "segmented-control-react";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import AppointmentSearch from "../../../../components/Modal/appointmentSearch";
 import { trackEvent } from "../../../../lib/trackEvent";
+import { adminApi } from "../../../../lib/adminApi";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -60,7 +61,13 @@ function App({ socket }) {
     setUser(assocPath(["details", key], value, user));
   };
 
-  const saveUser = () => {
+  const saveUser = async () => {
+    const data = await adminApi("/api/admin/platform-controls").catch(() => ({ controls: [] }));
+    const control = (data.controls || []).find((item) => item.key === "block_new_signups");
+    if (control?.enabled) {
+      alert(control.publicMessage || control.reason || "Client creation is temporarily disabled.");
+      return;
+    }
     //console.log("saving appza");
     socket.emit("SAVE_NEW_USER", user);
     socket.on("RECEIVE_SAVE_USER_SUCCESS", (data) => {

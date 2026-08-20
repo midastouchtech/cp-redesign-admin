@@ -1,15 +1,68 @@
-import userEvent from "@testing-library/user-event";
 import React, { Fragment, useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import moment from "moment";
+import { adminApi } from "../../../lib/adminApi";
+import { readRecentEntities } from "../../../lib/recentEntities";
 
 const Header = ({ title, onBack, user, latestNotifications }) => {
   const [showNotifications, setShow] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchResults, setSearchResults] = useState(null);
+  const [showSupport, setShowSupport] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [supportCategory, setSupportCategory] = useState("request");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportStatus, setSupportStatus] = useState("");
+  const [showRecent, setShowRecent] = useState(false);
 
   const toggleNotifications = () => {
     setShow(!showNotifications);
   };
+
+  const runSearch = async () => {
+    if (search.trim().length < 2) return;
+    const data = await adminApi(`/api/admin/search?q=${encodeURIComponent(search.trim())}`);
+    setSearchResults(data.results || {});
+  };
+
+  const submitSupport = async () => {
+    if (!supportMessage.trim()) return;
+    setSupportStatus("Submitting...");
+    try {
+      await adminApi("/api/admin/support-tickets", {
+        method: "POST",
+        body: JSON.stringify({
+          category: supportCategory,
+          message: supportMessage,
+          submittedByUserId: user?.id,
+          submittedByName: `${user?.details?.name || ""} ${user?.details?.surname || ""}`.trim(),
+          submittedByEmail: user?.details?.email,
+        }),
+      });
+      setSupportMessage("");
+      setSupportStatus("Support ticket submitted.");
+    } catch (err) {
+      setSupportStatus(err.message);
+    }
+  };
+
+  const resultLink = (type, item) => {
+    if (type === "companies") return `/companies/${item.id}/360`;
+    if (type === "users") return item.role === "admin" ? `/admin/edit/${item.id}` : `/client/edit/${item.id}`;
+    if (type === "appointments") return `/appointment/${item.id}`;
+    if (type === "sites") return `/sites/${item._id}`;
+    return "/employees";
+  };
+
+  const resultLabel = (type, item) =>
+    item.details?.name ||
+    item.details?.company?.name ||
+    item.displayName ||
+    item.name ||
+    item.details?.email ||
+    item.id ||
+    item._id;
   
   return (
     <div className="header">
@@ -25,16 +78,52 @@ const Header = ({ title, onBack, user, latestNotifications }) => {
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Search here..."
+                    placeholder="Search companies, users, appointments..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && runSearch()}
                   />
                   <div className="input-group-append">
                     <span className="input-group-text">
-                      <a href="javascript:void(0)">
+                      <a href="#search" onClick={(e) => { e.preventDefault(); runSearch(); }}>
                         <i className="flaticon-381-search-2"></i>
                       </a>
                     </span>
                   </div>
                 </div>
+                {searchResults && (
+                  <div className="dropdown-menu rounded show" style={{ position: "absolute", top: 58, right: 210, width: 360, maxHeight: 420, overflowY: "auto", padding: 12 }}>
+                    {Object.entries(searchResults).map(([type, items]) => (
+                      <div key={type} className="mb-2">
+                        <strong className="text-capitalize">{type}</strong>
+                        {(items || []).map((item) => (
+                          <Link key={`${type}-${item.id || item._id}`} className="d-block small py-1" to={resultLink(type, item)} onClick={() => setSearchResults(null)}>
+                            {resultLabel(type, item)}
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#recent" onClick={(e) => { e.preventDefault(); setShowRecent(!showRecent); }}>Recent</a>
+                {showRecent && (
+                  <div className="dropdown-menu rounded show" style={{ position: "absolute", top: 58, right: 170, width: 300, padding: 12 }}>
+                    {readRecentEntities().map((item) => (
+                      <Link key={`${item.type}-${item.id}`} className="d-block small py-1" to={item.to} onClick={() => setShowRecent(false)}>
+                        <strong>{item.type}</strong> {item.label}
+                      </Link>
+                    ))}
+                    {!readRecentEntities().length && <small>No recent entities yet.</small>}
+                  </div>
+                )}
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#support" onClick={(e) => { e.preventDefault(); setShowSupport(true); }}>Support</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#about" onClick={(e) => { e.preventDefault(); setShowAbout(true); }}>About</a>
               </li>
               <li
                 onClick={toggleNotifications}
@@ -139,6 +228,39 @@ const Header = ({ title, onBack, user, latestNotifications }) => {
           </div>
         </nav>
       </div>
+      {showSupport && (
+        <div className="modal fade show" style={{ display: "block", background: "rgba(0,0,0,.35)" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header"><h5 className="modal-title">Support</h5><button className="close" onClick={() => setShowSupport(false)}>×</button></div>
+              <div className="modal-body">
+                <select className="form-control mb-3" value={supportCategory} onChange={(e) => setSupportCategory(e.target.value)}>
+                  <option value="request">Request</option>
+                  <option value="complaint">Complaint</option>
+                  <option value="suggestion">Suggestion</option>
+                </select>
+                <textarea className="form-control" rows="5" value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="How can Qwabi Engineering help?" />
+                {supportStatus && <small className="d-block mt-2">{supportStatus}</small>}
+              </div>
+              <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setShowSupport(false)}>Close</button><button className="btn btn-primary" onClick={submitSupport}>Submit</button></div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAbout && (
+        <div className="modal fade show" style={{ display: "block", background: "rgba(0,0,0,.35)" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header"><h5 className="modal-title">About this system</h5><button className="close" onClick={() => setShowAbout(false)}>×</button></div>
+              <div className="modal-body">
+                <p>This system was built for Tecla Digital and ClinicPlus by Qwabi Engineering.</p>
+                <p>To contact developers, email <a href="mailto:aya@qwabi.co.za">aya@qwabi.co.za</a>.</p>
+              </div>
+              <div className="modal-footer"><button className="btn btn-primary" onClick={() => setShowAbout(false)}>Close</button></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

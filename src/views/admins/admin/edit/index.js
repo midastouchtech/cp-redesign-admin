@@ -76,6 +76,8 @@ function App({ socket }) {
   };
 
   const perfomDelete = () => {
+    const confirmText = window.prompt(`Type DELETE ${user?.id} to delete this admin`);
+    if (confirmText !== `DELETE ${user?.id}`) return;
     socket.emit("DELETE_ADMIN", user);
     socket.on("ADMIN_DELETE_SUCCESS", () => {
       trackEvent({
@@ -111,7 +113,7 @@ function App({ socket }) {
             <div className="card-body">
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
-                onClick={() => navigate("/clients")}
+                onClick={() => navigate("/admins")}
                 disabled={hasUpdatedUser}
               >
                 Close

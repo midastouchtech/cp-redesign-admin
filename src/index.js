@@ -41,6 +41,10 @@ import Signals from './views/signals';
 import Sites from './views/sites';
 import SiteDetail from './views/sites/detail';
 import SiteDuplicates from './views/sites/duplicates';
+import SystemControls from './views/systemControls';
+import Company360 from './views/company360';
+import RecycleBin from './views/recycleBin';
+import SupportTickets from './views/supportTickets';
 
 import './style.css';
 
@@ -126,9 +130,13 @@ const Main = () => {
           <Route path='/sites' element={<Sites socket={socket} />} />
           <Route path='/sites/duplicates' element={<SiteDuplicates socket={socket} />} />
           <Route path='/sites/:siteId' element={<SiteDetail socket={socket} />} />
+          <Route path='/companies/:companyId/360' element={<Company360 socket={socket} />} />
           <Route path='/messaging' element={<Messaging socket={socket} />} />
           <Route path='/audit' element={<Audit socket={socket} />} />
           <Route path='/signals' element={<Signals socket={socket} />} />
+          <Route path='/system-controls' element={<SystemControls socket={socket} />} />
+          <Route path='/recycle-bin' element={<RecycleBin socket={socket} />} />
+          <Route path='/support-tickets' element={<SupportTickets socket={socket} />} />
           <Route path='/companies' element={<Companies socket={socket} />} />
           <Route path='/clients' element={<Clients socket={socket} />} />
           <Route path='/invoices' element={<Invoices socket={socket} />} />
