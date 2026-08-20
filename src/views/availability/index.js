@@ -3,6 +3,7 @@ import styled from "styled-components";
 import moment from "moment";
 import { FontImport, Page, PageHeader, Toolbar, Field, FieldLabel, Select, StatusMessage, EmptyState, token } from "../../components/ListPage";
 import { useCachedFetch } from "../../hooks/useCachedFetch";
+import CapacityCalendar from "./CapacityCalendar";
 
 const COMPANION_API_URL = process.env.REACT_APP_COMPANION_API_URL;
 const COMPANION_STATS_SECRET = process.env.REACT_APP_COMPANION_STATS_SECRET;
@@ -100,9 +101,30 @@ const LegendItem = styled.span`
   gap: 6px;
 `;
 
-const Availability = () => {
-  const [clinic, setClinic] = useState(CLINICS[0]);
-  const [monthValue, setMonthValue] = useState(moment().format("YYYY-MM"));
+const PageTabs = styled.div`
+  display: inline-flex;
+  background: ${token.canvas};
+  border: 1px solid ${token.line};
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 18px;
+`;
+
+const PageTab = styled.button`
+  appearance: none;
+  border: none;
+  background: ${(p) => (p.$active ? token.surface : "transparent")};
+  color: ${(p) => (p.$active ? token.ink900 : token.ink500)};
+  box-shadow: ${(p) => (p.$active ? "0 1px 3px rgba(15,23,42,0.10)" : "none")};
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+`;
+
+const EmployeeBookingsTab = ({ clinic, setClinic, monthValue, setMonthValue }) => {
 
   const [year, month] = monthValue.split("-").map(Number);
 
@@ -132,19 +154,14 @@ const Availability = () => {
   };
 
   return (
-    <Page>
-      <FontImport />
-      <PageHeader
-        eyebrow="Scheduling"
-        title="Availability Checker"
-        subtitle={
-          data
-            ? `${data.employees.length} employees booked at ${clinic} in ${moment(monthValue, "YYYY-MM").format("MMMM YYYY")}${
-                cachedAt ? ` · updated ${new Date(cachedAt).toLocaleTimeString()}` : ""
-              }${refreshing ? " · refreshing…" : ""}`
-            : "See which employees are already booked at a clinic, per day"
-        }
-      />
+    <>
+      <p style={{ fontSize: 13, color: token.ink500, margin: "0 0 14px" }}>
+        {data
+          ? `${data.employees.length} employees booked at ${clinic} in ${moment(monthValue, "YYYY-MM").format("MMMM YYYY")}${
+              cachedAt ? ` · updated ${moment(cachedAt).fromNow()}` : ""
+            }${refreshing ? " · refreshing…" : ""}`
+          : "See which employees are already booked at a clinic, per day"}
+      </p>
 
       <Toolbar>
         <Field $minWidth="160px">
@@ -225,6 +242,38 @@ const Availability = () => {
           />
         )}
       </CalendarWrap>
+    </>
+  );
+};
+
+const Availability = () => {
+  const [activeTab, setActiveTab] = useState("bookings"); // 'bookings' | 'capacity'
+  const [clinic, setClinic] = useState(CLINICS[0]);
+  const [monthValue, setMonthValue] = useState(moment().format("YYYY-MM"));
+
+  return (
+    <Page>
+      <FontImport />
+      <PageHeader
+        eyebrow="Scheduling"
+        title="Availability Checker"
+        subtitle="Employee bookings and clinic-wide capacity, per day, week, or month"
+      />
+
+      <PageTabs>
+        <PageTab $active={activeTab === "bookings"} onClick={() => setActiveTab("bookings")}>
+          Employee Bookings
+        </PageTab>
+        <PageTab $active={activeTab === "capacity"} onClick={() => setActiveTab("capacity")}>
+          Clinic Capacity
+        </PageTab>
+      </PageTabs>
+
+      {activeTab === "bookings" ? (
+        <EmployeeBookingsTab clinic={clinic} setClinic={setClinic} monthValue={monthValue} setMonthValue={setMonthValue} />
+      ) : (
+        <CapacityCalendar />
+      )}
     </Page>
   );
 };

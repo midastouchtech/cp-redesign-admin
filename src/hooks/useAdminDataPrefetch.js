@@ -73,6 +73,10 @@ export function useAdminDataPrefetch(user) {
           path: `/api/admin/availability?clinic=${clinic}&year=${availabilityYear}&month=${availabilityMonth}`,
         },
         {
+          key: `admin-availability-capacity:${clinic}:${yearKey}-${String(availabilityMonth).padStart(2, "0")}`,
+          path: `/api/admin/availability/capacity?clinic=${clinic}&year=${availabilityYear}&month=${availabilityMonth}`,
+        },
+        {
           key: `admin-messaging-threads:::0`,
           path: `/api/admin/messaging/threads?page=0`,
         },
