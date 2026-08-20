@@ -3,7 +3,19 @@ import { useParams, Link } from "react-router-dom";
 import styled from "styled-components";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { FontImport, Page, PageHeader, StatusMessage, EmptyState, token } from "../../../components/ListPage";
+import {
+  FontImport,
+  Page,
+  PageHeader,
+  StatusMessage,
+  EmptyState,
+  TablePanel,
+  TableScroll,
+  Table,
+  RowActionLink,
+  StatusBadge,
+  token,
+} from "../../../components/ListPage";
 import { useCachedFetch } from "../../../hooks/useCachedFetch";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -238,6 +250,78 @@ const EmployeeDetail = () => {
               ))
             ) : (
               <EmptyState title="No company data" subtitle="No appointments with a linked company yet." />
+            )}
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Past services booked</PanelTitle>
+            {employee.pastServices?.length ? (
+              <TablePanel style={{ boxShadow: "none", border: `1px solid ${token.lineSoft}` }}>
+                <TableScroll>
+                  <Table>
+                    <thead>
+                      <tr>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Company</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {employee.pastServices.map((s, i) => (
+                        <tr key={`${s.appointmentId}-${s.serviceId}-${i}`}>
+                          <td>{s.serviceTitle}</td>
+                          <td>{s.date || "—"}</td>
+                          <td>{s.companyName || "—"}</td>
+                          <td>
+                            <StatusBadge status={s.status} />
+                          </td>
+                          <td>{formatCurrency(s.price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </TableScroll>
+              </TablePanel>
+            ) : (
+              <EmptyState title="No services on record" subtitle="This employee has no services logged on any appointment." />
+            )}
+          </Panel>
+
+          <Panel>
+            <PanelTitle>Past job spec files</PanelTitle>
+            {employee.pastJobSpecFiles?.length ? (
+              <TablePanel style={{ boxShadow: "none", border: `1px solid ${token.lineSoft}` }}>
+                <TableScroll>
+                  <Table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Company</th>
+                        <th>Type</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {employee.pastJobSpecFiles.map((f, i) => (
+                        <tr key={`${f.appointmentId}-${i}`}>
+                          <td>{f.date || "—"}</td>
+                          <td>{f.companyName || "—"}</td>
+                          <td>{f.isExtra ? "Extra job spec" : "Job spec"}</td>
+                          <td>
+                            <RowActionLink href={f.url} target="_blank" rel="noreferrer">
+                              View file
+                            </RowActionLink>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </TableScroll>
+              </TablePanel>
+            ) : (
+              <EmptyState title="No job spec files on record" subtitle="This employee has no job spec files uploaded on any appointment." />
             )}
           </Panel>
         </>
