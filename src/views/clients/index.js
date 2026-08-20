@@ -103,6 +103,7 @@ const Clients = ({ socket }) => {
                   <th>Email</th>
                   <th>Contact No.</th>
                   <th>Companies</th>
+                  <th>Company 360</th>
                   <th>Appointments</th>
                   <th>Suspended</th>
                   <th></th>
@@ -116,6 +117,13 @@ const Clients = ({ socket }) => {
                     <td>{client?.details.email}</td>
                     <td>{client?.details.cell}</td>
                     <td>{client?.companiesManaging?.length}</td>
+                    <td>
+                      {(client?.companiesManaging || []).slice(0, 2).map((company) => (
+                        <RowActionLink key={company.id} as={Link} to={`/companies/${company.id}/360`} style={{ marginRight: 8 }}>
+                          {company.name || company.id}
+                        </RowActionLink>
+                      ))}
+                    </td>
                     <td>{client?.appointmentsManaging?.length}</td>
                     <td>{client?.isSuspended ? "Yes" : "No"}</td>
                     <td>

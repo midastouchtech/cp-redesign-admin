@@ -6,12 +6,13 @@ import { connect } from "react-redux";
 import SideBar from "./sidebar";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isNil, isEmpty, concat } from "ramda";
+import { isNil, isEmpty } from "ramda";
 import cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import moment from "moment";
 import { useAdminDataPrefetch } from "../../hooks/useAdminDataPrefetch";
+import { adminApi } from "../../lib/adminApi";
 
 const Banner = styled.div`
     width: 100vw;
@@ -46,9 +47,10 @@ export const Layout = (props) => {
     () => localStorage.getItem("cp_admin_sidebar_collapsed") === "1"
   );
   const [firstLoad, setFirstLoad] = useState(0);
-  const [latestAppointments, setLatestAppointments] =useState([]);
   const [latestMessages, setLatestMessages] = useState([]);
   const [systemSettings, setSystemSettings] = useState();
+  const [activityToasts, setActivityToasts] = useState([]);
+  const [lastActivityPoll, setLastActivityPoll] = useState(() => new Date().toISOString());
 
   const showLoader = () => {
     setTimeout(() => {
@@ -75,8 +77,52 @@ export const Layout = (props) => {
   const cookieUser = cookies.get("clinicplus_admin_logged_in_user");
   const navigate = useNavigate();
   const location = useLocation();
+  const isQuoteOrLoginPage =
+    window.location.pathname.includes("quote") ||
+    window.location.pathname.includes("login") ||
+    window.location.pathname.includes("logout") ||
+    window.location.pathname.includes("reset-password");
 
   useAdminDataPrefetch(user);
+
+  useEffect(() => {
+    if (!user || isQuoteOrLoginPage) return;
+    const poll = async () => {
+      try {
+        const data = await adminApi(`/api/admin/recent-activity?since=${encodeURIComponent(lastActivityPoll)}`);
+        setLastActivityPoll(data.serverTime || new Date().toISOString());
+        const items = (data.items || []).slice(0, 5);
+        if (items.length) {
+          setActivityToasts((prev) => [...items, ...prev].slice(0, 5));
+        }
+      } catch (err) {
+        console.warn("[recent activity] poll failed", err);
+      }
+    };
+    const timer = setInterval(poll, 45000);
+    return () => clearInterval(timer);
+  }, [user, isQuoteOrLoginPage, lastActivityPoll]);
+
+  useEffect(() => {
+    if (!user || isQuoteOrLoginPage) return;
+    const loadRecentMessages = async () => {
+      try {
+        const data = await adminApi("/api/admin/messaging/threads?page=0");
+        setLatestMessages(
+          (data.threads || []).slice(0, 10).map((thread) => ({
+            createdAt: thread.lastMessage?.createdAt || thread.date,
+            author: thread.lastMessage?.author || { name: thread.userName || thread.companyName || "Client" },
+            appointment: thread.appointmentId,
+          }))
+        );
+      } catch (err) {
+        console.warn("[recent messages] load failed", err);
+      }
+    };
+    loadRecentMessages();
+    const timer = setInterval(loadRecentMessages, 60000);
+    return () => clearInterval(timer);
+  }, [user, isQuoteOrLoginPage]);
 
   useEffect(()=>{
     console.log("use effect socket", socket)
@@ -105,25 +151,9 @@ export const Layout = (props) => {
         setUser(u);
         socket.off("RECEIVE_USER");
       });
-      socket.on("RECEIVE_LATEST_APPOINTMENTS", (appointments) => {
-            setLatestAppointments(appointments);
-            console.log("set latest appointments", appointments)
-            socket.off('RECEIVE_LATEST_APPOINTMENTS')
-          });
-      socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
-        setLatestMessages(messages);
-        console.log("set latest messages", messages)
-        socket.off("RECEIVE_LATEST_MESSAGES")
-      });
     }
   
   }, [socket]);
-  const isQuoteOrLoginPage =
-    window.location.pathname.includes("quote") ||
-    window.location.pathname.includes("login") ||
-    window.location.pathname.includes("logout") ||
-    window.location.pathname.includes("reset-password");
-
   if (isQuoteOrLoginPage) {
     return (
       <div>
@@ -155,9 +185,8 @@ export const Layout = (props) => {
       </div>
     );
   }
-  const appointmentStats = latestAppointments.map(a => ({created: a?.tracking[0]?.date, by: a?.details?.company?.name, type:"app", id: a?.id}))
   const messageStats = latestMessages.map(m => ({created: m?.createdAt, by: m?.author?.name, type:"msg", id: m.appointment}))
-  const latestNotifications = concat(appointmentStats, messageStats).sort((a, b) => {
+  const latestNotifications = messageStats.sort((a, b) => {
     return moment(a.created).isBefore(moment(b.created)) ? 1 : -1;
   });
 
@@ -200,6 +229,17 @@ export const Layout = (props) => {
         <ChildrenContainer className="content-body" $sidebarCollapsed={sidebarCollapsed}>
           {children}
         </ChildrenContainer>
+        <div style={{ position: "fixed", right: 18, bottom: 18, zIndex: 9999, display: "flex", flexDirection: "column", gap: 8 }}>
+          {activityToasts.map((item, index) => {
+            const to = item.type === "appointment" ? `/appointment/${item.id}` : item.type === "company" ? `/companies/${item.id}/360` : `/client/edit/${item.id}`;
+            return (
+              <div key={`${item.type}-${item.id}-${index}`} onClick={() => navigate(to)} style={{ cursor: "pointer", background: "#151619", color: "#fff", borderRadius: 8, padding: "10px 12px", minWidth: 260, boxShadow: "0 8px 24px rgba(15,23,42,.18)" }}>
+                <strong>New {item.type}</strong>
+                <div style={{ fontSize: 12, opacity: .85 }}>{item.label}</div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

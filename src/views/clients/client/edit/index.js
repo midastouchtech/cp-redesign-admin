@@ -82,6 +82,8 @@ function App({ socket }) {
   });
 
   const perfomDelete = () => {
+    const confirmText = window.prompt(`Type DELETE ${user?.id} to delete this client`);
+    if (confirmText !== `DELETE ${user?.id}`) return;
     socket.emit("DELETE_USER", user);
     socket.on("USER_DELETE_SUCCESS", () => {
       trackEvent({

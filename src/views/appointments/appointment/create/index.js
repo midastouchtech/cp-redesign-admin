@@ -34,6 +34,7 @@ import RemainingSlots from '../RemainingSlots';
 import 'react-alert-confirm/lib/style.css';
 import AlertConfirm from 'react-alert-confirm';
 import { trackEvent } from '../../../../lib/trackEvent';
+import { adminApi } from '../../../../lib/adminApi';
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -187,7 +188,13 @@ function App({ socket }) {
       },
     });
   };
-  const saveAppointment = () => {
+  const saveAppointment = async () => {
+    const data = await adminApi('/api/admin/platform-controls').catch(() => ({ controls: [] }));
+    const control = (data.controls || []).find((item) => item.key === 'block_new_appointments');
+    if (control?.enabled) {
+      alert(control.publicMessage || control.reason || 'Appointment creation is temporarily disabled.');
+      return;
+    }
     // Validate clinic limit before saving
     const clinic = appointment?.details?.clinic;
     const limit = clinicLimits[clinic] || 100;

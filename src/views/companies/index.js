@@ -101,6 +101,7 @@ const Companies = ({ socket }) => {
                   <th>Manager</th>
                   <th>VAT</th>
                   <th>Registration No.</th>
+                  <th>360</th>
                   <th></th>
                 </tr>
               </thead>
@@ -112,6 +113,11 @@ const Companies = ({ socket }) => {
                     <td>{company.usersWhoCanManage[0]?.name}</td>
                     <td>{company.details.vat}</td>
                     <td>{company.details.registrationNumber}</td>
+                    <td>
+                      <RowActionLink as={Link} to={`/companies/${company.id}/360`}>
+                        Open 360
+                      </RowActionLink>
+                    </td>
                     <td>
                       <RowActionLink as={Link} to={`/company/edit/${company.id}`}>
                         More info

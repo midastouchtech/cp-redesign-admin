@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { MdSpaceDashboard, MdLibraryBooks, MdBusiness, MdHealthAndSafety, MdChevronLeft, MdCalendarViewMonth, MdOutlineSensors } from "react-icons/md";
+import { MdSpaceDashboard, MdLibraryBooks, MdBusiness, MdHealthAndSafety, MdChevronLeft, MdCalendarViewMonth, MdOutlineSensors, MdRestore } from "react-icons/md";
 import { HiUserGroup } from "react-icons/hi";
 import styled from "styled-components";
 import { FaFileInvoiceDollar, FaPlus, FaUsers, FaComments, FaMapMarkerAlt, FaHistory } from "react-icons/fa";
@@ -8,6 +8,7 @@ import { MdAdminPanelSettings } from "react-icons/md";
 import { AiOutlineLineChart } from "react-icons/ai";
 import { BsFillGearFill } from "react-icons/bs";
 import { connect } from "react-redux";
+import { adminApi } from "../../../lib/adminApi";
 
 const COLLAPSED_WIDTH = "4.5rem";
 const EXPANDED_WIDTH = "13.5rem";
@@ -214,19 +215,44 @@ const NAV_ITEMS = [
   { to: "/messaging", label: "Messaging", icon: FaComments, key: "messaging" },
   { to: "/audit", label: "Audit", icon: FaHistory, key: "audit" },
   { to: "/signals", label: "Platform Signals", icon: MdOutlineSensors, key: "signals" },
-  { to: "/operations", label: "System", icon: BsFillGearFill, key: "operations" },
+  { to: "/system-controls", label: "System Controls", icon: BsFillGearFill, key: "system-controls" },
+  { to: "/recycle-bin", label: "Recycle Bin", icon: MdRestore, key: "recycle-bin" },
+  { to: "/support-tickets", label: "Support Tickets", icon: FaComments, key: "support-tickets" },
 ];
 
 const QUICK_ACTIONS = [
-  { to: "appointment/create", label: "New Appointment" },
-  { to: "company/create", label: "New Company" },
-  { to: "client/create", label: "New Client" },
-  { to: "admin/create", label: "New Admin" },
+  { to: "appointment/create", label: "New Appointment", control: "block_new_appointments" },
+  { to: "company/create", label: "New Company", control: "block_new_companies" },
+  { to: "client/create", label: "New Client", control: "block_new_signups" },
+  { to: "admin/create", label: "New Admin", control: "block_admin_creation" },
 ];
 
 const SideBar = ({ isOpen, toggleOpen, user, collapsed, onToggleCollapsed }) => {
   const location = useLocation();
   const isXrayAdmin = user?.details?.adminType === "xrayAdmin";
+  const [controls, setControls] = useState([]);
+  const [pinnedCompanies, setPinnedCompanies] = useState([]);
+
+  useEffect(() => {
+    adminApi("/api/admin/platform-controls")
+      .then((data) => setControls(data.controls || []))
+      .catch(() => setControls([]));
+  }, []);
+
+  useEffect(() => {
+    const loadPins = () => {
+      try {
+        setPinnedCompanies(JSON.parse(localStorage.getItem("cp_admin_pinned_companies") || "[]"));
+      } catch {
+        setPinnedCompanies([]);
+      }
+    };
+    loadPins();
+    window.addEventListener("cp:pinned-companies-changed", loadPins);
+    return () => window.removeEventListener("cp:pinned-companies-changed", loadPins);
+  }, []);
+
+  const controlByKey = new Map(controls.map((control) => [control.key, control]));
 
   const items = NAV_ITEMS.filter((item) => {
     if (item.xrayOnly) return isXrayAdmin;
@@ -263,11 +289,31 @@ const SideBar = ({ isOpen, toggleOpen, user, collapsed, onToggleCollapsed }) => 
                 className="btn btn-sm btn-outline-primary"
                 data-toggle="modal"
                 data-target="#addOrderModalside"
-                onClick={toggleOpen}
+                title={controlByKey.get(action.control)?.enabled ? controlByKey.get(action.control)?.publicMessage || controlByKey.get(action.control)?.reason : ""}
+                onClick={(e) => {
+                  const control = controlByKey.get(action.control);
+                  if (control?.enabled) {
+                    e.preventDefault();
+                    alert(control.publicMessage || control.reason || "This action is temporarily disabled.");
+                    return;
+                  }
+                  toggleOpen();
+                }}
+                style={controlByKey.get(action.control)?.enabled ? { opacity: 0.5 } : undefined}
               >
                 <FaPlus size="0.6rem" /> {action.label}
               </Link>
             ))}
+            {pinnedCompanies.length > 0 && (
+              <div style={{ borderTop: "1px solid #eef1f5", marginTop: 6, paddingTop: 8 }}>
+                <small style={{ fontWeight: 700, color: "#64748B" }}>Pinned companies</small>
+                {pinnedCompanies.map((company) => (
+                  <Link key={company.id} to={`/companies/${company.id}/360`} className="btn btn-sm btn-outline-primary" onClick={toggleOpen}>
+                    {company.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           <div
