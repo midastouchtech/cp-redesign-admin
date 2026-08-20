@@ -36,6 +36,11 @@ import Employees from './views/employees';
 import EmployeeDetail from './views/employees/detail';
 import Availability from './views/availability';
 import Messaging from './views/messaging';
+import Audit from './views/audit';
+import Signals from './views/signals';
+import Sites from './views/sites';
+import SiteDetail from './views/sites/detail';
+import SiteDuplicates from './views/sites/duplicates';
 
 import './style.css';
 
@@ -118,7 +123,12 @@ const Main = () => {
           <Route path='/employees' element={<Employees socket={socket} />} />
           <Route path='/employees/:employeeId' element={<EmployeeDetail socket={socket} />} />
           <Route path='/availability' element={<Availability socket={socket} />} />
+          <Route path='/sites' element={<Sites socket={socket} />} />
+          <Route path='/sites/duplicates' element={<SiteDuplicates socket={socket} />} />
+          <Route path='/sites/:siteId' element={<SiteDetail socket={socket} />} />
           <Route path='/messaging' element={<Messaging socket={socket} />} />
+          <Route path='/audit' element={<Audit socket={socket} />} />
+          <Route path='/signals' element={<Signals socket={socket} />} />
           <Route path='/companies' element={<Companies socket={socket} />} />
           <Route path='/clients' element={<Clients socket={socket} />} />
           <Route path='/invoices' element={<Invoices socket={socket} />} />

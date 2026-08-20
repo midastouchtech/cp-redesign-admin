@@ -1,9 +1,9 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { MdSpaceDashboard, MdLibraryBooks, MdBusiness, MdHealthAndSafety, MdChevronLeft, MdCalendarViewMonth } from "react-icons/md";
+import { MdSpaceDashboard, MdLibraryBooks, MdBusiness, MdHealthAndSafety, MdChevronLeft, MdCalendarViewMonth, MdOutlineSensors } from "react-icons/md";
 import { HiUserGroup } from "react-icons/hi";
 import styled from "styled-components";
-import { FaFileInvoiceDollar, FaPlus, FaUsers, FaComments } from "react-icons/fa";
+import { FaFileInvoiceDollar, FaPlus, FaUsers, FaComments, FaMapMarkerAlt, FaHistory } from "react-icons/fa";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { AiOutlineLineChart } from "react-icons/ai";
 import { BsFillGearFill } from "react-icons/bs";
@@ -209,8 +209,11 @@ const NAV_ITEMS = [
   { to: "/reports", label: "Reports", icon: MdHealthAndSafety, key: "reports", hideForXray: true },
   { to: "/analytics", label: "Analytics", icon: AiOutlineLineChart, key: "analytics" },
   { to: "/employees", label: "Employees", icon: FaUsers, key: "employees" },
+  { to: "/sites", label: "Sites", icon: FaMapMarkerAlt, key: "sites" },
   { to: "/availability", label: "Availability", icon: MdCalendarViewMonth, key: "availability" },
   { to: "/messaging", label: "Messaging", icon: FaComments, key: "messaging" },
+  { to: "/audit", label: "Audit", icon: FaHistory, key: "audit" },
+  { to: "/signals", label: "Platform Signals", icon: MdOutlineSensors, key: "signals" },
   { to: "/operations", label: "System", icon: BsFillGearFill, key: "operations" },
 ];
 
