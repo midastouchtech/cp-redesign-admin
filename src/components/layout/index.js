@@ -22,8 +22,9 @@ const Banner = styled.div`
     font-weight: 700;
 `
 const ChildrenContainer = styled.div`
-  margin-left: 12rem;
+  margin-left: ${(p) => (p.$sidebarCollapsed ? "4.5rem" : "13.5rem")};
   padding-top: 1rem;
+  transition: margin-left 200ms ease;
   @media (max-width: 800px) {
     height: 80vh;
     overflow: scroll;
@@ -40,6 +41,9 @@ const exists = (i) => !isNil(i) && !isEmpty(i);
 export const Layout = (props) => {
   const [user, setUser] = React.useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem("cp_admin_sidebar_collapsed") === "1"
+  );
   const [firstLoad, setFirstLoad] = useState(0);
   const [latestAppointments, setLatestAppointments] =useState([]);
   const [latestMessages, setLatestMessages] = useState([]);
@@ -58,6 +62,13 @@ export const Layout = (props) => {
 
   const toggleOpen = () => {
     setIsOpen(!isOpen);
+  };
+  const toggleSidebarCollapsed = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("cp_admin_sidebar_collapsed", next ? "1" : "0");
+      return next;
+    });
   };
   const { children, socket, saveUser } = props;
   const cookieUser = cookies.get("clinicplus_admin_logged_in_user");
@@ -177,8 +188,13 @@ export const Layout = (props) => {
         
         <NavHeader toggleOpen={toggleOpen} />
         <Header latestNotifications={latestNotifications} />
-        <SideBar isOpen={isOpen} toggleOpen={toggleOpen} />
-        <ChildrenContainer className="content-body">
+        <SideBar
+          isOpen={isOpen}
+          toggleOpen={toggleOpen}
+          collapsed={sidebarCollapsed}
+          onToggleCollapsed={toggleSidebarCollapsed}
+        />
+        <ChildrenContainer className="content-body" $sidebarCollapsed={sidebarCollapsed}>
           {children}
         </ChildrenContainer>
       </div>
