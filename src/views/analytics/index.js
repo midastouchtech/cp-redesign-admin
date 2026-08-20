@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import styled from "styled-components";
 import {
   Chart as ChartJS,
@@ -10,15 +10,15 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { isEmpty, isNil, keys, mergeAll, range, values } from "ramda";
+import { isEmpty, isNil, mergeAll, range, values } from "ramda";
 import moment from "moment";
-import { Line } from "rc-progress";
 
 import { BsPeopleFill } from "react-icons/bs";
 import { GiReceiveMoney } from "react-icons/gi";
 import { BiNotepad } from "react-icons/bi";
 import { FaSyringe } from "react-icons/fa";
 import { connect } from "react-redux";
+import { useCachedFetch } from "../../hooks/useCachedFetch";
 
 const iconsByTitle = {
   money: GiReceiveMoney,
@@ -84,41 +84,17 @@ const exists = i => !isEmpty(i) && !isNil(i);
 const COMPANION_API_URL = process.env.REACT_APP_COMPANION_API_URL;
 const COMPANION_STATS_SECRET = process.env.REACT_APP_COMPANION_STATS_SECRET;
 
-const Analytics = ({ socket, user }) => {
-  const [analytics, setAnalytics] = useState(null);
-  const [originalAnalytics, setOriginalAnalytics] = useState(null);
+const Analytics = ({ user }) => {
   const [selectedMonth, setSelectedMonth] = useState(moment().format("MMMM"));
   const [selectedYear, setSelectedYear] = useState(moment().format("YYYY"));
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [counter, setCounter] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const myInterval = useRef();
 
-  useEffect(() => {
-    return () => clearInterval(myInterval.current);
-  }, []);
+  const type = user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all";
+  const date = `01-${selectedMonth}-${selectedYear}`;
+  const enabled = exists(user);
+  const cacheKey = `finance-analytics:${type}:${selectedMonth}:${selectedYear}`;
 
-  useEffect(() => {
-    if (isRunning && counter < 5) {
-      myInterval.current = setInterval(
-        () => setCounter((counter) => counter + 1),
-        1000
-      );
-    } else {
-      clearInterval(myInterval.current);
-      myInterval.current = null;
-    }
-  }, [isRunning]);
-
-  const getAnalytics = async () => {
-    setCounter(0);
-    setIsRunning(true);
-    setLoading(true);
-    setError(null);
-    const type = user?.details?.adminType === "xrayAdmin" ? "x-rays" : "all";
-    const date = `01-${selectedMonth}-${selectedYear}`;
-    try {
+  const fetcher = useMemo(
+    () => async () => {
       const res = await fetch(
         `${COMPANION_API_URL}/api/admin/finance-analytics?date=${date}&type=${type}`,
         { headers: { "x-admin-stats-secret": COMPANION_STATS_SECRET } }
@@ -126,29 +102,16 @@ const Analytics = ({ socket, user }) => {
       if (!res.ok) {
         throw new Error(`Failed to load finance analytics (${res.status})`);
       }
-      const data = await res.json();
-      setAnalytics(data);
-      setOriginalAnalytics(data);
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      setCounter(0);
-      setIsRunning(false);
-    }
-  };
+      return res.json();
+    },
+    [date, type]
+  );
 
-  useEffect(() => {
-    if (!analytics && !isRunning && exists(user)) {
-      getAnalytics();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  const clear = () => {
-    setAnalytics(originalAnalytics);
-  };
+  const { data: analytics, loading, refreshing, error, cachedAt, refetch } = useCachedFetch(
+    cacheKey,
+    fetcher,
+    { enabled }
+  );
 
   const amountOptions = {
     responsive: true,
@@ -330,7 +293,6 @@ const Analytics = ({ socket, user }) => {
       },
     ],
   };
-  console.log("timeElapsed", counter);
   return (
     <div className="container-fluid">
       <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
@@ -338,22 +300,21 @@ const Analytics = ({ socket, user }) => {
           <h6 className="fs-16 text-black font-w600 mb-0">Analytics</h6>
           <span className="fs-14 text-black">
             Listed below is monthly analytical information
+            {analytics && (
+              <span className="text-muted ml-2">
+                {refreshing ? "· refreshing…" : cachedAt ? `· updated ${moment(cachedAt).fromNow()}` : ""}
+              </span>
+            )}
           </span>
         </div>
         <div className="d-flex mb-3">
           <button
             type="button"
             class="btn btn-primary  mb-3 mr-2"
-            onClick={getAnalytics}
+            onClick={refetch}
+            disabled={loading || refreshing}
           >
-            Generate
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary mb-3 mr-2"
-            onClick={clear}
-          >
-            Clear
+            {loading || refreshing ? "Loading…" : "Refresh"}
           </button>
           <select
             className="form-control style-2 default-select mr-3"
@@ -573,12 +534,7 @@ const Analytics = ({ socket, user }) => {
       {loading && (
         <div class="row">
           <div class="col-md-12 text-center">
-            <h1> Generating analytical data, please wait ....</h1>
-            <Line
-              percent={(counter / 60) * 100}
-              strokeWidth={2}
-              strokeColor="#fe4128"
-            />
+            <h4 className="text-muted">Loading analytical data…</h4>
           </div>
         </div>
       )}
