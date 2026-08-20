@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DOVER_PRICE, XRAYS_PRICE, MEDICAL_SERVICES } from '../../../../config';
 import { keys, values } from 'ramda';
@@ -6,13 +6,30 @@ import styled from 'styled-components';
 import html2canvas from 'html2canvas';
 import jspdf from 'jspdf';
 import axios from 'axios';
-import { v4 as uuid } from 'uuid';
 import moment from 'moment';
 import { trackEvent } from '../../../../lib/trackEvent';
 
+const COMPANION_API_URL = process.env.REACT_APP_COMPANION_API_URL;
+const COMPANION_STATS_SECRET = process.env.REACT_APP_COMPANION_STATS_SECRET;
+
 const formatPrice = (price) => {
-  return `R ${price.toFixed(2)}`;
+  return `R ${(price ?? 0).toFixed(2)}`;
 };
+
+// html2canvas scale heuristic: more employees/service-lines means a taller rendered
+// #quote-container, and jspdf's .html() renders the whole element at a fixed page width — a
+// large, tall invoice at a high scale produces a huge canvas (slow, sometimes OOMs the tab) while
+// a tiny 1-employee invoice at the old fixed 0.36 renders unnecessarily blurry. Scale down as
+// employee count grows, floor at 0.22 so very large bookings still render (just smaller/denser),
+// ceiling at 0.5 so small bookings look crisper than the old fixed 0.36 default.
+// Thresholds (employee count -> scale): <=5: 0.5, <=15: 0.36 (old default), <=30: 0.28, >30: 0.22.
+function getHtml2CanvasScale(employeeCount) {
+  const count = employeeCount || 0;
+  if (count <= 5) return 0.5;
+  if (count <= 15) return 0.36;
+  if (count <= 30) return 0.28;
+  return 0.22;
+}
 
 const StyedContainer = styled.div`
   @media print {
@@ -47,6 +64,18 @@ const StyedContainer = styled.div`
       margin: 0 !important;
     }
   }
+  .section-header td {
+    padding: 10px 0 4px !important;
+    border: none !important;
+  }
+  .section-header h3,
+  .section-header h5 {
+    margin: 0;
+  }
+  .grand-total-row td {
+    border-top: 2px solid #333 !important;
+    padding-top: 10px !important;
+  }
   tr {
     &:last-of-type {
       td {
@@ -61,15 +90,11 @@ const StyedContainer = styled.div`
 
 function App({ socket }) {
   let params = useParams();
-  const invoiceId = uuid();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [appointment, setAppointment] = useState({});
   const [services, setServices] = useState([]);
-  const [total, setTotal] = useState(0);
   const [servicesPrice, setServicesPrice] = useState(0);
-  const [totalAccessCardPrice, setAccessCardPrice] = useState(0);
-  const [sitesPrice, setSitesPrice] = useState(0);
   const [company, setCompany] = useState({});
   const [disableButton, setButtonDisabled] = useState(false);
   const [status, setStatus] = useState('Email Invoice');
@@ -79,10 +104,47 @@ function App({ socket }) {
   const [xrayCount, setXrayCount] = useState(0);
   const [xrayPrice, setXrayPrice] = useState(0);
 
+  // Authoritative amount/invoice-number/subtotals, fetched from cp-companion's
+  // GET /api/admin/invoices/compute — replaces the client-side recomputation from
+  // appointment.details.employees that used to feed formatPrice/the totals row. The socket-fetched
+  // appointment is still used for everything non-price (dates, PO number, company/employee names).
+  const [invoiceNumber, setInvoiceNumber] = useState(null);
+  const [computedBreakdown, setComputedBreakdown] = useState(null);
+  const [computeLoading, setComputeLoading] = useState(true);
+
+  useEffect(() => {
+    if (!params.appId || !COMPANION_API_URL) return;
+    setComputeLoading(true);
+    fetch(
+      `${COMPANION_API_URL}/api/admin/invoices/compute?appointmentId=${encodeURIComponent(params.appId)}`,
+      { headers: { 'x-admin-stats-secret': COMPANION_STATS_SECRET || '' } }
+    )
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`compute failed: ${res.status}`))))
+      .then((data) => {
+        setInvoiceNumber(data.invoiceId);
+        setComputedBreakdown(data.servicesBreakdown);
+      })
+      .catch((err) => {
+        console.warn('[quote] failed to fetch authoritative invoice amount', err);
+      })
+      .finally(() => setComputeLoading(false));
+  }, [params.appId]);
+
+  const employeeCount = appointment?.details?.employees?.length || 0;
+  const html2canvasScale = getHtml2CanvasScale(employeeCount);
+
+  // Grand total shown on the totals row: prefer the authoritative computed value from
+  // cp-companion; fall back to the (legacy, client-recomputed) servicesPrice+doverPrice+xrayPrice
+  // only while the compute call hasn't returned yet, so the page still renders something
+  // reasonable during the brief loading window rather than blank.
+  const grandTotal = computedBreakdown
+    ? computedBreakdown.grandTotal
+    : servicesPrice + doverPrice + xrayPrice;
+
   const savetopdf = () => {
     window.scrollTo(0, 0);
     const input = document.getElementById('quote-container');
-    
+
     // Force all headings to be black by setting inline styles
     const headings = input.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const originalStyles = [];
@@ -90,7 +152,7 @@ function App({ socket }) {
       originalStyles[index] = heading.style.color || '';
       heading.style.color = 'black';
     });
-    
+
     var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
@@ -105,7 +167,7 @@ function App({ socket }) {
         pdf.save('clincplus-quote.pdf');
       },
       html2canvas: {
-        scale: 0.36,
+        scale: html2canvasScale,
       },
       x: 20,
       y: 20,
@@ -118,7 +180,7 @@ function App({ socket }) {
     window.scrollTo(0, 0);
     window.scrollTo(0, 0);
     const input = document.getElementById('quote-container');
-    
+
     // Force all headings to be black by setting inline styles
     const headings = input.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const originalStyles = [];
@@ -126,7 +188,7 @@ function App({ socket }) {
       originalStyles[index] = heading.style.color || '';
       heading.style.color = 'black';
     });
-    
+
     var doc = new jspdf('p', 'px', 'a4');
     doc.html(input, {
       callback: function (pdf) {
@@ -150,30 +212,59 @@ function App({ socket }) {
           url,
         })
           .then((response) => {
-            socket.emit('SEND_INVOICE', {
-              appointment,
-              url: response.data.publicUrl,
-              invoiceId,
-            });
+            const pdfUrl = response.data.publicUrl;
+            const stableInvoiceId = invoiceNumber || appointment.id;
+
+            // Legacy SEND_INVOICE is deliberately NOT emitted anymore — its handler
+            // (saveNewInvoice in the legacy server) already emails the client itself
+            // (sendNewInvoiceEmail), confirmed by reading that repo's code read-only. Emitting it
+            // alongside POST /api/admin/invoices (which also emails the client via Mailjet) meant
+            // every invoice send double-emailed the client. cp-companion's endpoint below is now
+            // the sole source of both the durable invoice record and the client email; the legacy
+            // server's own invoices collection simply stops receiving new rows going forward
+            // (confirmed nothing else in this repo or cp-companion reads from it).
             setStatus('Sending...');
-            socket.on('RECEIVE_SAVE_INVOICE_SUCCESS', (data) => {
-              setStatus('Invoice sent!');
-              // Note: 'invoice_sent' is a free-form action string, not one of the
-              // contract's enumerated actions ('message_sent' etc) — kept distinct
-              // deliberately since an invoice send is a more specific/meaningful
-              // event than a generic chat message for timeline readers.
-              trackEvent({
-                entityType: 'appointment',
-                entityId: appointment?.id,
-                action: 'invoice_sent',
-                metadata: { invoiceId, url: response.data.publicUrl },
+
+            if (!COMPANION_API_URL) {
+              setStatus('Error sending invoice');
+              return;
+            }
+
+            fetch(`${COMPANION_API_URL}/api/admin/invoices`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-admin-stats-secret': COMPANION_STATS_SECRET || '',
+              },
+              body: JSON.stringify({
+                appointmentId: appointment?.id,
+                invoiceId: stableInvoiceId,
+                pdfUrl,
+              }),
+            })
+              .then((res) => {
+                if (!res.ok) throw new Error(`cp-companion invoice record failed: ${res.status}`);
+                setStatus('Invoice sent!');
+                // Note: 'invoice_sent' is a free-form action string, not one of the
+                // contract's enumerated actions ('message_sent' etc) — kept distinct
+                // deliberately since an invoice send is a more specific/meaningful
+                // event than a generic chat message for timeline readers.
+                trackEvent({
+                  entityType: 'appointment',
+                  entityId: appointment?.id,
+                  action: 'invoice_sent',
+                  metadata: { invoiceId: stableInvoiceId, url: pdfUrl },
+                });
+              })
+              .catch((err) => {
+                console.warn('[quote] failed to record invoice in cp-companion', err);
+                setStatus('Error sending invoice');
               });
-            });
           })
           .catch((errr) => setStatus('Error sending invoice'));
       },
       html2canvas: {
-        scale: 0.36,
+        scale: html2canvasScale,
       },
       x: 20,
       y: 20,
@@ -198,8 +289,6 @@ function App({ socket }) {
       const allServices = allServicesWithVienna.filter(
         (s) => s.id !== 'vienna-test'
       );
-      //
-      console.log('all services', allServices);
       const servicesPrice = allServices.reduce((acc, service) => {
         return acc + service.price;
       }, 0);
@@ -212,9 +301,6 @@ function App({ socket }) {
         return acc;
       }, {});
 
-      // Sites and access cards no longer charged (pricing removed from invoicing)
-      const sitesPrices = 0;
-      const accessCardPrices = 0;
       const doverPrices = appointment?.details?.employees?.reduce(
         (acc, employee) => {
           const requiresDover = employee.dover?.required;
@@ -237,20 +323,12 @@ function App({ socket }) {
         (employee) => employee.xray?.required
       ).length;
 
-      console.log('doverPrice', doverPrices);
-      console.log('servicesPrice', servicesPrice);
-      const bookingPrice =
-        servicesPrice + doverPrices + xrayPrices;
-      console.log('bookingPrice', bookingPrice);
-
       setDoverPrice(doverPrices);
       setDoverCount(employeesDoingDOver);
       setXrayPrice(xrayPrices);
       setXrayCount(employeesDoingXray);
       setServicesPrice(servicesPrice);
       setServiceCounts(serviceCounts);
-      setSitesPrice(sitesPrices);
-      setAccessCardPrice(accessCardPrices);
       setServices(allServices);
       if (appointment.invoice) {
         setButtonDisabled(true);
@@ -357,7 +435,7 @@ function App({ socket }) {
                   </p>
                   <h4>Invoice Number</h4>
                   <p className='mb-3'>
-                    <strong>{appointment.id}</strong>
+                    <strong>{computeLoading ? 'Loading…' : invoiceNumber || appointment.id}</strong>
                   </p>
                   <h4>Terms</h4>
                   <p>
@@ -398,7 +476,11 @@ function App({ socket }) {
                         </tr>
                       </thead>
                       <tbody>
-                        <h5>Service prices</h5>
+                        <tr class='section-header'>
+                          <td colspan='3'>
+                            <h5>Service prices</h5>
+                          </td>
+                        </tr>
                         {values(MEDICAL_SERVICES)
                           .map((service) =>
                           serviceCounts[service.id] ? (
@@ -419,8 +501,11 @@ function App({ socket }) {
                           )
                         )}
 
-                        <br />
-                        <h5>Site Prices</h5>
+                        <tr class='section-header'>
+                          <td colspan='3'>
+                            <h5>Site Prices</h5>
+                          </td>
+                        </tr>
                         {appointment?.details?.employees?.map((employee) => (
                           <tr>
                             <td class='col-md-8 text-capitalize'>
@@ -440,15 +525,21 @@ function App({ socket }) {
                           </tr>
                         ))}
 
-                        <br />
-                        <h5>Access cards</h5>
+                        <tr class='section-header'>
+                          <td colspan='3'>
+                            <h5>Access cards</h5>
+                          </td>
+                        </tr>
                         <tr>
                           <td class='col-md-8'>Access cards</td>
                           <td class='col-md-1' style={{ textAlign: 'center' }}>—</td>
                           <td class='col-md-5 text-right'>No charge</td>
                         </tr>
-                        <br />
-                        <h3>Clinicplus Medicals Total</h3>
+                        <tr class='section-header'>
+                          <td colspan='3'>
+                            <h3>Clinicplus Medicals Total</h3>
+                          </td>
+                        </tr>
                         <tr>
                           <td class='col-md-8'></td>
                           <td class='col-md-1' style={{ textAlign: 'center' }}>
@@ -459,33 +550,58 @@ function App({ socket }) {
                           <td class='col-md-5 text-right'>
                             <h3>
                               <strong>
-                                {formatPrice(servicesPrice)}
+                                {formatPrice(
+                                  computedBreakdown ? computedBreakdown.servicesSubtotal : servicesPrice
+                                )}
                               </strong>
                             </h3>
                           </td>
                         </tr>
-                        <br />
-                        <br />
-                        <h3>Clinicplus Dover Total</h3>
-                        <tr>
-                          <td class='col-md-8 text-capitalize'>Employees</td>
-                          <td class='col-md-1'>{doverCount}</td>
-                          <td class='col-md-5 text-right'>
-                            <h3>{formatPrice(doverPrice)}</h3>
+                        <tr class='section-header'>
+                          <td colspan='3'>
+                            <h3>Clinicplus Dover Total</h3>
                           </td>
                         </tr>
-                        <br />
-                        <br />
-                        <br />
-                        <h3>Xray Service</h3>
                         <tr>
                           <td class='col-md-8 text-capitalize'>Employees</td>
-                          <td class='col-md-1'>{xrayCount}</td>
+                          <td class='col-md-1'>
+                            {computedBreakdown ? computedBreakdown.doverEmployeeCount : doverCount}
+                          </td>
                           <td class='col-md-5 text-right'>
-                            <h3>{formatPrice(xrayPrice)}</h3>
+                            <h3>
+                              {formatPrice(computedBreakdown ? computedBreakdown.doverSubtotal : doverPrice)}
+                            </h3>
                           </td>
                         </tr>
-                        <br />
+                        <tr class='section-header'>
+                          <td colspan='3'>
+                            <h3>Xray Service</h3>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class='col-md-8 text-capitalize'>Employees</td>
+                          <td class='col-md-1'>
+                            {computedBreakdown ? computedBreakdown.xrayEmployeeCount : xrayCount}
+                          </td>
+                          <td class='col-md-5 text-right'>
+                            <h3>
+                              {formatPrice(computedBreakdown ? computedBreakdown.xraySubtotal : xrayPrice)}
+                            </h3>
+                          </td>
+                        </tr>
+                        <tr class='grand-total-row'>
+                          <td class='col-md-8'></td>
+                          <td class='col-md-1' style={{ textAlign: 'center' }}>
+                            <h3>
+                              <strong>Grand Total:</strong>
+                            </h3>
+                          </td>
+                          <td class='col-md-5 text-right'>
+                            <h2>
+                              <strong>{formatPrice(grandTotal)}</strong>
+                            </h2>
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
@@ -503,7 +619,7 @@ function App({ socket }) {
                   <p>Branch: 632005</p>
                   <p>Reference: {company?.details?.name}</p>
                 </div>
-                
+
                 <div class='col-md-6 text-left'>
                   <h4>
                     <strong>Dover Service Banking Details</strong>
