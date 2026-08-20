@@ -1,29 +1,23 @@
-import { isNil, isEmpty, repeat } from "ramda";
+import { isNil, isEmpty } from "ramda";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import styled from "styled-components";
-
-const getBadgeclassName = (status) => {
-  switch (status) {
-    case "pending":
-      return "badge badge-warning";
-    case "approved":
-      return "badge badge-success";
-    case "declined":
-      return "badge badge-danger";
-    default:
-      return "badge badge-primary";
-  }
-};
-
-const NoAppointments = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 500px;
-  width: 100%;
-
-`;
+import {
+  FontImport,
+  Page,
+  PageHeader,
+  Toolbar,
+  Field,
+  FieldLabel,
+  Input,
+  Button,
+  StatusMessage,
+  TablePanel,
+  TableScroll,
+  Table,
+  RowActionLink,
+  EmptyState,
+  Pagination,
+} from "../../components/ListPage";
 
 const Companies = ({ socket }) => {
   const [companies, setCompanies] = useState(null);
@@ -34,32 +28,30 @@ const Companies = ({ socket }) => {
   const [notFound, setNotFound] = useState(false);
 
   const getPageCompanies = (p) => {
-      socket.emit("GET_NEXT_PAGE_COMPANIES", { page: p});
-      socket.on("RECEIVE_NEXT_PAGE_COMPANIES", (data) => {
-        setCompanies(data);
-        setOriginalCompanies(data);
-        setPage(p);
-      });
+    socket.emit("GET_NEXT_PAGE_COMPANIES", { page: p });
+    socket.on("RECEIVE_NEXT_PAGE_COMPANIES", (data) => {
+      setCompanies(data);
+      setOriginalCompanies(data);
+      setPage(p);
+    });
   };
-  
-  useEffect(()=>{
-    console.log("use effect socket", socket)
+
+  useEffect(() => {
     if (socket && !companies) {
       getPageCompanies(0);
     }
-  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
-  
 
-  const handleSearch = async (term) => {
+  const handleSearch = async () => {
     setLoading(true);
     setNotFound(false);
-    socket.emit("SEARCH_COMPANY", {term: searchTerm});
+    socket.emit("SEARCH_COMPANY", { term: searchTerm });
     socket.on("RECEIVE_SEARCHED_COMPANY", (data) => {
       setCompanies(data);
       setLoading(false);
     });
-    socket.on("RECEIVE_SEARCHED_COMPANY_NOT_FOUND", (data) => {
+    socket.on("RECEIVE_SEARCHED_COMPANY_NOT_FOUND", () => {
       setCompanies([]);
       setNotFound(true);
       setLoading(false);
@@ -70,136 +62,72 @@ const Companies = ({ socket }) => {
     setCompanies(originalCompanies);
     setSearchTerm("");
     setNotFound(false);
-  }
+  };
 
   return (
-    <div className="container-fluid">
-      <div className="d-flex flex-wrap mb-2 align-items-center justify-content-between">
-        <div className="mb-3 mr-3">
-          <h6 className="fs-16 text-black font-w600 mb-0">
-            Companies
-          </h6>
-          <span className="fs-14">All active companies listed here </span>
-        </div>
-      </div>
-      <div className="row mb-3">
-        <div className="col-10">
-          <input
+    <Page>
+      <FontImport />
+      <PageHeader eyebrow="Directory" title="Companies" subtitle="All active companies listed here" />
+
+      <Toolbar>
+        <Field $flex="1 1 320px" $minWidth="240px">
+          <FieldLabel>Search</FieldLabel>
+          <Input
             type="text"
-            className="form-control input-default"
             placeholder="Enter company name"
-            onChange={(e) => setSearchTerm(e.target.value)}
             value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
-        </div>
-        <div className="col-1">
-          <button type="button" class="btn btn-primary" onClick={handleSearch}>Search</button>
-        </div>
-        <div className="col-1">
-          <button type="button" class="btn btn-primary" onClick={clearSearch}>Clear</button>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-12 d-flex justify-content-center">
-        {loading && (
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Searching for appointment</span>
-          </div>
-        )}
-        </div>
-        {notFound && (
-          <div className="alert alert-danger" role="alert">
-            Company could not be found.
-          </div>
-        )}
-      </div>
-      <br />
-      <div className="row">
-        <div className="col-xl-12">
-          <div className="tab-content">
-            <div id="All" className="tab-pane active fade show">
-              <div className="table-responsive">
-                {!isNil(companies) && !isEmpty(companies) && (
-                  <table
-                    id="example2"
-                    className="table card-table display dataTablesCard"
-                  >
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Manager</th>
-                        <th>Vat</th>
-                        <th>Registration Number </th>
-                        <th>Info </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {companies?.map((company, index) => (
-                        <tr key={index}>
-                          <td>{company.id}</td>
-                          <td>{company.details.name}</td>
-                          <td>{company.usersWhoCanManage[0].name}</td>
-                          <td>{company.details.vat}</td>
-                          <td>{company.details.registrationNumber}</td>
-                          <td>
-                            <Link to={`/company/edit/${company.id}`}  className="btn btn-xs btn-primary text-nowrap">
-                              <i
-                                className="fa fa-info
-                                            scale5 mr-3"
-                                aria-hidden="true"
-                              ></i>
-                              More info
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-                {(isNil(companies) || isEmpty(companies)) && (
-                  <NoAppointments>
-                    <div className="d-flex">
-                      <h1>No Companies</h1>
-                    </div>
-                  </NoAppointments>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="event-tabs mb-3 mr-3">
-        <ul className="nav nav-tabs" role="tablist">
-          <li className="nav-item">
-            <a
-              className={`nav-link`}
-              onClick={() => getPageCompanies(page === 0 ? 0 : page-1)}
-            >
-              Prev Page
-            </a>
-          </li> 
-          <li className="nav-item">
-            <a
-              className={`nav-link`}
-              onClick={() => getPageCompanies(page+1)}
-            >
-              Next Page
-            </a>
-          </li>
-          {repeat('i', page).map((i, index) => (
-            <li className="nav-item">
-              <a
-                className={`nav-link`}
-                onClick={() => getPageCompanies(index)}
-              >
-                Page {index+1}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+        </Field>
+        <Button onClick={handleSearch} disabled={loading}>
+          {loading ? "Searching…" : "Search"}
+        </Button>
+        <Button $variant="ghost" onClick={clearSearch}>
+          Clear
+        </Button>
+      </Toolbar>
+
+      {notFound && <StatusMessage $tone="danger">Company could not be found.</StatusMessage>}
+
+      <TablePanel>
+        <TableScroll>
+          {!isNil(companies) && !isEmpty(companies) ? (
+            <Table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Manager</th>
+                  <th>VAT</th>
+                  <th>Registration No.</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {companies.map((company, index) => (
+                  <tr key={index}>
+                    <td>{company.id}</td>
+                    <td>{company.details.name}</td>
+                    <td>{company.usersWhoCanManage[0]?.name}</td>
+                    <td>{company.details.vat}</td>
+                    <td>{company.details.registrationNumber}</td>
+                    <td>
+                      <RowActionLink as={Link} to={`/company/edit/${company.id}`}>
+                        More info
+                      </RowActionLink>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          ) : (
+            <EmptyState title="No companies" subtitle="Try a different search term." />
+          )}
+        </TableScroll>
+        <Pagination page={page} onChange={getPageCompanies} />
+      </TablePanel>
+    </Page>
   );
 };
 
