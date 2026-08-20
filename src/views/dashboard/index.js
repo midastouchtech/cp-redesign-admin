@@ -422,34 +422,49 @@ const CompareBarFill = styled.div`
 
 /* Latest appointments / messages ---------------------------------------- */
 
+const TableScroll = styled.div`
+  overflow-x: auto;
+`;
+
 const Table = styled.table`
   width: 100%;
+  min-width: 380px;
   border-collapse: collapse;
-  font-size: 13px;
+  table-layout: fixed;
+  font-size: 12px;
+
   thead th {
     text-align: left;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: ${token.ink500};
-    padding: 0 10px 10px;
+    padding: 0 8px 8px 0;
     border-bottom: 1px solid ${token.line};
   }
+  thead th:nth-child(1) { width: 34%; }
+  thead th:nth-child(2) { width: 26%; }
+  thead th:nth-child(3) { width: 20%; }
+  thead th:nth-child(4) { width: 20%; }
+
   tbody td {
-    padding: 11px 10px;
+    padding: 8px 8px 8px 0;
     border-bottom: 1px solid ${token.lineSoft};
     color: ${token.ink700};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: ${token.canvas}; }
+  tbody tr:hover td { background: ${token.canvas}; }
 `;
 
 const StatusBadge = styled.span`
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 3px 9px;
+  padding: 2px 7px;
   border-radius: 999px;
   text-transform: capitalize;
   background: ${(p) =>
@@ -458,46 +473,65 @@ const StatusBadge = styled.span`
 `;
 
 const ScrollPanel = styled(Panel)`
-  max-height: 420px;
+  max-height: 340px;
   overflow-y: auto;
 `;
 
 const MessageItem = styled.div`
-  padding: 12px 0;
+  padding: 9px 0;
   border-bottom: 1px solid ${token.lineSoft};
   &:last-child { border-bottom: none; }
 `;
 
 const MessageHead = styled.div`
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-bottom: 3px;
+
+  strong {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  span {
+    font-size: 11px;
+    color: ${token.ink500};
+    flex-shrink: 0;
+  }
 `;
 
 const MessageBubble = styled.p`
   background: ${token.canvas};
-  border-radius: 0 10px 10px 10px;
-  padding: 8px 12px;
-  font-size: 13px;
+  border-radius: 0 8px 8px 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.4;
   color: ${token.ink700};
-  margin: 6px 0;
+  margin: 4px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 const MessageFooter = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 10px;
   color: ${token.ink500};
 `;
 
 const ReplyLink = styled(Link)`
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   color: ${token.primary};
   font-weight: 600;
+  font-size: 10px;
   text-decoration: none;
   &:hover { text-decoration: underline; }
 `;
@@ -919,28 +953,30 @@ const Dashboard = ({ user }) => {
             <PanelTitle>Latest appointments</PanelTitle>
           </PanelHead>
           {latestAppointments?.length ? (
-            <Table>
-              <thead>
-                <tr>
-                  <th>Company</th>
-                  <th>User</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {latestAppointments.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td>{appointment?.details?.company?.name}</td>
-                    <td>{appointment?.usersWhoCanManage ? appointment.usersWhoCanManage[0].name : ""}</td>
-                    <td>{appointment?.details?.date}</td>
-                    <td>
-                      <StatusBadge $status={appointment?.status}>{appointment?.status}</StatusBadge>
-                    </td>
+            <TableScroll>
+              <Table>
+                <thead>
+                  <tr>
+                    <th>Company</th>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {latestAppointments.map((appointment) => (
+                    <tr key={appointment.id} title={appointment?.details?.company?.name}>
+                      <td>{appointment?.details?.company?.name}</td>
+                      <td>{appointment?.usersWhoCanManage ? appointment.usersWhoCanManage[0].name : ""}</td>
+                      <td>{moment(appointment?.details?.date).format("DD MMM")}</td>
+                      <td>
+                        <StatusBadge $status={appointment?.status}>{appointment?.status}</StatusBadge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableScroll>
           ) : (
             <Empty>No recent appointments.</Empty>
           )}
@@ -954,16 +990,14 @@ const Dashboard = ({ user }) => {
             latestMessages.map((message) => (
               <MessageItem key={`${message.appointment}-${message.createdAt}`}>
                 <MessageHead>
-                  <strong style={{ fontSize: 13 }}>{capitalize(message?.company)}</strong>
-                  <span style={{ fontSize: 12, color: token.ink500 }}>{capitalize(message?.author?.name)}</span>
+                  <strong title={capitalize(message?.company)}>{capitalize(message?.company)}</strong>
+                  <span>{capitalize(message?.author?.name)}</span>
                 </MessageHead>
                 <MessageBubble>{message?.message}</MessageBubble>
                 <MessageFooter>
-                  <span>
-                    {moment(message.createdAt).format("DD/MM/YYYY")} at {moment(message.createdAt).format("HH:mm")}
-                  </span>
+                  <span>{moment(message.createdAt).format("DD MMM, HH:mm")}</span>
                   <ReplyLink to={`appointment/${message.appointment}`}>
-                    <FaReply size="0.7rem" /> reply
+                    <FaReply size="0.6rem" /> reply
                   </ReplyLink>
                 </MessageFooter>
               </MessageItem>
