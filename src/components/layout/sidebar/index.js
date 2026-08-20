@@ -72,15 +72,15 @@ const NavContainer = styled.div`
       font-size: 13px;
       font-weight: 600;
       line-height: 1.2;
-      color: #334155;
+      color: #FE634E;
     }
     li a:hover {
       background: #f5f7fa;
-      color: #1e40af;
+      color: #FE634E;
     }
     li.mm-active > a {
       background: #eaf0fe;
-      color: #1e40af;
+      color: #FE634E;
     }
     li a svg {
       flex-shrink: 0;
@@ -89,11 +89,11 @@ const NavContainer = styled.div`
       width: 16px;
       height: 16px;
       margin: 0 !important;
-      color: #64748b;
+      color: #FE634E;
     }
     li.mm-active > a svg,
     li a:hover svg {
-      color: #1e40af;
+      color: #FE634E;
     }
   }
 
@@ -111,10 +111,10 @@ const NavContainer = styled.div`
     border-top: 1px solid #eef1f5;
     flex-shrink: 0;
     cursor: pointer;
-    color: #64748b;
+    color: #FE634E;
     background: #fff;
     &:hover {
-      color: #1e40af;
+      color: #FE634E;
       background: #f5f7fa;
     }
     svg {
