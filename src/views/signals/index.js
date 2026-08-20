@@ -195,7 +195,7 @@ const SideBySide = styled.div`
   margin-bottom: 16px;
 
   @media (min-width: 900px) {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: 1fr 1fr;
     align-items: start;
   }
 `;
@@ -431,7 +431,7 @@ const Signals = () => {
               )}
             </SectionCard>
 
-            <SectionCard>
+            <SectionCard style={{ gridColumn: "1 / -1" }}>
               <SectionTitle>
                 Pricing anomalies ({anomalies.totalCount}{anomalies.query ? ` of ${data.anomalies?.length || 0}` : ""})
               </SectionTitle>
