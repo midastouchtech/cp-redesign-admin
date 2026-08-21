@@ -292,8 +292,8 @@ const Signals = () => {
         eyebrow="Operations"
         title="Platform Signals"
         subtitle={
-          "Read-only view of the platform's hourly sync pipeline output — dormancy, data quality, and pricing " +
-          "anomalies across the platform. Never reads live production." +
+          "A daily health view of companies that may need follow-up, possible data issues, and appointment pricing " +
+          "mismatches. This page uses the latest saved system check, so it will not slow down live bookings." +
           (cachedAt ? ` · updated ${moment(cachedAt).fromNow()}` : "") +
           (refreshing ? " · refreshing…" : "")
         }
@@ -311,30 +311,6 @@ const Signals = () => {
 
       {data && (
         <>
-          {/* Last sync run */}
-          <SectionCard>
-            <SectionTitle>Last sync run</SectionTitle>
-            {lastRun ? (
-              <>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <SyncBadge status={lastRun.status} />
-                  <span style={{ fontSize: 12, color: token.ink500 }}>
-                    {moment(lastRun.startedAt).format("D MMM YYYY, HH:mm")}
-                  </span>
-                </div>
-                <JobList>
-                  {lastRun.jobs?.map((j) => (
-                    <JobItem key={j.name}>
-                      {j.name}: {j.processed} processed, {j.errors} errors ({j.durationMs}ms)
-                    </JobItem>
-                  ))}
-                </JobList>
-              </>
-            ) : (
-              <EmptyState title="No sync runs recorded yet" />
-            )}
-          </SectionCard>
-
           {/* Dormant companies + New ClinicPlus companies + Pricing anomalies, side by side */}
           <SideBySide>
             <SectionCard>
@@ -509,6 +485,30 @@ const Signals = () => {
                   </Row>
                 ))}
               </List>
+            )}
+          </SectionCard>
+
+          {/* Last sync run */}
+          <SectionCard>
+            <SectionTitle>Last sync run</SectionTitle>
+            {lastRun ? (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <SyncBadge status={lastRun.status} />
+                  <span style={{ fontSize: 12, color: token.ink500 }}>
+                    {moment(lastRun.startedAt).format("D MMM YYYY, HH:mm")}
+                  </span>
+                </div>
+                <JobList>
+                  {lastRun.jobs?.map((j) => (
+                    <JobItem key={j.name}>
+                      {j.name}: {j.processed} processed, {j.errors} errors ({j.durationMs}ms)
+                    </JobItem>
+                  ))}
+                </JobList>
+              </>
+            ) : (
+              <EmptyState title="No sync runs recorded yet" />
             )}
           </SectionCard>
 

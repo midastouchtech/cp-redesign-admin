@@ -247,7 +247,7 @@ const EmployeeBookingsTab = ({ clinic, setClinic, monthValue, setMonthValue }) =
 };
 
 const Availability = () => {
-  const [activeTab, setActiveTab] = useState("bookings"); // 'bookings' | 'capacity'
+  const [activeTab, setActiveTab] = useState("capacity"); // 'bookings' | 'capacity'
   const [clinic, setClinic] = useState(CLINICS[0]);
   const [monthValue, setMonthValue] = useState(moment().format("YYYY-MM"));
 
