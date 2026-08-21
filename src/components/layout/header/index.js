@@ -22,7 +22,7 @@ import {
   MdSupportAgent,
 } from "react-icons/md";
 import { adminApi } from "../../../lib/adminApi";
-import { readRecentEntities } from "../../../lib/recentEntities";
+import { readRecentEntities, subscribeToRecentEntities } from "../../../lib/recentEntities";
 import { theme } from "../theme";
 
 function useOnClickOutside(refs, handler) {
@@ -678,6 +678,7 @@ const Header = ({ user, latestNotifications, sidebarCollapsed, onOpenMobileNav }
   const [showRecent, setShowRecent] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [recent, setRecent] = useState(() => readRecentEntities());
 
   const searchRef = useRef(null);
   const recentRef = useRef(null);
@@ -691,6 +692,12 @@ const Header = ({ user, latestNotifications, sidebarCollapsed, onOpenMobileNav }
   useOnClickOutside(recentRef, () => setShowRecent(false));
   useOnClickOutside(notifRef, () => setShowNotifications(false));
   useOnClickOutside(profileRef, () => setShowProfileMenu(false));
+
+  useEffect(() => {
+    const loadRecent = () => setRecent(readRecentEntities());
+    loadRecent();
+    return subscribeToRecentEntities(loadRecent);
+  }, []);
 
   const runSearch = async () => {
     if (search.trim().length < 2) return;
@@ -755,7 +762,6 @@ const Header = ({ user, latestNotifications, sidebarCollapsed, onOpenMobileNav }
     item._id;
 
   const displayName = `${user?.details?.name || ""} ${user?.details?.surname || ""}`.trim() || "Admin";
-  const recent = readRecentEntities();
 
   return (
     <Bar $sidebarCollapsed={sidebarCollapsed}>

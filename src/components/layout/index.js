@@ -16,6 +16,7 @@ import { useAdminDataPrefetch } from "../../hooks/useAdminDataPrefetch";
 import { adminApi } from "../../lib/adminApi";
 import { theme } from "./theme";
 import { MdClose } from "react-icons/md";
+import { rememberEntity } from "../../lib/recentEntities";
 
 const ACTIVITY_TOAST_TTL_MS = 8000;
 
@@ -209,6 +210,60 @@ export const Layout = (props) => {
   }, [user, isQuoteOrLoginPage, lastActivityPoll]);
 
   useEffect(() => {
+    if (!user || isQuoteOrLoginPage) return;
+    const fetchRecentMessages = async () => {
+      try {
+        const data = await adminApi("/api/admin/messaging/threads?page=0");
+        const messages = (data.threads || [])
+          .filter((thread) => thread.lastMessage)
+          .map((thread) => ({
+            created: thread.lastMessage?.createdAt || thread.date,
+            by: thread.companyName || thread.userName || thread.appointmentId,
+            type: "msg",
+            id: thread.appointmentId,
+            preview: thread.lastMessage?.message || thread.lastMessage?.text || "",
+          }))
+          .sort((a, b) => (moment(a.created).isBefore(moment(b.created)) ? 1 : -1))
+          .slice(0, 8);
+        setLatestMessages(messages);
+      } catch (err) {
+        console.warn("[recent messages] fetch failed", err);
+      }
+    };
+    fetchRecentMessages();
+    const timer = setInterval(fetchRecentMessages, 60000);
+    return () => clearInterval(timer);
+  }, [user, isQuoteOrLoginPage]);
+
+  useEffect(() => {
+    if (!user || isQuoteOrLoginPage) return;
+    const path = location.pathname;
+    const rememberFromRoute = (entity) => {
+      if (entity) rememberEntity(entity);
+    };
+
+    const company360Match = path.match(/^\/companies\/([^/]+)\/360$/);
+    const companyEditMatch = path.match(/^\/company\/edit\/([^/]+)$/);
+    const appointmentMatch = path.match(/^\/appointment\/([^/]+)$/);
+    const clientMatch = path.match(/^\/client\/edit\/([^/]+)$/);
+    const adminMatch = path.match(/^\/admin\/edit\/([^/]+)$/);
+
+    rememberFromRoute(
+      company360Match
+        ? { type: "company", id: company360Match[1], label: `Company ${company360Match[1]}`, to: path }
+        : companyEditMatch
+          ? { type: "company", id: companyEditMatch[1], label: `Company ${companyEditMatch[1]}`, to: path }
+        : appointmentMatch
+          ? { type: "appointment", id: appointmentMatch[1], label: `Appointment ${appointmentMatch[1]}`, to: path }
+          : clientMatch
+            ? { type: "client", id: clientMatch[1], label: `Client ${clientMatch[1]}`, to: path }
+            : adminMatch
+              ? { type: "admin", id: adminMatch[1], label: `Admin ${adminMatch[1]}`, to: path }
+              : null
+    );
+  }, [location.pathname, user, isQuoteOrLoginPage]);
+
+  useEffect(() => {
     if (!activityToasts.length) return undefined;
     const timers = activityToasts.map((toast) => {
       const elapsed = Date.now() - (toast.receivedAt || Date.now());
@@ -257,8 +312,8 @@ export const Layout = (props) => {
           });
       socket.on("RECEIVE_LATEST_MESSAGES", (messages) => {
         setLatestMessages(messages);
-        console.log("set latest messages", messages)
-        socket.off("RECEIVE_LATEST_MESSAGES")
+            console.log("set latest messages", messages)
+            socket.off("RECEIVE_LATEST_MESSAGES")
       });
     }
   
@@ -295,7 +350,13 @@ export const Layout = (props) => {
     );
   }
   const appointmentStats = latestAppointments.map(a => ({created: a?.tracking[0]?.date, by: a?.details?.company?.name, type:"app", id: a?.id}))
-  const messageStats = latestMessages.map(m => ({created: m?.createdAt, by: m?.author?.name, type:"msg", id: m.appointment}))
+  const messageStats = latestMessages.map(m => ({
+    created: m?.created || m?.createdAt,
+    by: m?.by || m?.company || m?.author?.name,
+    type: "msg",
+    id: m?.id || m?.appointment,
+    preview: m?.preview || m?.message || m?.text,
+  }))
   const latestNotifications = concat(appointmentStats, messageStats).sort((a, b) => {
     return moment(a.created).isBefore(moment(b.created)) ? 1 : -1;
   });
