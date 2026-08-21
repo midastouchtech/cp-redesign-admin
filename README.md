@@ -1,5 +1,10 @@
 # Getting Started with Create React App
 
+## Environment
+
+Environment variables used by this app are documented in
+[`docs/ENVIRONMENT_VARIABLES.md`](docs/ENVIRONMENT_VARIABLES.md).
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
