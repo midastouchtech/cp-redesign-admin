@@ -113,6 +113,7 @@ const Main = () => {
             path='/company/edit/:companyId'
             element={<CompanyEditor socket={socket} />}
           />
+          <Route path='/companies/:companyId/360' element={<Company360 socket={socket} />} />
           <Route
             path='/appointments'
             element={<Appointments socket={socket} />}
