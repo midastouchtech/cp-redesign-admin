@@ -4,6 +4,7 @@ import Header from "./header";
 import { connect } from "react-redux";
 import SideBar from "./sidebar";
 import FloatingCreate from "./floatingCreate";
+import VersionWelcomeModal from "./VersionWelcomeModal";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isNil, isEmpty, concat } from "ramda";
@@ -14,6 +15,9 @@ import moment from "moment";
 import { useAdminDataPrefetch } from "../../hooks/useAdminDataPrefetch";
 import { adminApi } from "../../lib/adminApi";
 import { theme } from "./theme";
+import { MdClose } from "react-icons/md";
+
+const ACTIVITY_TOAST_TTL_MS = 8000;
 
 const Banner = styled.div`
     width: 100vw;
@@ -41,6 +45,94 @@ const ChildrenContainer = styled.div`
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
+  }
+`;
+
+const ToastStack = styled.div`
+  position: fixed;
+  right: 18px;
+  bottom: 96px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+  pointer-events: none;
+`;
+
+const ToastCard = styled.button`
+  position: relative;
+  width: 100%;
+  min-height: 76px;
+  padding: 13px 44px 13px 14px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(254, 99, 78, .18), transparent 44%),
+    #151519;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, .28);
+  animation: toastIn 220ms cubic-bezier(.22, .8, .28, 1) both;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 52px rgba(15, 23, 42, .34);
+  }
+
+  @keyframes toastIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+  }
+`;
+
+const ToastTitle = styled.strong`
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0;
+`;
+
+const ToastText = styled.div`
+  color: rgba(255, 255, 255, .78);
+  font-size: 12px;
+  line-height: 1.45;
+`;
+
+const ToastClose = styled.button`
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .1);
+  color: rgba(255, 255, 255, .82);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, .2);
+    color: #fff;
   }
 `;
 
@@ -99,7 +191,12 @@ export const Layout = (props) => {
       try {
         const data = await adminApi(`/api/admin/recent-activity?since=${encodeURIComponent(lastActivityPoll)}`);
         setLastActivityPoll(data.serverTime || new Date().toISOString());
-        const items = (data.items || []).slice(0, 5);
+        const receivedAt = Date.now();
+        const items = (data.items || []).slice(0, 5).map((item) => ({
+          ...item,
+          toastKey: `${item.type}-${item.id}-${receivedAt}`,
+          receivedAt,
+        }));
         if (items.length) {
           setActivityToasts((prev) => [...items, ...prev].slice(0, 5));
         }
@@ -110,6 +207,21 @@ export const Layout = (props) => {
     const timer = setInterval(poll, 45000);
     return () => clearInterval(timer);
   }, [user, isQuoteOrLoginPage, lastActivityPoll]);
+
+  useEffect(() => {
+    if (!activityToasts.length) return undefined;
+    const timers = activityToasts.map((toast) => {
+      const elapsed = Date.now() - (toast.receivedAt || Date.now());
+      return setTimeout(() => {
+        setActivityToasts((current) => current.filter((item) => item.toastKey !== toast.toastKey));
+      }, Math.max(ACTIVITY_TOAST_TTL_MS - elapsed, 0));
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [activityToasts]);
+
+  const dismissActivityToast = (toastKey) => {
+    setActivityToasts((current) => current.filter((item) => item.toastKey !== toastKey));
+  };
 
   useEffect(()=>{
     console.log("use effect socket", socket)
@@ -226,17 +338,28 @@ export const Layout = (props) => {
           {children}
         </ChildrenContainer>
         <FloatingCreate />
-        <div style={{ position: "fixed", right: 18, bottom: 96, zIndex: 9999, display: "flex", flexDirection: "column", gap: 8 }}>
+        <VersionWelcomeModal user={user} />
+        <ToastStack aria-live="polite" aria-label="Recent activity notifications">
           {activityToasts.map((item, index) => {
             const to = item.type === "appointment" ? `/appointment/${item.id}` : item.type === "company" ? `/companies/${item.id}/360` : `/client/edit/${item.id}`;
             return (
-              <div key={`${item.type}-${item.id}-${index}`} onClick={() => navigate(to)} style={{ cursor: "pointer", background: "#151619", color: "#fff", borderRadius: 8, padding: "10px 12px", minWidth: 260, boxShadow: "0 8px 24px rgba(15,23,42,.18)" }}>
-                <strong>New {item.type}</strong>
-                <div style={{ fontSize: 12, opacity: .85 }}>{item.label}</div>
-              </div>
+              <ToastCard key={item.toastKey || `${item.type}-${item.id}-${index}`} type="button" onClick={() => navigate(to)}>
+                <ToastClose
+                  type="button"
+                  aria-label="Dismiss notification"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    dismissActivityToast(item.toastKey);
+                  }}
+                >
+                  <MdClose />
+                </ToastClose>
+                <ToastTitle>New {item.type}</ToastTitle>
+                <ToastText>{item.label}</ToastText>
+              </ToastCard>
             );
           })}
-        </div>
+        </ToastStack>
       </div>
     </div>
   );

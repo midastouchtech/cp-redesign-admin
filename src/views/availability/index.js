@@ -16,6 +16,7 @@ import {
   TableScroll,
   Table,
   RowActionLink,
+  StatusBadge,
   token,
 } from "../../components/ListPage";
 import { useCachedFetch } from "../../hooks/useCachedFetch";
@@ -174,6 +175,31 @@ const ServiceToggle = styled.label`
     margin: 0;
     accent-color: ${token.brand};
   }
+`;
+
+const EmployeeCellStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const EmployeeTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const BookingCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+`;
+
+const BookingMeta = styled.div`
+  font-size: 11px;
+  color: ${token.ink500};
+  line-height: 1.45;
 `;
 
 const serviceLabel = (service) => {
@@ -425,8 +451,7 @@ const BookedEmployeesListTab = () => {
                   <th>Employee</th>
                   <th>Clinic</th>
                   <th>Company</th>
-                  <th>Services</th>
-                  <th>Appointment</th>
+                  <th>Booking</th>
                 </tr>
               </thead>
               <tbody>
@@ -434,18 +459,25 @@ const BookedEmployeesListTab = () => {
                   <tr key={`${row.appointmentId}-${row.employee.id || row.employee.idNumber || row.employee.name}-${index}`}>
                     <td>{moment(row.date).format("DD MMM YYYY")}</td>
                     <td>
-                      <strong>{row.employee.name || "Unnamed employee"}</strong>
-                      <div style={{ fontSize: 11, color: token.ink500 }}>
-                        {[row.employee.idNumber, row.employee.occupation].filter(Boolean).join(" · ") || "-"}
-                      </div>
+                      <EmployeeCellStack>
+                        <EmployeeTitleRow>
+                          <strong>{row.employee.name || "Unnamed employee"}</strong>
+                          <StatusBadge status={row.status || "unknown"} />
+                        </EmployeeTitleRow>
+                        <div style={{ fontSize: 11, color: token.ink500 }}>
+                          {[row.employee.idNumber, row.employee.occupation].filter(Boolean).join(" · ") || "-"}
+                        </div>
+                      </EmployeeCellStack>
                     </td>
                     <td>{row.clinic || "-"}</td>
                     <td>{row.companyName || "-"}</td>
-                    <td>{row.employee.services?.map(serviceLabel).join(", ") || "-"}</td>
                     <td>
-                      <RowActionLink as="a" href={`/appointment/${row.appointmentId}`}>
-                        {row.appointmentId}
-                      </RowActionLink>
+                      <BookingCell>
+                        <RowActionLink as="a" href={`/appointment/${row.appointmentId}`}>
+                          {row.appointmentId}
+                        </RowActionLink>
+                        <BookingMeta>{row.employee.services?.map(serviceLabel).join(", ") || "-"}</BookingMeta>
+                      </BookingCell>
                     </td>
                   </tr>
                 ))}
