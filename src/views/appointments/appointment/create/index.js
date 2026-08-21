@@ -34,7 +34,13 @@ import RemainingSlots from '../RemainingSlots';
 import 'react-alert-confirm/lib/style.css';
 import AlertConfirm from 'react-alert-confirm';
 import { trackEvent } from '../../../../lib/trackEvent';
-import { getBlockingPlatformControlOrFallback, platformControlMessage } from '../../../../lib/platformControlGuard';
+import {
+  findBlockingPlatformControl,
+  getBlockingPlatformControlOrFallback,
+  getCachedPlatformControls,
+  platformControlMessage,
+  subscribeToPlatformControls,
+} from '../../../../lib/platformControlGuard';
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -190,8 +196,14 @@ function App({ socket }) {
     });
   };
   useEffect(() => {
+    const cachedControl = findBlockingPlatformControl(getCachedPlatformControls(), 'block_new_appointments');
+    if (cachedControl) setBlockingControl(cachedControl);
+    const unsubscribe = subscribeToPlatformControls((controls) => {
+      setBlockingControl(findBlockingPlatformControl(controls, 'block_new_appointments'));
+    });
     getBlockingPlatformControlOrFallback('block_new_appointments')
       .then(setBlockingControl);
+    return unsubscribe;
   }, []);
 
   const saveAppointment = async () => {

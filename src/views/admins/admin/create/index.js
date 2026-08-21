@@ -23,7 +23,13 @@ import { SegmentedControl } from "segmented-control-react";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import AppointmentSearch from "../../../../components/Modal/appointmentSearch";
 import { trackEvent } from "../../../../lib/trackEvent";
-import { getBlockingPlatformControlOrFallback, platformControlMessage } from "../../../../lib/platformControlGuard";
+import {
+  findBlockingPlatformControl,
+  getBlockingPlatformControlOrFallback,
+  getCachedPlatformControls,
+  platformControlMessage,
+  subscribeToPlatformControls,
+} from "../../../../lib/platformControlGuard";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -62,8 +68,14 @@ function App({ socket }) {
   };
 
   useEffect(() => {
+    const cachedControl = findBlockingPlatformControl(getCachedPlatformControls(), "block_admin_creation");
+    if (cachedControl) setBlockingControl(cachedControl);
+    const unsubscribe = subscribeToPlatformControls((controls) => {
+      setBlockingControl(findBlockingPlatformControl(controls, "block_admin_creation"));
+    });
     getBlockingPlatformControlOrFallback("block_admin_creation")
       .then(setBlockingControl);
+    return unsubscribe;
   }, []);
 
   const saveUser = async () => {

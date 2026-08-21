@@ -22,7 +22,13 @@ import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { trackEvent } from "../../../../lib/trackEvent";
-import { getBlockingPlatformControlOrFallback, platformControlMessage } from "../../../../lib/platformControlGuard";
+import {
+  findBlockingPlatformControl,
+  getBlockingPlatformControlOrFallback,
+  getCachedPlatformControls,
+  platformControlMessage,
+  subscribeToPlatformControls,
+} from "../../../../lib/platformControlGuard";
 
 function App({ socket }) {
   let params = useParams();
@@ -47,8 +53,14 @@ function App({ socket }) {
   const [blockingControl, setBlockingControl] = useState(null);
 
   useEffect(() => {
+    const cachedControl = findBlockingPlatformControl(getCachedPlatformControls(), "block_new_companies");
+    if (cachedControl) setBlockingControl(cachedControl);
+    const unsubscribe = subscribeToPlatformControls((controls) => {
+      setBlockingControl(findBlockingPlatformControl(controls, "block_new_companies"));
+    });
     getBlockingPlatformControlOrFallback("block_new_companies")
       .then(setBlockingControl);
+    return unsubscribe;
   }, []);
 
   const setDetail = (key, value) => {

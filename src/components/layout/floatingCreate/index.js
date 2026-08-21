@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { createGlobalStyle } from "styled-components";
 import { MdAdd, MdClose } from "react-icons/md";
-import { getBlockingPlatformControlOrFallback, platformControlMessage } from "../../../lib/platformControlGuard";
+import {
+  fetchPlatformControls,
+  getCachedPlatformControls,
+  platformControlMessage,
+  subscribeToPlatformControls,
+} from "../../../lib/platformControlGuard";
 import { theme, FontImport } from "../theme";
 
 const GlobalFont = createGlobalStyle`${FontImport}`;
@@ -177,16 +182,23 @@ const Fab = styled.button`
 const FloatingCreate = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
-  const [controls, setControls] = useState(null);
+  const [controls, setControls] = useState(() => getCachedPlatformControls());
 
   useEffect(() => {
     let alive = true;
-    Promise.all(ACTIONS.map((action) => getBlockingPlatformControlOrFallback(action.control)))
-      .then((results) => {
-        if (alive) setControls(results.filter(Boolean));
+    const unsubscribe = subscribeToPlatformControls((nextControls) => {
+      if (alive) setControls(nextControls);
+    });
+    fetchPlatformControls()
+      .then((nextControls) => {
+        if (alive) setControls(nextControls);
+      })
+      .catch(() => {
+        if (alive) setControls(ACTIONS.map((action) => ({ key: action.control, enabled: true })));
       });
     return () => {
       alive = false;
+      unsubscribe();
     };
   }, []);
 

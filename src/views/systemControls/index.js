@@ -19,6 +19,7 @@ import {
 import { adminApi } from "../../lib/adminApi";
 import { useCachedFetch } from "../../hooks/useCachedFetch";
 import { connect } from "react-redux";
+import { setCachedPlatformControls } from "../../lib/platformControlGuard";
 
 const LABELS = {
   block_new_appointments: "Block new appointments",
@@ -99,6 +100,7 @@ const SystemControls = ({ user, socket }) => {
   useEffect(() => {
     if (data?.controls) {
       setLocalControls(data.controls);
+      setCachedPlatformControls(data.controls);
     }
   }, [data]);
 
@@ -119,6 +121,9 @@ const SystemControls = ({ user, socket }) => {
     setLocalControls((current) =>
       (current || controls).map((item) => (item.key === control.key ? optimisticControl : item))
     );
+    setCachedPlatformControls(
+      controls.map((item) => (item.key === control.key ? optimisticControl : item))
+    );
     setBusyKey(control.key);
     try {
       const result = await adminApi(`/api/admin/platform-controls/${control.key}`, {
@@ -135,6 +140,9 @@ const SystemControls = ({ user, socket }) => {
       setLocalControls((current) =>
         (current || controls).map((item) => (item.key === control.key ? result.control : item))
       );
+      setCachedPlatformControls(
+        (localControls || controls).map((item) => (item.key === control.key ? result.control : item))
+      );
       setReason("");
       setPublicMessage("");
       setExpiresAt("");
@@ -142,6 +150,7 @@ const SystemControls = ({ user, socket }) => {
       await refetchAudit();
     } catch (err) {
       setLocalControls(previousControls);
+      setCachedPlatformControls(previousControls);
       setActionError(err.message);
     } finally {
       setBusyKey("");
@@ -164,6 +173,16 @@ const SystemControls = ({ user, socket }) => {
         setAt: new Date().toISOString(),
       }))
     );
+    setCachedPlatformControls(
+      controls.map((control) => ({
+        ...control,
+        enabled,
+        reason: nextReason,
+        publicMessage,
+        expiresAt: expiresAt || null,
+        setAt: new Date().toISOString(),
+      }))
+    );
     setBusyKey("global");
     try {
       const result = await adminApi("/api/admin/platform-controls/lockdown", {
@@ -178,6 +197,7 @@ const SystemControls = ({ user, socket }) => {
         }),
       });
       if (result.controls) setLocalControls(result.controls);
+      if (result.controls) setCachedPlatformControls(result.controls);
       setReason("");
       setPublicMessage("");
       setExpiresAt("");
@@ -185,6 +205,7 @@ const SystemControls = ({ user, socket }) => {
       await refetchAudit();
     } catch (err) {
       setLocalControls(previousControls);
+      setCachedPlatformControls(previousControls);
       setActionError(err.message);
     } finally {
       setBusyKey("");
