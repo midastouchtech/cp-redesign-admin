@@ -55,6 +55,7 @@ const SystemControls = ({ user, socket }) => {
   const [systemSettings, setSystemSettings] = useState(null);
   const [clinicLimits, setClinicLimits] = useState({});
   const [clinicSettingsStatus, setClinicSettingsStatus] = useState("");
+  const [localControls, setLocalControls] = useState(null);
 
   const controlsFetcher = useMemo(() => () => adminApi("/api/admin/platform-controls"), []);
   const auditFetcher = useMemo(
@@ -64,7 +65,7 @@ const SystemControls = ({ user, socket }) => {
 
   const { data, loading, error, refetch } = useCachedFetch("platform-controls", controlsFetcher);
   const { data: auditData, refetch: refetchAudit } = useCachedFetch("platform-control-audit", auditFetcher);
-  const controls = data?.controls || [];
+  const controls = localControls || data?.controls || [];
   const active = controls.filter((control) => control.enabled);
   const clinics = [
     ...DEFAULT_CLINICS,
@@ -95,31 +96,52 @@ const SystemControls = ({ user, socket }) => {
     };
   }, [socket]);
 
+  useEffect(() => {
+    if (data?.controls) {
+      setLocalControls(data.controls);
+    }
+  }, [data]);
+
   const toggleControl = async (control) => {
     setActionError("");
-    if (!reason.trim()) {
-      setActionError("Add a reason before changing a platform control.");
-      return;
-    }
+    const nextEnabled = !control.enabled;
+    const nextReason = reason.trim() || "Changed from System controls";
+    const previousControls = controls;
+    const optimisticControl = {
+      ...control,
+      enabled: nextEnabled,
+      reason: nextReason,
+      publicMessage,
+      expiresAt: expiresAt || null,
+      setAt: new Date().toISOString(),
+    };
+
+    setLocalControls((current) =>
+      (current || controls).map((item) => (item.key === control.key ? optimisticControl : item))
+    );
     setBusyKey(control.key);
     try {
-      await adminApi(`/api/admin/platform-controls/${control.key}`, {
+      const result = await adminApi(`/api/admin/platform-controls/${control.key}`, {
         method: "PATCH",
         body: JSON.stringify({
-          enabled: !control.enabled,
-          reason,
+          enabled: nextEnabled,
+          reason: nextReason,
           publicMessage,
           expiresAt: expiresAt || null,
           confirmText: control.key,
           ...actor(user),
         }),
       });
+      setLocalControls((current) =>
+        (current || controls).map((item) => (item.key === control.key ? result.control : item))
+      );
       setReason("");
       setPublicMessage("");
       setExpiresAt("");
       await refetch();
       await refetchAudit();
     } catch (err) {
+      setLocalControls(previousControls);
       setActionError(err.message);
     } finally {
       setBusyKey("");
@@ -128,31 +150,41 @@ const SystemControls = ({ user, socket }) => {
 
   const lockdown = async (enabled) => {
     setActionError("");
-    if (!reason.trim()) {
-      setActionError("Add a reason before changing global lockdown.");
-      return;
-    }
+    const nextReason = reason.trim() || "Changed from System controls";
     const confirmText = window.prompt("Type GLOBAL LOCKDOWN to confirm");
     if (confirmText !== "GLOBAL LOCKDOWN") return;
+    const previousControls = controls;
+    setLocalControls((current) =>
+      (current || controls).map((control) => ({
+        ...control,
+        enabled,
+        reason: nextReason,
+        publicMessage,
+        expiresAt: expiresAt || null,
+        setAt: new Date().toISOString(),
+      }))
+    );
     setBusyKey("global");
     try {
-      await adminApi("/api/admin/platform-controls/lockdown", {
+      const result = await adminApi("/api/admin/platform-controls/lockdown", {
         method: "POST",
         body: JSON.stringify({
           enabled,
-          reason,
+          reason: nextReason,
           publicMessage,
           expiresAt: expiresAt || null,
           confirmText,
           ...actor(user),
         }),
       });
+      if (result.controls) setLocalControls(result.controls);
       setReason("");
       setPublicMessage("");
       setExpiresAt("");
       await refetch();
       await refetchAudit();
     } catch (err) {
+      setLocalControls(previousControls);
       setActionError(err.message);
     } finally {
       setBusyKey("");
@@ -225,7 +257,7 @@ const SystemControls = ({ user, socket }) => {
       <Toolbar>
         <Field $flex="1 1 260px" $minWidth="240px">
           <FieldLabel>Reason</FieldLabel>
-          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Required for every change" />
+          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Optional; default reason is recorded if empty" />
         </Field>
         <Field $flex="1 1 260px" $minWidth="240px">
           <FieldLabel>Public message</FieldLabel>
