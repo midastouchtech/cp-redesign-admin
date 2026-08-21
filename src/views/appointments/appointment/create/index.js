@@ -34,6 +34,7 @@ import RemainingSlots from '../RemainingSlots';
 import 'react-alert-confirm/lib/style.css';
 import AlertConfirm from 'react-alert-confirm';
 import { trackEvent } from '../../../../lib/trackEvent';
+import { getBlockingPlatformControlOrFallback, platformControlMessage } from '../../../../lib/platformControlGuard';
 
 const getFormattedPrice = (price) => `R${price.toFixed(2)}`;
 
@@ -83,6 +84,7 @@ function App({ socket }) {
   const [searchParamCompanyName, setSearchParamCompanyName] = useState(
     searchParams.get('companyName') || null
   );
+  const [blockingControl, setBlockingControl] = useState(null);
 
   const setDetail = (key, value) => {
     //
@@ -187,7 +189,22 @@ function App({ socket }) {
       },
     });
   };
-  const saveAppointment = () => {
+  useEffect(() => {
+    getBlockingPlatformControlOrFallback('block_new_appointments')
+      .then(setBlockingControl);
+  }, []);
+
+  const saveAppointment = async () => {
+    const control = blockingControl || await getBlockingPlatformControlOrFallback('block_new_appointments');
+    if (control) {
+      AlertConfirm({
+        title: 'Bookings unavailable',
+        desc: platformControlMessage(control, 'New appointment creation is temporarily disabled.'),
+        onOk: () => {},
+      });
+      setBlockingControl(control);
+      return;
+    }
     // Validate clinic limit before saving
     const clinic = appointment?.details?.clinic;
     const limit = clinicLimits[clinic] || 100;
@@ -368,6 +385,11 @@ function App({ socket }) {
         <div className='col-xl-12 col-lg-12'>
           <div className='card'>
             <div className='card-body'>
+              {blockingControl && (
+                <div className='alert alert-danger'>
+                  {platformControlMessage(blockingControl, 'New appointment creation is temporarily disabled.')}
+                </div>
+              )}
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
                 onClick={() => navigate('/appointment/' + appointment?.id)}
@@ -382,6 +404,7 @@ function App({ socket }) {
                 onClick={saveAppointment}
                 disabled={(() => {
                   if (!hasUpdatedAppointmnent) return true;
+                  if (blockingControl) return true;
                   if (isFullyBooked) return true;
                   const clinic = appointment?.details?.clinic;
                   const limit = clinicLimits[clinic];

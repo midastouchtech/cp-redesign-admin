@@ -22,6 +22,7 @@ import Uploader from "../../../../components/Upload";
 import { SegmentedControl } from "segmented-control-react";
 import UserSearch from "../../../../components/Modal/userSearch";
 import { trackEvent } from "../../../../lib/trackEvent";
+import { getBlockingPlatformControlOrFallback, platformControlMessage } from "../../../../lib/platformControlGuard";
 
 function App({ socket }) {
   let params = useParams();
@@ -43,12 +44,24 @@ function App({ socket }) {
     ],
   });
   const [show, setShow] = useState(false);
+  const [blockingControl, setBlockingControl] = useState(null);
+
+  useEffect(() => {
+    getBlockingPlatformControlOrFallback("block_new_companies")
+      .then(setBlockingControl);
+  }, []);
 
   const setDetail = (key, value) => {
     setCompany(assocPath(["details", key], value, company));
   };
 
-  const saveCompany = () => {
+  const saveCompany = async () => {
+    const control = blockingControl || await getBlockingPlatformControlOrFallback("block_new_companies");
+    if (control) {
+      alert(platformControlMessage(control, "New company creation is temporarily disabled."));
+      setBlockingControl(control);
+      return;
+    }
     //console.log("saving appza");
     socket.emit("SAVE_NEW_COMPANY", company);
     socket.on("COMPANY_ADDED", (c) => {
@@ -100,13 +113,18 @@ function App({ socket }) {
         <div className="col-xl-12 col-lg-12">
           <div className="card">
             <div className="card-body">
+              {blockingControl && (
+                <div className="alert alert-danger">
+                  {platformControlMessage(blockingControl, "New company creation is temporarily disabled.")}
+                </div>
+              )}
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
                 onClick={() => navigate("/companies")}
               >
                 Close
               </button>
-              <button className={`btn mr-1 btn-primary`} onClick={saveCompany}>
+              <button className={`btn mr-1 btn-primary`} onClick={saveCompany} disabled={!!blockingControl}>
                 Save Company
               </button>
             </div>

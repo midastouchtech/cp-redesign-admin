@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled, { createGlobalStyle } from "styled-components";
 import { MdAdd, MdClose } from "react-icons/md";
-import { adminApi } from "../../../lib/adminApi";
+import { getBlockingPlatformControlOrFallback, platformControlMessage } from "../../../lib/platformControlGuard";
 import { theme, FontImport } from "../theme";
 
 const GlobalFont = createGlobalStyle`${FontImport}`;
@@ -98,7 +98,7 @@ const PanelList = styled.div`
   gap: 3px;
 `;
 
-const ActionLink = styled(Link)`
+const ActionLink = styled.button`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -109,6 +109,9 @@ const ActionLink = styled(Link)`
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
+  border: 0;
+  width: 100%;
+  background: transparent;
   cursor: pointer;
   opacity: ${(p) => (p.$disabled ? 0.5 : 1)};
   transition: background 150ms ease, color 150ms ease, transform 150ms ease;
@@ -172,16 +175,22 @@ const Fab = styled.button`
 `;
 
 const FloatingCreate = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(true);
-  const [controls, setControls] = useState([]);
+  const [controls, setControls] = useState(null);
 
   useEffect(() => {
-    adminApi("/api/admin/platform-controls")
-      .then((data) => setControls(data.controls || []))
-      .catch(() => setControls([]));
+    let alive = true;
+    Promise.all(ACTIONS.map((action) => getBlockingPlatformControlOrFallback(action.control)))
+      .then((results) => {
+        if (alive) setControls(results.filter(Boolean));
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  const controlByKey = new Map(controls.map((control) => [control.key, control]));
+  const controlByKey = new Map((controls || []).map((control) => [control.key, control]));
 
   return (
     <>
@@ -198,18 +207,19 @@ const FloatingCreate = () => {
             <PanelList>
               {ACTIONS.map((action) => {
                 const control = controlByKey.get(action.control);
-                const disabled = !!control?.enabled;
+                const disabled = controls === null || !!control?.enabled;
                 return (
                   <ActionLink
                     key={action.to}
-                    to={action.to}
+                    type="button"
                     $disabled={disabled}
-                    title={disabled ? control?.publicMessage || control?.reason : ""}
-                    onClick={(e) => {
+                    title={disabled ? platformControlMessage(control, controls === null ? "Checking platform controls..." : undefined) : ""}
+                    onClick={() => {
                       if (disabled) {
-                        e.preventDefault();
-                        alert(control?.publicMessage || control?.reason || "This action is temporarily disabled.");
+                        alert(platformControlMessage(control, controls === null ? "Checking platform controls. Please try again in a moment." : undefined));
+                        return;
                       }
+                      navigate(`/${action.to}`);
                     }}
                   >
                     <MdAdd aria-hidden="true" />

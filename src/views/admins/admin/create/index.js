@@ -23,6 +23,7 @@ import { SegmentedControl } from "segmented-control-react";
 import CompanySearch from "../../../../components/Modal/companySearch";
 import AppointmentSearch from "../../../../components/Modal/appointmentSearch";
 import { trackEvent } from "../../../../lib/trackEvent";
+import { getBlockingPlatformControlOrFallback, platformControlMessage } from "../../../../lib/platformControlGuard";
 
 const exists = (i) => !isNil(i) && !isEmpty(i);
 const ChatContainer = styled.div`
@@ -41,6 +42,7 @@ function App({ socket }) {
   const [isLoading, setIsLoading] = useState(true);
   const [show, setShowCompanySearch] = useState(false);
   const [showAppSearch, setShowAppointmentSearch] = useState(false);
+  const [blockingControl, setBlockingControl] = useState(null);
   const [user, setUser] = useState({
     details: {
       name: "",
@@ -59,7 +61,18 @@ function App({ socket }) {
     setUser(assocPath(["details", key], value, user));
   };
 
-  const saveUser = () => {
+  useEffect(() => {
+    getBlockingPlatformControlOrFallback("block_admin_creation")
+      .then(setBlockingControl);
+  }, []);
+
+  const saveUser = async () => {
+    const control = blockingControl || await getBlockingPlatformControlOrFallback("block_admin_creation");
+    if (control) {
+      alert(platformControlMessage(control, "New admin creation is temporarily disabled."));
+      setBlockingControl(control);
+      return;
+    }
     //console.log("saving appza");
     socket.emit("SAVE_NEW_USER", user);
     socket.on("RECEIVE_SAVE_USER_SUCCESS", (data) => {
@@ -79,13 +92,18 @@ function App({ socket }) {
         <div className="col-xl-12 col-lg-12">
           <div className="card">
             <div className="card-body">
+              {blockingControl && (
+                <div className="alert alert-danger">
+                  {platformControlMessage(blockingControl, "New admin creation is temporarily disabled.")}
+                </div>
+              )}
               <button
                 className={`btn btn-primary btn-outline-primary mr-1`}
                 onClick={() => navigate("/clients")}
               >
                 Close
               </button>
-              <button className={`btn mr-1 btn-primary`} onClick={saveUser}>
+              <button className={`btn mr-1 btn-primary`} onClick={saveUser} disabled={!!blockingControl}>
                 Save User
               </button>
             </div>
