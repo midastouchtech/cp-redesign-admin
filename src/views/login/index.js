@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import cookies from "js-cookie";
 import { trackEvent } from "../../lib/trackEvent";
+import { trackLoginEvent } from "../../lib/trackLoginEvent";
 
 function App({ socket }) {
   let navigate = useNavigate();
@@ -36,6 +37,7 @@ function App({ socket }) {
         actorId: user?.id,
         actorName: `${user?.details?.name} ${user?.details?.surname}`.trim(),
       });
+      trackLoginEvent(user);
       window.location.replace("/");
     });
   };
