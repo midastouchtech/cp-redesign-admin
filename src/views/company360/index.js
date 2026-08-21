@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import moment from "moment";
 import {
@@ -17,15 +17,36 @@ import { adminApi } from "../../lib/adminApi";
 import { rememberEntity } from "../../lib/recentEntities";
 import { useCachedFetch } from "../../hooks/useCachedFetch";
 
+const PINNED_COMPANIES_KEY = "cp_admin_pinned_companies";
+
+const readPinnedCompanies = () => {
+  try {
+    return JSON.parse(localStorage.getItem(PINNED_COMPANIES_KEY) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+const notifyPinnedCompaniesChanged = () => {
+  window.dispatchEvent(new Event("cp:pinned-companies-changed"));
+};
+
 const pinCompany = (company) => {
-  const key = "cp_admin_pinned_companies";
-  const current = JSON.parse(localStorage.getItem(key) || "[]");
+  const current = readPinnedCompanies();
   const next = [
     { id: company.id, name: company.details?.name || company.id },
     ...current.filter((item) => item.id !== company.id),
   ].slice(0, 10);
-  localStorage.setItem(key, JSON.stringify(next));
-  window.dispatchEvent(new Event("cp:pinned-companies-changed"));
+  localStorage.setItem(PINNED_COMPANIES_KEY, JSON.stringify(next));
+  notifyPinnedCompaniesChanged();
+  return next;
+};
+
+const unpinCompany = (companyId) => {
+  const next = readPinnedCompanies().filter((item) => item.id !== companyId);
+  localStorage.setItem(PINNED_COMPANIES_KEY, JSON.stringify(next));
+  notifyPinnedCompaniesChanged();
+  return next;
 };
 
 const SectionTitle = ({ children }) => <h4 style={{ margin: "24px 0 10px", color: token.ink900 }}>{children}</h4>;
@@ -34,7 +55,9 @@ const Company360 = () => {
   const { companyId } = useParams();
   const fetcher = useMemo(() => () => adminApi(`/api/admin/companies/${companyId}/360`), [companyId]);
   const { data, loading, error } = useCachedFetch(`company-360:${companyId}`, fetcher);
+  const [pinnedCompanies, setPinnedCompanies] = useState(() => readPinnedCompanies());
   const company = data?.company;
+  const isPinned = company ? pinnedCompanies.some((item) => item.id === company.id) : false;
 
   useEffect(() => {
     if (company) {
@@ -47,6 +70,12 @@ const Company360 = () => {
     }
   }, [company]);
 
+  useEffect(() => {
+    const loadPins = () => setPinnedCompanies(readPinnedCompanies());
+    window.addEventListener("cp:pinned-companies-changed", loadPins);
+    return () => window.removeEventListener("cp:pinned-companies-changed", loadPins);
+  }, []);
+
   return (
     <Page>
       <FontImport />
@@ -54,7 +83,15 @@ const Company360 = () => {
         eyebrow="Company 360"
         title={company?.details?.name || "Company 360"}
         subtitle={company ? `Company ID ${company.id}` : "Company details, activity, invoices, and risks"}
-        actions={company && <Button type="button" onClick={() => pinCompany(company)}>Pin company</Button>}
+        actions={company && (
+          <Button
+            type="button"
+            $variant={isPinned ? "ghost" : undefined}
+            onClick={() => setPinnedCompanies(isPinned ? unpinCompany(company.id) : pinCompany(company))}
+          >
+            {isPinned ? "Unpin company" : "Pin company"}
+          </Button>
+        )}
       />
 
       {loading && <StatusMessage>Loading company profile...</StatusMessage>}

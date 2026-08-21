@@ -280,12 +280,24 @@ const PinnedLabel = styled.small`
   margin-bottom: 9px;
 `;
 
-const PinnedButton = styled(Link)`
+const PinnedRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
   height: 36px;
-  padding: 0 12px;
+
+  &:not(:last-child) {
+    margin-bottom: 6px;
+  }
+`;
+
+const PinnedButton = styled(Link)`
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
   border-radius: 10px;
   border: 1px solid rgba(254, 99, 78, 0.28);
   background: #fff;
@@ -302,12 +314,40 @@ const PinnedButton = styled(Link)`
     box-shadow: 0 8px 18px rgba(254, 99, 78, 0.16);
   }
 
-  &:not(:last-child) {
-    margin-bottom: 6px;
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
+  }
+`;
+
+const PinnedRemove = styled.button`
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid ${theme.inkFaint};
+  background: #fff;
+  color: ${theme.inkMuted};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+
+  &:hover {
+    background: ${theme.brandSoft};
+    color: ${theme.brand};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.brand};
+    outline-offset: 1px;
   }
 `;
 
@@ -418,6 +458,15 @@ const SideBar = ({ isOpen, toggleOpen, user, collapsed, onToggleCollapsed }) => 
     return () => window.removeEventListener("cp:pinned-companies-changed", loadPins);
   }, []);
 
+  const unpinCompany = (event, companyId) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const next = pinnedCompanies.filter((company) => company.id !== companyId);
+    localStorage.setItem("cp_admin_pinned_companies", JSON.stringify(next));
+    setPinnedCompanies(next);
+    window.dispatchEvent(new Event("cp:pinned-companies-changed"));
+  };
+
   const sections = NAV_SECTIONS.map((section) => ({
     ...section,
     items: section.items.filter((item) => {
@@ -477,13 +526,22 @@ const SideBar = ({ isOpen, toggleOpen, user, collapsed, onToggleCollapsed }) => 
             <PinnedPanel $collapsed={collapsed}>
               <PinnedLabel>Pinned 360</PinnedLabel>
               {pinnedCompanies.map((company) => (
-                <PinnedButton
-                  key={company.id}
-                  to={`/companies/${company.id}/360`}
-                  onClick={() => isOpen && toggleOpen()}
-                >
-                  {company.name}
-                </PinnedButton>
+                <PinnedRow key={company.id}>
+                  <PinnedButton
+                    to={`/companies/${company.id}/360`}
+                    onClick={() => isOpen && toggleOpen()}
+                  >
+                    <span>{company.name}</span>
+                  </PinnedButton>
+                  <PinnedRemove
+                    type="button"
+                    aria-label={`Unpin ${company.name}`}
+                    title="Unpin company"
+                    onClick={(event) => unpinCompany(event, company.id)}
+                  >
+                    ×
+                  </PinnedRemove>
+                </PinnedRow>
               ))}
             </PinnedPanel>
           )}
